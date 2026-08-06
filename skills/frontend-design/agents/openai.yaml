@@ -1,7 +1,7 @@
 interface:
   display_name: "Frontend Design"
-  short_description: "Design and verify cohesive production interfaces"
-  default_prompt: "Use $frontend-design to design, implement, and verify a cohesive production interface."
+  short_description: "Design, audit, and verify production frontends"
+  default_prompt: "Use $frontend-design to design, audit, implement, and verify a cohesive and reliable production frontend."
 
 policy:
   allow_implicit_invocation: true

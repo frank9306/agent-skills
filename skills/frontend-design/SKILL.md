@@ -1,6 +1,6 @@
 ---
 name: frontend-design
-description: Design, build, reshape, polish, or review production frontend interfaces and design systems. Use for pages, components, web apps, dashboards, landing pages, responsive UI, screenshot-driven refinement, visual consistency, accessibility, interaction states, frontend code quality, or requests to remove generic AI-looking design. Supports new and existing products across frameworks while preserving project-owned design systems and conventions.
+description: Design, build, reshape, polish, or audit production frontend interfaces and design systems. Use for pages, components, web apps, dashboards, responsive UI, screenshot refinement, visual consistency, accessibility, frontend architecture, state and API reliability, type safety, testing, performance, security boundaries, observability, dependency risk, or requests to remove generic AI-looking design. Supports new and existing products across frameworks while preserving project-owned conventions.
 ---
 
 # Frontend Design
@@ -42,9 +42,22 @@ Choose the smallest matching route and load only its required references:
 | Screenshot | Reproduce or improve against visual evidence | `visual-review.md`, then the reference matching the observed problem |
 | System | Create, extract, or update a design system or `DESIGN.md` | `design-system.md` and `assets/DESIGN.template.md` |
 | Review | Audit without modifying implementation | `visual-review.md`, `responsive-accessibility.md`, `frontend-engineering.md` |
+| Engineering audit | Review architecture, state, API, business rules, types, tests, security, recovery, or dependency risk | Load only the matching engineering references listed below |
 | De-slop | Remove templated visual or copy patterns | `anti-slop.md`, `visual-review.md` |
 
 Load `data-visualization.md` for dashboards and chart-heavy interfaces. A task may use several routes, but avoid loading unrelated references.
+
+For an engineering audit, load references by concern:
+
+- Architecture and reuse: `architecture-review.md`
+- State and effects: `state-and-effects.md`
+- API integration: `api-reliability.md`
+- Business transitions and exceptional paths: `business-correctness.md`
+- Type boundaries: `type-runtime-safety.md`
+- Tests and mocks: `testing-reliability.md`
+- Browser security boundaries: `frontend-security.md`
+- Error recovery and telemetry: `observability-recovery.md`
+- Dependencies and project configuration: `dependency-config-risk.md`
 
 ## Lock the direction
 
@@ -81,6 +94,8 @@ node <skill-directory>/scripts/verify-design.mjs <project-root>
 ```
 
 Use `--json` for structured output. Treat warnings as review leads, not proof of a visual defect. Never claim visual quality from static scanning alone.
+
+For audit work, classify every result as `observed`, `inferred`, or `unverified`. Confirm business rules against product evidence and API behavior; never infer them from field names. A passing static scan does not establish architectural quality, runtime safety, security, or business correctness.
 
 ## Review and hand off
 

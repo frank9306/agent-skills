@@ -6,7 +6,7 @@ A growing collection of reusable Agent Skills. Each Skill is self-contained unde
 
 | Skill | Purpose |
 |---|---|
-| [`frontend-design`](skills/frontend-design/SKILL.md) | Design, build, polish, and review cohesive production frontend interfaces. |
+| [`frontend-design`](skills/frontend-design/SKILL.md) | Design, build, polish, and audit cohesive, reliable production frontends. |
 | [`write-articles`](skills/write-articles/SKILL.md) | Write evidence-led articles with factual checks and blue engineering hand-drawn knowledge-card illustrations. |
 
 ## Install

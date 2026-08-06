@@ -6,7 +6,8 @@
   "type": "module",
   "scripts": {
     "check": "node scripts/check-skills.mjs",
-    "check:frontend": "node skills/frontend-design/scripts/verify-design.mjs ."
+    "check:frontend": "node skills/frontend-design/scripts/verify-design.mjs .",
+    "test:frontend": "node --test skills/frontend-design/tests/*.test.mjs"
   },
   "engines": {
     "node": ">=18"
