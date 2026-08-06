@@ -1,0 +1,4 @@
+interface:
+  display_name: "证据驱动图文写作"
+  short_description: "撰写事实准确的文章与蓝色工程手绘知识卡"
+  default_prompt: "Use $write-articles to create a precise evidence-led article and a coherent set of blue engineering hand-drawn knowledge-card illustrations."
