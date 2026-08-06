@@ -1,0 +1,14 @@
+{
+  "name": "@frank9306/agent-skills",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Frank's reusable Agent Skills collection",
+  "type": "module",
+  "scripts": {
+    "check": "node scripts/check-skills.mjs",
+    "check:frontend": "node skills/frontend-design/scripts/verify-design.mjs ."
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}
