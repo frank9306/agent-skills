@@ -3,3 +3,5 @@ Thumbs.db
 node_modules/
 coverage/
 dist/
+__pycache__/
+*.py[cod]
