@@ -11,10 +11,12 @@ import test from "node:test";
 const execFileAsync = promisify(execFile);
 const skillRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const verifier = path.join(skillRoot, "scripts", "verify-design.mjs");
+const minimalDesignContract = "# Product Design System\n\n## Overview\n";
 
 test("reports representative engineering and security review leads", async (context) => {
   const fixtureRoot = await fs.mkdtemp(path.join(os.tmpdir(), "frontend-design-test-"));
   context.after(() => fs.rm(fixtureRoot, { recursive: true, force: true }));
+  await fs.writeFile(path.join(fixtureRoot, "DESIGN.md"), minimalDesignContract, "utf8");
   await fs.mkdir(path.join(fixtureRoot, "components"), { recursive: true });
   await fs.writeFile(path.join(fixtureRoot, "components", "Account.tsx"), `
 import axios from "axios";
@@ -52,6 +54,7 @@ export function Account(props: any) {
 test("reports competing mechanisms and exact duplicated blocks as review leads", async (context) => {
   const fixtureRoot = await fs.mkdtemp(path.join(os.tmpdir(), "frontend-design-test-"));
   context.after(() => fs.rm(fixtureRoot, { recursive: true, force: true }));
+  await fs.writeFile(path.join(fixtureRoot, "DESIGN.md"), minimalDesignContract, "utf8");
   await fs.mkdir(path.join(fixtureRoot, "features", "one"), { recursive: true });
   await fs.mkdir(path.join(fixtureRoot, "features", "two"), { recursive: true });
   const repeated = `
@@ -77,4 +80,20 @@ export function normalizeAccount(account) {
   assert.ok(rules.has("architecture.multiple-state-libraries"));
   assert.ok(rules.has("api.multiple-request-libraries"));
   assert.ok(rules.has("architecture.exact-duplicate-block"));
+});
+
+test("fails when the required root DESIGN.md is absent", async (context) => {
+  const fixtureRoot = await fs.mkdtemp(path.join(os.tmpdir(), "frontend-design-test-"));
+  context.after(() => fs.rm(fixtureRoot, { recursive: true, force: true }));
+
+  await assert.rejects(
+    execFileAsync(process.execPath, [verifier, fixtureRoot, "--json"]),
+    (error) => {
+      assert.equal(error.code, 1);
+      const result = JSON.parse(error.stdout);
+      assert.equal(result.counts.error, 1);
+      assert.ok(result.findings.some((finding) => finding.rule === "design-contract.absent"));
+      return true;
+    },
+  );
 });

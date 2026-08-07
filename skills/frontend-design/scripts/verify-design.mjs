@@ -188,7 +188,7 @@ async function inspectDesignContract() {
     }
   } catch (error) {
     if (error.code === "ENOENT") {
-      add("notice", "design-contract.absent", designFile, 1, "No root DESIGN.md found. This is acceptable for a small or established project with another canonical design source.");
+      add("error", "design-contract.absent", designFile, 1, "Required root DESIGN.md is missing. Create it from the frontend-design DESIGN template before continuing.");
       return;
     }
     throw error;
@@ -215,6 +215,7 @@ try {
     root,
       filesScanned: inspectedFiles.length,
     counts: {
+      error: findings.filter((item) => item.severity === "error").length,
       warning: findings.filter((item) => item.severity === "warning").length,
       notice: findings.filter((item) => item.severity === "notice").length,
     },
@@ -229,9 +230,10 @@ try {
     for (const item of findings) {
       console.log(`${item.severity.toUpperCase()} ${item.rule} ${item.file}:${item.line} ${item.message}`);
     }
-    console.log(`${result.counts.warning} warning(s), ${result.counts.notice} notice(s).`);
+    console.log(`${result.counts.error} error(s), ${result.counts.warning} warning(s), ${result.counts.notice} notice(s).`);
     console.log(result.note);
   }
+  if (result.counts.error > 0) process.exitCode = 1;
 } catch (error) {
   const failure = { error: error.message, root };
   if (json) process.stdout.write(`${JSON.stringify(failure, null, 2)}\n`);

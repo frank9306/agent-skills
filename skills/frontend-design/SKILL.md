@@ -12,23 +12,53 @@ Create interfaces with a specific point of view, preserve product coherence, imp
 Apply guidance in this order:
 
 1. Follow the user's explicit brief and constraints.
-2. Follow applicable repository instructions and `DESIGN.md`.
+2. Follow applicable repository instructions and the required root `DESIGN.md`.
 3. Reuse existing tokens, components, layouts, copy patterns, and sibling screens.
 4. Preserve accessibility, correctness, platform conventions, and framework constraints.
 5. Apply this Skill's design and engineering guidance.
 
 Do not trade an established product identity for novelty. Do not use consistency as an excuse for repeating a broken pattern; explain the conflict and make the smallest coherent repair.
 
+## Require the design contract
+
+Treat `<project-root>/DESIGN.md` as a hard prerequisite for every frontend design, implementation, polish, screenshot, system, review, engineering-audit, and de-slop task. Confirm that the file exists before analyzing or changing the frontend.
+
+If `DESIGN.md` is absent, create it from `assets/DESIGN.template.md` before continuing. For an existing product, replace template prompts with evidence from the repository and rendered product; mark genuinely unresolved decisions explicitly instead of inventing them. If the task is read-only or file creation is not authorized, stop and report the missing prerequisite. Do not substitute another design document, inferred conventions, or a verbal brief for the required root file.
+
+## Gate new-surface implementation
+
+For every new page or site, require an explicit decision on whether the user wants to review a design image before implementation. If the request already says to show or skip a design image, use that answer. Otherwise ask, in the user's language, "Do you want to review a design image before implementation?" and stop until the user answers. Do not infer consent from silence and do not write implementation code before this gate is resolved.
+
+If the user chooses preview-first:
+
+1. Capture the minimum product brief and create or update a provisional root `DESIGN.md` with the known direction and constraints.
+2. Generate one to three design images that differ materially in layout, typography, density, or interaction direction; do not produce color-only variants.
+3. Present the images with concise tradeoffs and wait for the user to select or revise a direction.
+4. Record the approved decisions in `DESIGN.md`, then implement against the approved image.
+
+If the user skips the preview, complete `DESIGN.md`, state the chosen direction, and proceed to implementation. A skipped preview does not waive the required design contract or rendered browser verification.
+
 ## Inspect before designing
 
-Inspect the repository, current changes, runtime, package manager, and verification commands. Locate:
+After satisfying the design-contract prerequisite, inspect the repository, current changes, runtime, package manager, and verification commands. Locate:
 
 - `AGENTS.md`, `DESIGN.md`, token and theme files
+- lockfiles, `packageManager`, `tsconfig.json`, and Tailwind configuration or CSS entry points
 - global styles, layout shells, routes, and same-class components
 - fonts, icons, imagery, component libraries, and existing states
 - screenshots or rendered output when available
 
 For an existing surface, name the concrete visual or interaction problem before editing it. For a mature product, treat sibling components as the default design direction.
+
+## Prefer the frontend stack
+
+When starting a frontend project or when the project leaves the choice open, prefer:
+
+1. `pnpm` for dependency installation and package scripts. Set and honor the project's `packageManager` field and commit the pnpm lockfile.
+2. TypeScript for application, component, configuration, and test code. Enable the strictest settings supported by the chosen framework and avoid weakening type safety for convenience.
+3. Tailwind CSS for styling. Express durable design decisions through project tokens, theme configuration, CSS variables, and reusable component variants rather than scattered arbitrary values.
+
+These are defaults, not authorization to migrate an existing project. If a repository already establishes another package manager, language, or styling system, preserve it unless the user explicitly requests a migration. Do not install Tailwind CSS or any other dependency without approval when dependency addition requires approval.
 
 ## Route the task
 
