@@ -7,6 +7,7 @@ A growing collection of reusable Agent Skills. Each Skill is self-contained unde
 | Skill | Purpose |
 |---|---|
 | [`frontend-design`](skills/frontend-design/SKILL.md) | Design, build, polish, and audit cohesive, reliable production frontends. |
+| [`read-web-content`](skills/read-web-content/SKILL.md) | Read and extract useful content from public URLs with privacy-aware fallbacks. |
 | [`write-articles`](skills/write-articles/SKILL.md) | Write evidence-led articles with factual checks and blue engineering hand-drawn knowledge-card illustrations. |
 
 ## Install
@@ -15,6 +16,7 @@ Install one Skill globally with the Skills CLI:
 
 ```bash
 npx skills add frank9306/agent-skills --skill frontend-design -g
+npx skills add frank9306/agent-skills --skill read-web-content -g
 npx skills add frank9306/agent-skills --skill write-articles -g
 ```
 
@@ -25,6 +27,7 @@ The repository checks use Node.js 18+ and run on Windows, macOS, and Linux witho
 ```bash
 npm run check
 node skills/frontend-design/scripts/verify-design.mjs <project-root>
+python -m unittest discover -s skills/read-web-content/tests -p "test_*.py"
 python skills/write-articles/scripts/check_draft.py <draft.md>
 python skills/write-articles/scripts/check_image_specs.py <image.png> [...]
 ```

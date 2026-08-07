@@ -1,0 +1,4 @@
+interface:
+  display_name: "Read Web Content"
+  short_description: "Read and extract useful content from public URLs"
+  default_prompt: "Use $read-web-content to read and summarize this public URL safely."
