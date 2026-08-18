@@ -1,0 +1,4 @@
+interface:
+  display_name: "Route Project Work"
+  short_description: "Select the correct project workflow entry point"
+  default_prompt: "Use $route-work to select the correct workflow for this project request."

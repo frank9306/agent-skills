@@ -21,6 +21,7 @@ Keep names to two components unless the artifact has an established compound nam
 | `implement-` | Executing one bounded engineering artifact | `implement-issue` |
 | `review-` | Assessing work against explicit standards or requirements | `review-code` |
 | `diagnose-` | Reproducing a problem and determining its cause | `diagnose-bug` |
+| `route-` | Selecting one owning workflow without performing its work | `route-work` |
 | `migrate-` | Safely changing an existing persisted structure or convention | `migrate-context` |
 | `sync-` | Reconciling two existing sources of truth | `sync-docs` |
 
@@ -32,6 +33,7 @@ Keep names to two components unless the artifact has an established compound nam
 - `manage-` Skills may create, update, close, index, and archive their artifact; use a plural artifact name when the Skill owns a collection.
 - `maintain-` Skills update only durable facts. They must not turn temporary progress or speculation into project truth.
 - Review and diagnosis Skills report findings unless their descriptions explicitly authorize remediation.
+- `route-` Skills select one primary owning Skill and preserve that Skill's authorization and stage gates.
 - Established engineering acronyms may stand alone when expansion would reduce recognition, such as `tdd`.
 
 ## Number and wording
@@ -54,6 +56,7 @@ Resolve requirement ambiguity?    clarify-
 Implement one bounded artifact?   implement-
 Assess quality or compliance?      review-
 Find a root cause?                 diagnose-
+Select an owning workflow?        route-
 Convert an existing structure?    migrate-
 Reconcile existing sources?       sync-
 ```

@@ -27,6 +27,7 @@ None.
 | ID | Title |
 |---|---|
 | [ISSUE-0001](ISSUE-0001-add-capture-research-skill.md) | Add capture-research skill |
+| [ISSUE-0005](ISSUE-0005-add-route-work-skill.md) | Add route-work skill |
 
 ## Cancelled
 

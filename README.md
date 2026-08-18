@@ -13,6 +13,7 @@ A growing collection of reusable Agent Skills. Each Skill is self-contained unde
 | [`manage-issues`](skills/engineering/manage-issues/SKILL.md) | Engineering | Manage local Issues, their index, and the project Changelog. |
 | [`maintain-context`](skills/engineering/maintain-context/SKILL.md) | Engineering | Maintain verified and durable project domain knowledge. |
 | [`to-adr`](skills/engineering/to-adr/SKILL.md) | Engineering | Record confirmed architecture decisions as numbered ADRs. |
+| [`route-work`](skills/engineering/route-work/SKILL.md) | Engineering | Select the correct project workflow entry point. |
 | [`clarify-requirements`](skills/engineering/clarify-requirements/SKILL.md) | Engineering | Resolve ambiguity before creating local Issues. |
 | [`tdd`](skills/engineering/tdd/SKILL.md) | Engineering | Implement behavior through red-green-refactor loops. |
 | [`implement-issue`](skills/engineering/implement-issue/SKILL.md) | Engineering | Implement and verify one ready local Issue. |
@@ -34,6 +35,7 @@ npx skills add frank9306/agent-skills --skill capture-research -g
 npx skills add frank9306/agent-skills --skill manage-issues -g
 npx skills add frank9306/agent-skills --skill maintain-context -g
 npx skills add frank9306/agent-skills --skill to-adr -g
+npx skills add frank9306/agent-skills --skill route-work -g
 npx skills add frank9306/agent-skills --skill clarify-requirements -g
 npx skills add frank9306/agent-skills --skill tdd -g
 npx skills add frank9306/agent-skills --skill implement-issue -g
