@@ -6,7 +6,7 @@ A growing collection of reusable Agent Skills. Each Skill is self-contained unde
 
 | Skill | Category | Purpose |
 |---|---|---|
-| [`create-my-project`](skills/engineering/create-my-project/SKILL.md) | Engineering | Create minimal React, Tauri, Typer, and FastAPI projects with official scaffolds. |
+| [`scaffold-project`](skills/engineering/scaffold-project/SKILL.md) | Engineering | Create minimal React, Tauri, Typer, and FastAPI projects with official scaffolds. |
 | [`frontend-design`](skills/engineering/frontend-design/SKILL.md) | Engineering | Design, build, polish, and audit cohesive, reliable production frontends. |
 | [`read-web-content`](skills/content/read-web-content/SKILL.md) | Content | Read and extract useful content from public URLs with privacy-aware fallbacks. |
 | [`write-articles`](skills/content/write-articles/SKILL.md) | Content | Write evidence-led articles with factual checks and blue engineering hand-drawn knowledge-card illustrations. |
@@ -16,7 +16,7 @@ A growing collection of reusable Agent Skills. Each Skill is self-contained unde
 Install one Skill globally with the Skills CLI:
 
 ```bash
-npx skills add frank9306/agent-skills --skill create-my-project -g
+npx skills add frank9306/agent-skills --skill scaffold-project -g
 npx skills add frank9306/agent-skills --skill frontend-design -g
 npx skills add frank9306/agent-skills --skill read-web-content -g
 npx skills add frank9306/agent-skills --skill write-articles -g

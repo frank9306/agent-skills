@@ -1,4 +1,0 @@
-interface:
-  display_name: "Create My Project"
-  short_description: "Create tested projects and maintain governance docs"
-  default_prompt: "Use $create-my-project to create or maintain a tested project with governance docs and ADRs."
