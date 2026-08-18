@@ -1,0 +1,3 @@
+# agent-skills Domain Context
+
+No durable domain terms or business invariants have been recorded yet. Add them only when verified evidence makes them useful beyond the current task.

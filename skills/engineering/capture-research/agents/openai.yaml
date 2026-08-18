@@ -1,0 +1,4 @@
+interface:
+  display_name: "Capture Project Research"
+  short_description: "Turn sourced research into a project record"
+  default_prompt: "Use $capture-research to turn these sources and findings into a cited project research record."

@@ -9,6 +9,7 @@ A growing collection of reusable Agent Skills. Each Skill is self-contained unde
 | [`init-project`](skills/engineering/init-project/SKILL.md) | Engineering | Create minimal React, Tauri, Typer, and FastAPI projects with official scaffolds. |
 | [`init-docs`](skills/engineering/init-docs/SKILL.md) | Engineering | Initialize repository-owned AI engineering documentation. |
 | [`capture-meeting`](skills/engineering/capture-meeting/SKILL.md) | Engineering | Convert meeting content into a structured project record. |
+| [`capture-research`](skills/engineering/capture-research/SKILL.md) | Engineering | Convert sourced investigation into a cited project research record. |
 | [`manage-issues`](skills/engineering/manage-issues/SKILL.md) | Engineering | Manage local Issues, their index, and the project Changelog. |
 | [`maintain-context`](skills/engineering/maintain-context/SKILL.md) | Engineering | Maintain verified and durable project domain knowledge. |
 | [`to-adr`](skills/engineering/to-adr/SKILL.md) | Engineering | Record confirmed architecture decisions as numbered ADRs. |
@@ -29,6 +30,7 @@ Install one Skill globally with the Skills CLI:
 npx skills add frank9306/agent-skills --skill init-project -g
 npx skills add frank9306/agent-skills --skill init-docs -g
 npx skills add frank9306/agent-skills --skill capture-meeting -g
+npx skills add frank9306/agent-skills --skill capture-research -g
 npx skills add frank9306/agent-skills --skill manage-issues -g
 npx skills add frank9306/agent-skills --skill maintain-context -g
 npx skills add frank9306/agent-skills --skill to-adr -g
