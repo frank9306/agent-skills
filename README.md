@@ -12,6 +12,11 @@ A growing collection of reusable Agent Skills. Each Skill is self-contained unde
 | [`manage-issues`](skills/engineering/manage-issues/SKILL.md) | Engineering | Manage local Issues, their index, and the project Changelog. |
 | [`maintain-context`](skills/engineering/maintain-context/SKILL.md) | Engineering | Maintain verified and durable project domain knowledge. |
 | [`to-adr`](skills/engineering/to-adr/SKILL.md) | Engineering | Record confirmed architecture decisions as numbered ADRs. |
+| [`clarify-requirements`](skills/engineering/clarify-requirements/SKILL.md) | Engineering | Resolve ambiguity before creating local Issues. |
+| [`tdd`](skills/engineering/tdd/SKILL.md) | Engineering | Implement behavior through red-green-refactor loops. |
+| [`implement-issue`](skills/engineering/implement-issue/SKILL.md) | Engineering | Implement and verify one ready local Issue. |
+| [`review-code`](skills/engineering/review-code/SKILL.md) | Engineering | Review Git changes against standards and requirements. |
+| [`diagnose-bug`](skills/engineering/diagnose-bug/SKILL.md) | Engineering | Reproduce a bug and determine its root cause. |
 | [`frontend-design`](skills/engineering/frontend-design/SKILL.md) | Engineering | Design, build, polish, and audit cohesive, reliable production frontends. |
 | [`read-web-content`](skills/content/read-web-content/SKILL.md) | Content | Read and extract useful content from public URLs with privacy-aware fallbacks. |
 | [`write-articles`](skills/content/write-articles/SKILL.md) | Content | Write evidence-led articles with factual checks and blue engineering hand-drawn knowledge-card illustrations. |
@@ -27,6 +32,11 @@ npx skills add frank9306/agent-skills --skill capture-meeting -g
 npx skills add frank9306/agent-skills --skill manage-issues -g
 npx skills add frank9306/agent-skills --skill maintain-context -g
 npx skills add frank9306/agent-skills --skill to-adr -g
+npx skills add frank9306/agent-skills --skill clarify-requirements -g
+npx skills add frank9306/agent-skills --skill tdd -g
+npx skills add frank9306/agent-skills --skill implement-issue -g
+npx skills add frank9306/agent-skills --skill review-code -g
+npx skills add frank9306/agent-skills --skill diagnose-bug -g
 npx skills add frank9306/agent-skills --skill frontend-design -g
 npx skills add frank9306/agent-skills --skill read-web-content -g
 npx skills add frank9306/agent-skills --skill write-articles -g

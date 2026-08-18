@@ -1,0 +1,7 @@
+interface:
+  display_name: "Clarify Requirements"
+  short_description: "Resolve ambiguity before creating local issues"
+  default_prompt: "Use $clarify-requirements to question and resolve this requirement before implementation."
+
+policy:
+  allow_implicit_invocation: false

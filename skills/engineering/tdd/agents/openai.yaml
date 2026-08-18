@@ -1,0 +1,4 @@
+interface:
+  display_name: "Test-Driven Development"
+  short_description: "Build behavior through red-green-refactor loops"
+  default_prompt: "Use $tdd to implement this behavior one red-green-refactor slice at a time."

@@ -13,10 +13,12 @@ Keep names to two components unless the artifact has an established compound nam
 | Prefix | Use when | Examples |
 |---|---|---|
 | `init-` | Safely creating a durable baseline, normally once per project | `init-project`, `init-docs` |
-| `to-` | Transforming existing input into a new structured artifact | `to-spec`, `to-adr` |
+| `to-` | Transforming existing input into a new structured artifact | `to-adr`, `to-report` |
 | `capture-` | Bringing external source material into the project | `capture-meeting` |
 | `manage-` | Owning an artifact's complete lifecycle and indexes | `manage-issues` |
 | `maintain-` | Keeping durable project knowledge aligned with verified facts | `maintain-context` |
+| `clarify-` | Resolving requirement ambiguity before work is created | `clarify-requirements` |
+| `implement-` | Executing one bounded engineering artifact | `implement-issue` |
 | `review-` | Assessing work against explicit standards or requirements | `review-code` |
 | `diagnose-` | Reproducing a problem and determining its cause | `diagnose-bug` |
 | `migrate-` | Safely changing an existing persisted structure or convention | `migrate-context` |
@@ -30,10 +32,11 @@ Keep names to two components unless the artifact has an established compound nam
 - `manage-` Skills may create, update, close, index, and archive their artifact; use a plural artifact name when the Skill owns a collection.
 - `maintain-` Skills update only durable facts. They must not turn temporary progress or speculation into project truth.
 - Review and diagnosis Skills report findings unless their descriptions explicitly authorize remediation.
+- Established engineering acronyms may stand alone when expansion would reduce recognition, such as `tdd`.
 
 ## Number and wording
 
-- Use a singular artifact for one-output transformations: `to-issue`, `to-adr`, `to-spec`.
+- Use a singular artifact for one-output transformations: `to-adr`, `to-report`.
 - Use a plural artifact for collection lifecycle management: `manage-issues`, `manage-releases`.
 - Keep uncountable concepts singular: `maintain-context`.
 - Prefer the ecosystem's official spelling for technologies: `init-fastapi`, `init-tauri`.
@@ -47,6 +50,8 @@ Transform input into an artifact? to-
 Import external source material?  capture-
 Own a complete lifecycle?         manage-
 Maintain durable project truth?   maintain-
+Resolve requirement ambiguity?    clarify-
+Implement one bounded artifact?   implement-
 Assess quality or compliance?      review-
 Find a root cause?                 diagnose-
 Convert an existing structure?    migrate-

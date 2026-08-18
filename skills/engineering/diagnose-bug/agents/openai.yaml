@@ -1,0 +1,7 @@
+interface:
+  display_name: "Diagnose Bug"
+  short_description: "Reproduce and determine the root cause of a bug"
+  default_prompt: "Use $diagnose-bug to reproduce this failure and determine its root cause."
+
+policy:
+  allow_implicit_invocation: false
