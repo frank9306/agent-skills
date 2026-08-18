@@ -33,7 +33,7 @@ Use the narrowest reliable method available. A successful HTTP response is not s
 Use the bundled local extractor first:
 
 ```bash
-python skills/read-web-content/scripts/fetch_url.py "https://example.com/article"
+python skills/content/read-web-content/scripts/fetch_url.py "https://example.com/article"
 ```
 
 It fetches the target directly and does not disclose the URL to an additional extraction service. Optional `readability-lxml` and `html2text` packages improve main-content extraction; the standard-library fallback remains usable without them.
@@ -41,7 +41,7 @@ It fetches the target directly and does not disclose the URL to an additional ex
 For a public, nonsensitive URL when local extraction fails:
 
 ```bash
-python skills/read-web-content/scripts/fetch_url.py --use-proxy "https://example.com/article"
+python skills/content/read-web-content/scripts/fetch_url.py --use-proxy "https://example.com/article"
 ```
 
 Proxy mode tries `defuddle.md` and then `r.jina.ai`. These services receive the complete URL and may log or cache it.
@@ -55,4 +55,3 @@ Reject or warn on:
 - navigation-heavy output without the expected title or subject;
 - raw JSON when readable Markdown was requested;
 - content whose source URL or provenance cannot be established.
-

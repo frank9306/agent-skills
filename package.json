@@ -6,9 +6,9 @@
   "type": "module",
   "scripts": {
     "check": "node scripts/check-skills.mjs",
-    "check:frontend": "node skills/frontend-design/scripts/verify-design.mjs .",
-    "test:frontend": "node --test skills/frontend-design/tests/*.test.mjs",
-    "test:read-web-content": "python -m unittest discover -s skills/read-web-content/tests -p \"test_*.py\""
+    "check:frontend": "node skills/engineering/frontend-design/scripts/verify-design.mjs .",
+    "test:frontend": "node --test skills/engineering/frontend-design/tests/*.test.mjs",
+    "test:read-web-content": "python -m unittest discover -s skills/content/read-web-content/tests -p \"test_*.py\""
   },
   "engines": {
     "node": ">=18"
