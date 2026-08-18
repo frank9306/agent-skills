@@ -1,0 +1,56 @@
+# Skill Naming Standard
+
+Skill directory names and frontmatter `name` values use lowercase kebab-case with an action-oriented prefix:
+
+```text
+<verb>-<artifact>
+```
+
+Keep names to two components unless the artifact has an established compound name. Put trigger details and scope boundaries in the Skill description instead of the name.
+
+## Prefixes
+
+| Prefix | Use when | Examples |
+|---|---|---|
+| `init-` | Safely creating a durable baseline, normally once per project | `init-project`, `init-docs` |
+| `to-` | Transforming existing input into a new structured artifact | `to-spec`, `to-adr` |
+| `capture-` | Bringing external source material into the project | `capture-meeting` |
+| `manage-` | Owning an artifact's complete lifecycle and indexes | `manage-issues` |
+| `maintain-` | Keeping durable project knowledge aligned with verified facts | `maintain-context` |
+| `review-` | Assessing work against explicit standards or requirements | `review-code` |
+| `diagnose-` | Reproducing a problem and determining its cause | `diagnose-bug` |
+| `migrate-` | Safely changing an existing persisted structure or convention | `migrate-context` |
+| `sync-` | Reconciling two existing sources of truth | `sync-docs` |
+
+## Semantic rules
+
+- `init-` Skills must be safe to rerun, must not overwrite user content, and must not own later maintenance.
+- `to-` Skills name the output artifact, not the input source. For example, a confirmed decision becomes `to-adr`.
+- `capture-` Skills preserve source provenance and distinguish sourced facts from model inference.
+- `manage-` Skills may create, update, close, index, and archive their artifact; use a plural artifact name when the Skill owns a collection.
+- `maintain-` Skills update only durable facts. They must not turn temporary progress or speculation into project truth.
+- Review and diagnosis Skills report findings unless their descriptions explicitly authorize remediation.
+
+## Number and wording
+
+- Use a singular artifact for one-output transformations: `to-issue`, `to-adr`, `to-spec`.
+- Use a plural artifact for collection lifecycle management: `manage-issues`, `manage-releases`.
+- Keep uncountable concepts singular: `maintain-context`.
+- Prefer the ecosystem's official spelling for technologies: `init-fastapi`, `init-tauri`.
+- Avoid redundant suffixes and implementation details in names.
+
+## Selection guide
+
+```text
+Create a reusable baseline?       init-
+Transform input into an artifact? to-
+Import external source material?  capture-
+Own a complete lifecycle?         manage-
+Maintain durable project truth?   maintain-
+Assess quality or compliance?      review-
+Find a root cause?                 diagnose-
+Convert an existing structure?    migrate-
+Reconcile existing sources?       sync-
+```
+
+Every new Skill must follow this standard. Renames must update the directory, `SKILL.md` frontmatter, `agents/openai.yaml`, repository documentation, commands, tests, and cross-Skill references together.

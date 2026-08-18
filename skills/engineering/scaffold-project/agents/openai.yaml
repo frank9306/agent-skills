@@ -1,4 +1,0 @@
-interface:
-  display_name: "Scaffold Project"
-  short_description: "Create and verify minimal projects from official scaffolds"
-  default_prompt: "Use $scaffold-project to create and verify a minimal project with the requested supported stack."

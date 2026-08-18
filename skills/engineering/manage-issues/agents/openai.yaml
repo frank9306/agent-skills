@@ -1,0 +1,4 @@
+interface:
+  display_name: "Manage Local Issues"
+  short_description: "Manage local issues and project changelog"
+  default_prompt: "Use $manage-issues to create or update a repository-local engineering issue."

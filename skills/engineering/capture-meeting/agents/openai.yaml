@@ -1,0 +1,4 @@
+interface:
+  display_name: "Capture Project Meeting"
+  short_description: "Turn meeting content into a project record"
+  default_prompt: "Use $capture-meeting to turn these meeting notes into a structured project record."

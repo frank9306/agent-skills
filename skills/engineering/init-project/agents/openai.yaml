@@ -1,0 +1,4 @@
+interface:
+  display_name: "Initialize Project"
+  short_description: "Create and verify minimal projects from official scaffolds"
+  default_prompt: "Use $init-project to create and verify a minimal project with the requested supported stack."

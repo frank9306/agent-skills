@@ -1,0 +1,4 @@
+interface:
+  display_name: "Decision to ADR"
+  short_description: "Record confirmed architecture decisions as ADRs"
+  default_prompt: "Use $to-adr to record this confirmed architecture decision as an ADR."

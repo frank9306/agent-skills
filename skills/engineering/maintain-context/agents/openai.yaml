@@ -1,0 +1,4 @@
+interface:
+  display_name: "Maintain Project Context"
+  short_description: "Maintain verified project domain knowledge"
+  default_prompt: "Use $maintain-context to update durable project domain knowledge from verified evidence."

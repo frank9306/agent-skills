@@ -1,9 +1,9 @@
 ---
-name: scaffold-project
+name: init-project
 description: "Create a minimal tested project with an official scaffold using one of four preferred profiles: pnpm + React + TypeScript + Vite, Tauri + React + TypeScript, uv + Typer, or uv + FastAPI. Use when the user asks to create, initialize, or scaffold a new project with one of these stacks."
 ---
 
-# Scaffold Project
+# Initialize Project
 
 Create a minimal runnable project from an official scaffold, add the profile's test setup, and verify the result. Do not add project-governance files, AI context, agent instructions, ADRs, deployment configuration, or unrelated application features.
 

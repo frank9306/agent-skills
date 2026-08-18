@@ -1,0 +1,4 @@
+interface:
+  display_name: "Initialize Project Docs"
+  short_description: "Initialize local AI engineering documentation"
+  default_prompt: "Use $init-docs to initialize local AI engineering documentation for this project."
