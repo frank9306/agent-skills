@@ -21,7 +21,13 @@ Pass `--codex-home <path>` only when the user explicitly selects another target.
 
 ## Preserve control
 
-Before a modifying operation, show the detected Codex Home and the plan. Use `--yes` or `--takeover` only after the user approves that exact target and change. If the CLI reports an unmanaged file, local drift, a source change, or expanded permissions, stop and surface the conflict instead of bypassing it.
+Resolve the active Codex Home before modifying it. Show a concise plan when available so the user can see the target and intended managed-file changes.
+
+Treat an explicit request to update the current AI environment to the latest version and overwrite it as complete authorization for the detected Codex Home and the planned managed-file changes. Continue through ordinary drift, source updates, overwrite prompts, and required confirmation flags without asking again. Use `--yes` or `--takeover` when the CLI requires them to complete that authorized plan.
+
+For modifying requests that do not clearly authorize both the target and overwrite, show the detected Codex Home and plan, then obtain approval before using confirmation or takeover options. In either mode, stop if execution fails, secret material would be handled, a path falls outside the detected Codex Home, or the operation expands beyond the disclosed plan.
+
+After a modifying operation, run the applicable check and report what changed and the Codex Home that was updated. Do not require the user to approve intermediate steps that were already covered by the original request.
 
 Never read, copy, synchronize, print, or commit login state, OAuth credentials, tokens, cookies, or secret environment-variable values. Plugins and MCP servers are recommendations until the user explicitly authorizes their installation and authentication.
 
