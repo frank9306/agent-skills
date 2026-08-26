@@ -28,6 +28,7 @@ None.
 |---|---|
 | [ISSUE-0001](ISSUE-0001-add-capture-research-skill.md) | Add capture-research skill |
 | [ISSUE-0005](ISSUE-0005-add-route-work-skill.md) | Add route-work skill |
+| [ISSUE-0006](ISSUE-0006-add-sync-ai-environment-skill.md) | Add sync-ai-environment skill |
 
 ## Cancelled
 

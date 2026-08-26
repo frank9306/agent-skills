@@ -22,6 +22,8 @@ A growing collection of reusable Agent Skills. Each Skill is self-contained unde
 | [`frontend-design`](skills/engineering/frontend-design/SKILL.md) | Engineering | Design, build, polish, and audit cohesive, reliable production frontends. |
 | [`read-web-content`](skills/content/read-web-content/SKILL.md) | Content | Read and extract useful content from public URLs with privacy-aware fallbacks. |
 | [`write-articles`](skills/content/write-articles/SKILL.md) | Content | Write evidence-led articles with factual checks and blue engineering hand-drawn knowledge-card illustrations. |
+| [`manage-credentials`](skills/security/manage-credentials/SKILL.md) | Security | Manage credentials in a local encrypted vault with audit and optional encrypted sync. |
+| [`sync-ai-environment`](skills/environment/sync-ai-environment/SKILL.md) | Environment | Initialize, check, synchronize, and upgrade a managed global AI environment. |
 
 ## Install
 
@@ -44,6 +46,8 @@ npx skills add frank9306/agent-skills --skill diagnose-bug -g
 npx skills add frank9306/agent-skills --skill frontend-design -g
 npx skills add frank9306/agent-skills --skill read-web-content -g
 npx skills add frank9306/agent-skills --skill write-articles -g
+npx skills add frank9306/agent-skills --skill manage-credentials -g
+npx skills add frank9306/agent-skills --skill sync-ai-environment -g
 ```
 
 ## Validate
@@ -79,6 +83,10 @@ skills/
       references/
       scripts/
       assets/
+  security/
+    <skill-name>/
+  environment/
+    <skill-name>/
 scripts/
   check-skills.mjs
 ```

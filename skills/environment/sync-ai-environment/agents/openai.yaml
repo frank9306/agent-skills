@@ -1,0 +1,4 @@
+interface:
+  display_name: "Sync AI Environment"
+  short_description: "Check and synchronize the managed global AI environment."
+  default_prompt: "Use $sync-ai-environment to check and synchronize my current AI environment."
