@@ -1,0 +1,4 @@
+interface:
+  display_name: "Manage Cloudflare"
+  short_description: "Safely manage Cloudflare Tunnel, DNS, and Access."
+  default_prompt: "Use $manage-cloudflare to inspect or safely change a Cloudflare Tunnel, DNS, or Access resource with a dry run and rollback plan."
