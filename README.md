@@ -24,6 +24,7 @@ A growing collection of reusable Agent Skills. Each Skill is self-contained unde
 | [`write-articles`](skills/content/write-articles/SKILL.md) | Content | Write evidence-led articles with factual checks and blue engineering hand-drawn knowledge-card illustrations. |
 | [`manage-credentials`](skills/security/manage-credentials/SKILL.md) | Security | Manage credentials in a local encrypted vault with audit and optional encrypted sync. |
 | [`manage-cloudflare`](skills/security/manage-cloudflare/SKILL.md) | Security | Safely inspect and manage Cloudflare Tunnel, DNS, and Access through the official API. |
+| [`manage-tailscale`](skills/security/manage-tailscale/SKILL.md) | Security | Automate Tailscale setup, authorized enrollment, private service routing, verification, and maintenance. |
 | [`sync-ai-environment`](skills/environment/sync-ai-environment/SKILL.md) | Environment | Initialize, check, synchronize, and upgrade a managed global AI environment. |
 
 ## Install

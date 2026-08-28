@@ -1,0 +1,4 @@
+interface:
+  display_name: "Manage Tailscale"
+  short_description: "Automate private access setup and Tailscale maintenance"
+  default_prompt: "Use $manage-tailscale to inspect my devices, complete authorized setup using existing credentials, and verify access to the requested private service."

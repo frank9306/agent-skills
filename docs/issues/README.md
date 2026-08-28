@@ -31,6 +31,7 @@ None.
 | [ISSUE-0006](ISSUE-0006-add-sync-ai-environment-skill.md) | Add sync-ai-environment skill |
 | [ISSUE-0007](ISSUE-0007-streamline-ai-environment-update-authorization.md) | Streamline AI environment update authorization |
 | [ISSUE-0008](ISSUE-0008-add-manage-cloudflare-skill.md) | Add manage-cloudflare skill |
+| [ISSUE-0009](ISSUE-0009-add-manage-tailscale-skill.md) | Add manage-tailscale skill |
 
 ## Cancelled
 
