@@ -1,0 +1,23 @@
+[Unit]
+Description=Hermes to DeepSeek Harness task dispatcher
+After=network-online.target docker.service
+Wants=network-online.target
+Requires=docker.service
+
+[Service]
+Type=simple
+User=admin
+Group=Users
+WorkingDirectory=/vol2/1000/myprojects/ai-task-dispatcher
+ExecStart=/usr/bin/python3 /vol2/1000/myprojects/ai-task-dispatcher/dsh_dispatch_server.py
+Restart=on-failure
+RestartSec=10
+TimeoutStopSec=15
+UMask=0077
+PrivateTmp=true
+ProtectSystem=full
+ProtectHome=read-only
+# Allow existing sudo Docker execution; address-family filtering implies NoNewPrivileges.
+
+[Install]
+WantedBy=multi-user.target

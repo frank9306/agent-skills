@@ -32,6 +32,7 @@ None.
 | [ISSUE-0007](ISSUE-0007-streamline-ai-environment-update-authorization.md) | Streamline AI environment update authorization |
 | [ISSUE-0008](ISSUE-0008-add-manage-cloudflare-skill.md) | Add manage-cloudflare skill |
 | [ISSUE-0009](ISSUE-0009-add-manage-tailscale-skill.md) | Add manage-tailscale skill |
+| [ISSUE-0010](ISSUE-0010-add-dispatch-dsh-task-hermes-skill-and-dispatcher-runtime.md) | Add dispatch-dsh-task Hermes skill and dispatcher runtime |
 
 ## Cancelled
 

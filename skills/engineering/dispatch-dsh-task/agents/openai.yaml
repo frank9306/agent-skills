@@ -1,0 +1,4 @@
+interface:
+  display_name: "Dispatch DSH Task"
+  short_description: "Dispatch my-knowledge tasks from Hermes to DSH"
+  default_prompt: "Use $dispatch-dsh-task to create or run an auditable my-knowledge task through the restricted dispatcher."
