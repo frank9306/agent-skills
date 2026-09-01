@@ -1,4 +1,0 @@
-interface:
-  display_name: "Manage Credentials"
-  short_description: "Add, list, search, retrieve, audit, and sync personal credentials in a local Fernet-encrypted vault, with Agent intent recognition for save requests."
-  default_prompt: "Use $manage-credentials to securely store, retrieve, or audit the user's personal credentials and recognize save intents from conversation."
