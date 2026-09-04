@@ -10,11 +10,12 @@
     "test:frontend": "node --test skills/engineering/frontend-design/tests/*.test.mjs",
     "test:read-web-content": "python -m unittest discover -s skills/content/read-web-content/tests -p \"test_*.py\"",
     "test:dispatch-dsh-task": "python -m unittest discover -s skills/engineering/dispatch-dsh-task/scripts/tests -p \"test_*.py\"",
+    "test:audit-codex-harness": "python -m unittest discover -s skills/engineering/audit-codex-harness/scripts/tests -p \"test_*.py\"",
     "test:init-docs": "python -m unittest discover -s skills/engineering/init-docs/scripts/tests -p \"test_*.py\"",
     "test:manage-issues": "python -m unittest discover -s skills/engineering/manage-issues/scripts/tests -p \"test_*.py\"",
     "test:to-adr": "python -m unittest discover -s skills/engineering/to-adr/scripts/tests -p \"test_*.py\"",
     "test:ai-docs": "npm run test:init-docs && npm run test:manage-issues && npm run test:to-adr",
-    "test": "npm run test:frontend && npm run test:read-web-content && npm run test:dispatch-dsh-task && npm run test:ai-docs"
+    "test": "npm run test:frontend && npm run test:read-web-content && npm run test:dispatch-dsh-task && npm run test:audit-codex-harness && npm run test:ai-docs"
   },
   "engines": {
     "node": ">=18"

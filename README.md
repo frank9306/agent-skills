@@ -21,6 +21,7 @@ A growing collection of reusable Agent Skills. Each Skill is self-contained unde
 | [`diagnose-bug`](skills/engineering/diagnose-bug/SKILL.md) | Engineering | Reproduce a bug and determine its root cause. |
 | [`frontend-design`](skills/engineering/frontend-design/SKILL.md) | Engineering | Design, build, polish, and audit cohesive, reliable production frontends. |
 | [`dispatch-dsh-task`](skills/engineering/dispatch-dsh-task/SKILL.md) | Engineering | Dispatch audited my-knowledge work from Hermes to the restricted DSH runner. |
+| [`audit-codex-harness`](skills/engineering/audit-codex-harness/SKILL.md) | Engineering | Audit project-scoped Codex traces and score harness efficiency. |
 | [`read-web-content`](skills/content/read-web-content/SKILL.md) | Content | Read and extract useful content from public URLs with privacy-aware fallbacks. |
 | [`write-articles`](skills/content/write-articles/SKILL.md) | Content | Write evidence-led articles with factual checks and blue engineering hand-drawn knowledge-card illustrations. |
 | [`manage-credentials`](skills/security/manage-credentials/SKILL.md) | Security | Manage credentials in a local encrypted vault with audit and optional encrypted sync. |
@@ -48,6 +49,7 @@ npx skills add frank9306/agent-skills --skill review-code -g
 npx skills add frank9306/agent-skills --skill diagnose-bug -g
 npx skills add frank9306/agent-skills --skill frontend-design -g
 npx skills add frank9306/agent-skills --skill dispatch-dsh-task -g
+npx skills add frank9306/agent-skills --skill audit-codex-harness -g
 npx skills add frank9306/agent-skills --skill read-web-content -g
 npx skills add frank9306/agent-skills --skill write-articles -g
 npx skills add frank9306/agent-skills --skill manage-credentials -g
@@ -66,6 +68,7 @@ node skills/engineering/frontend-design/scripts/verify-design.mjs <project-root>
 python -m unittest discover -s skills/content/read-web-content/tests -p "test_*.py"
 python skills/content/write-articles/scripts/check_draft.py <draft.md>
 python skills/content/write-articles/scripts/check_image_specs.py <image.png> [...]
+python -m unittest discover -s skills/engineering/audit-codex-harness/scripts/tests -p "test_*.py"
 ```
 
 The frontend verifier and article checks report review leads. They do not replace browser inspection, visual review, factual verification, accessibility checks, or project-owned test evidence.

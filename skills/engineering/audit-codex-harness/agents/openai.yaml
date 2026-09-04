@@ -1,0 +1,4 @@
+interface:
+  display_name: "Codex Harness Audit"
+  short_description: "Score project-level Codex harness efficiency"
+  default_prompt: "Use $audit-codex-harness to audit this project's Codex traces and recommend evidence-backed harness improvements."

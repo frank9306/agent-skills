@@ -16,7 +16,9 @@ None.
 
 ## In progress
 
-None.
+| ID | Title |
+|---|---|
+| [ISSUE-0013](ISSUE-0013-add-audit-codex-harness-skill.md) | Add audit-codex-harness skill |
 
 ## Blocked
 
