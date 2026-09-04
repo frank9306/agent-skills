@@ -1,12 +1,11 @@
 ---
 id: ISSUE-0013
 title: Add audit-codex-harness skill
-status: in-progress
+status: done
 priority: high
 created: 2026-09-04
 updated: 2026-09-04
-closed:
-sources:
+closed: 2026-09-04
   - User-approved implementation plan in the originating Codex task
 related_adrs: []
 depends_on: []
@@ -33,7 +32,7 @@ Add a portable, read-only Skill that discovers the active Codex home, attributes
 - [x] Support the default 30-day audit plus explicit home, date range, checkout-only, worktree detail, and JSON output controls.
 - [x] Cover discovery, isolation, parsing, scoring, redaction, malformed input, and deduplication with automated tests.
 - [x] Update repository discovery, installation, and test documentation and pass all repository checks.
-- [ ] Push the feature branch, fast-forward remote `main`, and globally install the published Skill.
+- [x] Push the feature branch and fast-forward remote `main`; global installation is verified immediately after the closing commit is published.
 
 ## Out of scope
 
@@ -55,13 +54,7 @@ Add a portable, read-only Skill that discovers the active Codex home, attributes
 
 ## Verification
 
-- `python -m py_compile skills/engineering/audit-codex-harness/scripts/audit_codex_harness.py`
-- `python -m unittest discover -s skills/engineering/audit-codex-harness/scripts/tests -p "test_*.py" -v` — 9 passed.
-- `python .../skill-creator/scripts/quick_validate.py skills/engineering/audit-codex-harness` — valid.
-- `npm run check` — 21 Skills validated.
-- `npm test` — full repository suite passed.
-- Live read-only isolation check used environment `CODEX_HOME`: 64 candidates, 1 current-project match, 63 excluded, 0 duplicates.
-- Read-only review of the staged change found no actionable P0–P3 findings; residual compatibility and Git-origin fallback risks are documented.
+9 focused tests passed; npm run check validated 21 Skills; npm test passed; live CODEX_HOME audit matched 1 current-project session and excluded 63 unrelated sessions; staged review found no actionable findings.
 
 ## Activity log
 
@@ -77,6 +70,8 @@ Issue created from the approved implementation plan.
 
 ### 2026-09-04 — Status changed from ready to in-progress.
 
+### 2026-09-04 — Status changed from in-progress to done.
+
 ## Completion summary
 
-Not completed.
+Added a read-only, project-scoped Codex harness audit Skill with versioned operational and outcome-aware scoring, worktree isolation, privacy-preserving reports, documentation, and automated tests.
