@@ -26,11 +26,13 @@ Rotate or revoke a token in Cloudflare after suspected disclosure, remove it fro
 
 ## Tunnel rollback
 
-An applied ingress update requires a snapshot file. The CLI saves the complete pre-change API response with restrictive permissions before the PUT. Treat it as sensitive because origin URLs or request settings may contain private data.
+An applied ingress or DNS update requires a snapshot file. The CLI saves the complete pre-change Tunnel API response or exact pre-change DNS record list with restrictive permissions before the write. Treat it as sensitive because origin URLs or request settings may contain private data.
 
 To recover, inspect the snapshot locally, extract its `config`, and restore that complete config through the same Tunnel configuration PUT endpoint after explicit authorization. Re-read the configuration afterward. Never restore a snapshot to a different account or Tunnel.
 
 For a simple service correction, the preferred inverse is another guarded `update-ingress-service` call using the newly applied service as `--expected-service` and the previous service as `--new-service`.
+
+For `ensure-ingress-hostname` and `ensure-dns-tunnel-cname`, record whether the resource was absent or its exact old value. A created resource must be removed only after separate explicit authorization; an updated resource can be restored with a guarded inverse call using the applied value as the expected value.
 
 ## Publication verification
 

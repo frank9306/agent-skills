@@ -134,6 +134,78 @@ def build_ingress_update(
     }
 
 
+def build_ingress_ensure(
+    response: dict[str, Any], hostname: str, service: str, expected_service: str | None,
+) -> tuple[dict[str, Any], dict[str, Any]]:
+    result = response.get("result") or {}
+    config = result.get("config")
+    if not isinstance(config, dict) or not isinstance(config.get("ingress"), list):
+        raise CloudflareError("Unexpected Tunnel configuration response")
+    updated = json.loads(json.dumps(config))
+    ingress = updated["ingress"]
+    validate_ingress(ingress)
+    matches = [rule for rule in ingress if rule.get("hostname") == hostname]
+    if len(matches) > 1:
+        raise CloudflareError(f"Expected at most one ingress rule for {hostname}, found {len(matches)}")
+    if matches:
+        rule = matches[0]
+        if expected_service is None:
+            raise CloudflareError(f"Expected no ingress rule for {hostname}, but one exists")
+        if rule.get("service") != expected_service:
+            raise CloudflareError(
+                f"Ingress service changed: expected {expected_service!r}, found {rule.get('service')!r}"
+            )
+        rule["service"] = service
+        action = "update"
+        old_service = expected_service
+    else:
+        if expected_service is not None:
+            raise CloudflareError(f"Expected ingress service {expected_service!r}, but the hostname is absent")
+        ingress.insert(-1, {"hostname": hostname, "service": service})
+        action = "create"
+        old_service = None
+    validate_ingress(ingress)
+    return updated, {
+        "action": action,
+        "hostname": hostname,
+        "old_service": old_service,
+        "new_service": service,
+        "config_version": result.get("version"),
+        "unrelated_rules_preserved": len(ingress) - 1,
+        "catch_all_last": True,
+    }
+
+
+def build_dns_ensure(
+    records: list[dict[str, Any]], hostname: str, target: str, expected_target: str | None,
+) -> tuple[dict[str, Any], dict[str, Any]]:
+    if len(records) > 1:
+        raise CloudflareError(f"Expected at most one DNS record for {hostname}, found {len(records)}")
+    payload = {"type": "CNAME", "name": hostname, "content": target, "proxied": True}
+    if not records:
+        if expected_target is not None:
+            raise CloudflareError(f"Expected DNS target {expected_target!r}, but the record is absent")
+        return payload, {
+            "action": "create", "hostname": hostname, "old_target": None,
+            "new_target": target, "record_id": None, "proxied": True,
+        }
+    record = records[0]
+    if expected_target is None:
+        raise CloudflareError(f"Expected no DNS record for {hostname}, but one exists")
+    if record.get("type") != "CNAME" or record.get("content") != expected_target:
+        raise CloudflareError(
+            f"DNS record changed: expected CNAME {expected_target!r}, found "
+            f"{record.get('type')!r} {record.get('content')!r}"
+        )
+    record_id = record.get("id")
+    if not record_id:
+        raise CloudflareError("DNS record response did not contain an id")
+    return payload, {
+        "action": "update", "hostname": hostname, "old_target": expected_target,
+        "new_target": target, "record_id": record_id, "proxied": True,
+    }
+
+
 def write_snapshot(path: Path, payload: dict[str, Any]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     descriptor = os.open(path, os.O_WRONLY | os.O_CREAT | os.O_EXCL, 0o600)
@@ -177,6 +249,21 @@ def build_parser() -> argparse.ArgumentParser:
     update.add_argument("--no-tls-verify", action="store_true")
     update.add_argument("--snapshot-file", type=Path)
     update.add_argument("--apply", action="store_true")
+    ensure_ingress = sub.add_parser("ensure-ingress-hostname")
+    ensure_ingress.add_argument("--account-id", required=True)
+    ensure_ingress.add_argument("--tunnel-id", required=True)
+    ensure_ingress.add_argument("--hostname", required=True)
+    ensure_ingress.add_argument("--service", required=True)
+    ensure_ingress.add_argument("--expected-service")
+    ensure_ingress.add_argument("--snapshot-file", type=Path)
+    ensure_ingress.add_argument("--apply", action="store_true")
+    ensure_dns = sub.add_parser("ensure-dns-tunnel-cname")
+    ensure_dns.add_argument("--zone-id", required=True)
+    ensure_dns.add_argument("--hostname", required=True)
+    ensure_dns.add_argument("--tunnel-id", required=True)
+    ensure_dns.add_argument("--expected-target")
+    ensure_dns.add_argument("--snapshot-file", type=Path)
+    ensure_dns.add_argument("--apply", action="store_true")
     return parser
 
 
@@ -258,6 +345,34 @@ def run(args: argparse.Namespace, client: Client) -> Any:
             raise CloudflareError("--snapshot-file is required with --apply")
         write_snapshot(args.snapshot_file, current)
         result = client.request("PUT", path, {"config": updated})
+        return {"dry_run": False, "plan": plan, "snapshot_file": str(args.snapshot_file), "result": result.get("result")}
+    if args.command == "ensure-ingress-hostname":
+        path = f"/accounts/{args.account_id}/cfd_tunnel/{args.tunnel_id}/configurations"
+        current = client.request("GET", path)
+        updated, plan = build_ingress_ensure(
+            current, args.hostname, args.service, args.expected_service
+        )
+        if not args.apply:
+            return {"dry_run": True, "plan": plan}
+        if args.snapshot_file is None:
+            raise CloudflareError("--snapshot-file is required with --apply")
+        write_snapshot(args.snapshot_file, current)
+        result = client.request("PUT", path, {"config": updated})
+        return {"dry_run": False, "plan": plan, "snapshot_file": str(args.snapshot_file), "result": result.get("result")}
+    if args.command == "ensure-dns-tunnel-cname":
+        path = f"/zones/{args.zone_id}/dns_records"
+        records = client.get_all(path, {"name": args.hostname})
+        target = f"{args.tunnel_id}.cfargotunnel.com"
+        payload, plan = build_dns_ensure(records, args.hostname, target, args.expected_target)
+        if not args.apply:
+            return {"dry_run": True, "plan": plan}
+        if args.snapshot_file is None:
+            raise CloudflareError("--snapshot-file is required with --apply")
+        write_snapshot(args.snapshot_file, {"records": records})
+        if plan["action"] == "create":
+            result = client.request("POST", path, payload)
+        else:
+            result = client.request("PUT", f"{path}/{plan['record_id']}", payload)
         return {"dry_run": False, "plan": plan, "snapshot_file": str(args.snapshot_file), "result": result.get("result")}
     raise CloudflareError(f"Unsupported command: {args.command}")
 

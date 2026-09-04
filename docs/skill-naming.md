@@ -18,10 +18,13 @@ Keep names to two components unless the artifact has an established compound nam
 | `manage-` | Owning an artifact's complete lifecycle and indexes | `manage-issues` |
 | `maintain-` | Keeping durable project knowledge aligned with verified facts | `maintain-context` |
 | `clarify-` | Resolving requirement ambiguity before work is created | `clarify-requirements` |
+| `model-` | Actively discovering and stress-testing a domain representation | `model-domain` |
+| `design-` | Shaping a bounded technical structure before implementation | `design-modules` |
 | `implement-` | Executing one bounded engineering artifact | `implement-issue` |
 | `review-` | Assessing work against explicit standards or requirements | `review-code` |
 | `diagnose-` | Reproducing a problem and determining its cause | `diagnose-bug` |
 | `route-` | Selecting one owning workflow without performing its work | `route-work` |
+| `write-` | Creating or revising a maintained document for a defined audience | `write-agent-docs` |
 | `migrate-` | Safely changing an existing persisted structure or convention | `migrate-context` |
 | `sync-` | Reconciling two existing sources of truth | `sync-docs` |
 
@@ -53,10 +56,13 @@ Import external source material?  capture-
 Own a complete lifecycle?         manage-
 Maintain durable project truth?   maintain-
 Resolve requirement ambiguity?    clarify-
+Discover a domain model?          model-
+Shape a technical structure?      design-
 Implement one bounded artifact?   implement-
 Assess quality or compliance?      review-
 Find a root cause?                 diagnose-
 Select an owning workflow?        route-
+Create or revise a document?       write-
 Convert an existing structure?    migrate-
 Reconcile existing sources?       sync-
 ```

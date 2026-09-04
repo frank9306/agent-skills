@@ -18,4 +18,6 @@ Use the engineering flow:
 - Ready Issue: implement one Issue through TDD and read-only code review.
 - Reported failure: diagnose the root cause, then create a proposed Issue for the fix.
 
+When terminology or concept boundaries materially affect behavior, model the domain before finalizing requirements and promote only confirmed durable knowledge to Context. When implementation materially changes module ownership, public interfaces, persistence ownership, or cross-module behavior, design that boundary before the first TDD slice. Architecture review remains a separate read-only survey and produces candidates rather than automatic refactors.
+
 Do not create separate Spec or Ticket files. Keep desired behavior and acceptance criteria in each self-contained Issue.

@@ -1,0 +1,4 @@
+interface:
+  display_name: "Review Architecture"
+  short_description: "Find evidence-backed architecture problems"
+  default_prompt: "Use $review-architecture to assess this codebase or subsystem and report prioritized architecture candidates."

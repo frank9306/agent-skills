@@ -26,8 +26,10 @@ Resolve:
 
 Separate facts, user decisions, assumptions, and unresolved questions. Challenge contradictions explicitly.
 
+Identify the canonical domain terms used by the requested behavior and check them against Context. When ambiguous terminology, concept boundaries, relationships, or invariants could materially change behavior or design, use `$model-domain` if available before declaring the requirement ready. Route only confirmed durable knowledge to `$maintain-context`.
+
 ## Finish with an Issue-ready brief
 
 Stop only when no unresolved branch can materially change implementation or acceptance. Return a concise brief containing problem, desired behavior, acceptance criteria, out of scope, decisions, assumptions, sources, and any natural vertical split.
 
-Do not create a separate Spec. When the user wants the work recorded, hand the brief to $manage-issues to create one self-contained Issue or several independent Issues. Propose $maintain-context or $to-adr only when confirmed durable knowledge or a lasting technical decision emerged.
+Do not create a separate Spec. When the user wants the work recorded, hand the brief to `$manage-issues` to create one self-contained Issue or several independent Issues. Propose `$maintain-context` or `$to-adr` only when confirmed durable knowledge or a lasting technical decision emerged.

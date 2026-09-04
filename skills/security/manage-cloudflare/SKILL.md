@@ -25,12 +25,13 @@ Read [references/api-and-recovery.md](references/api-and-recovery.md) before a w
 2. Read the complete current Tunnel configuration before editing ingress. Determine whether `config_src` is Cloudflare-managed.
 3. For a write, state the exact account, zone, resource, old value, new value, verification, and rollback action. Follow the active project's authorization policy.
 4. Run the mutation command without `--apply` first. Review its JSON plan.
-5. For Tunnel ingress changes, require an exact `--expected-service`, keep every unrelated rule unchanged, keep the catch-all rule last, and provide `--snapshot-file` when applying.
-6. Apply only after scoped authorization, then re-read the resource and test both the origin path and the public hostname. Verify Access blocks an unauthenticated request before treating a private origin as safely published.
-7. If verification fails, restore from the protected snapshot or apply the explicitly recorded inverse change. Stop after one failed retry unless the project authorizes further investigation.
+5. For an existing Tunnel ingress rule, require an exact `--expected-service`; omit it only when the hostname must be absent. Keep every unrelated rule unchanged, keep the catch-all rule last, and provide `--snapshot-file` when applying.
+6. For a Tunnel DNS CNAME, require an exact `--expected-target`; omit it only when the record must be absent. Always use the discovered Tunnel ID and a proxied CNAME to `<tunnel-id>.cfargotunnel.com`.
+7. Apply only after scoped authorization, then re-read the resource and test both the origin path and the public hostname. Verify Access blocks an unauthenticated request before treating a private origin as safely published.
+8. If verification fails, restore from the protected snapshot or apply the explicitly recorded inverse change. Stop after one failed retry unless the project authorizes further investigation.
 
 ## Commands
 
-Run `python scripts/cloudflare_control.py --help`. Discovery commands cover accounts, zones, DNS records, Tunnels, Tunnel configuration, Access applications, and Access policies. `update-ingress-service` performs the guarded public-hostname service update used for remotely managed Tunnel routes.
+Run `python scripts/cloudflare_control.py --help`. Discovery commands cover accounts, zones, DNS records, Tunnels, Tunnel configuration, Access applications, and Access policies. `update-ingress-service` updates an existing service. `ensure-ingress-hostname` creates an absent hostname rule before the final catch-all or updates one exact existing rule. `ensure-dns-tunnel-cname` creates an absent proxied Tunnel CNAME or updates one exact existing CNAME. All mutation commands default to dry-run and require `--snapshot-file` with `--apply`.
 
 Do not expose an internal administration UI through Tunnel without an Access application and restrictive allow policy. Do not alter the final catch-all ingress rule, overwrite a configuration assembled from partial data, or put credentials into rollback evidence.

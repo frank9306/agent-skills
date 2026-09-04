@@ -15,7 +15,7 @@ Read the related local Issue, root agent instructions, docs/agents/, Context, re
 
 ## Review two axes
 
-Standards review checks whether the diff follows documented project rules, established interfaces, data compatibility, security boundaries, and local conventions.
+Standards review checks whether the diff follows documented project rules, established interfaces, data compatibility, security boundaries, and local conventions. For material structural changes, also check for duplicated business knowledge, leaky interfaces, caller-coordinated internal steps, terminology that conflicts with Context, unnecessary pass-through layers, change diffusion across unrelated modules, and tests coupled to internal structure. Report these only when the diff provides a concrete failure or maintenance scenario, not as aesthetic preference.
 
 Requirements review checks whether the diff implements every acceptance criterion, respects out-of-scope boundaries, handles material edge cases, and provides evidence that would fail if the behavior regressed.
 

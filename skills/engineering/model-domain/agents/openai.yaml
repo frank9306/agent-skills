@@ -1,0 +1,4 @@
+interface:
+  display_name: "Model Domain"
+  short_description: "Clarify domain concepts and invariants"
+  default_prompt: "Use $model-domain to clarify and stress-test the domain concepts involved in this request."

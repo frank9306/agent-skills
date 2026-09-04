@@ -1,0 +1,4 @@
+interface:
+  display_name: "Write Agent Docs"
+  short_description: "Write concise project instructions for agents"
+  default_prompt: "Use $write-agent-docs to create or revise the agent-facing instructions for this project."

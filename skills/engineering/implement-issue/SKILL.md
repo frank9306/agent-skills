@@ -20,6 +20,8 @@ Require:
 - Problem, desired outcome, and acceptance criteria are concrete.
 - The requested behavior fits the stated scope.
 
+When the Issue introduces a module, changes a public interface, moves business rules across boundaries, changes persistence ownership, or adds material cross-module behavior, require `$design-modules` to be available and use it before the first TDD slice. Routine behavior inside an established boundary does not need a separate design pass.
+
 Preserve unrelated uncommitted changes. If they overlap the required files and cannot be isolated safely, stop and report the collision.
 
 Use $manage-issues to transition the Issue to in-progress and record the start.
@@ -35,6 +37,8 @@ If implementation reveals a missing product decision or materially different sco
 Run every project check required by the Issue and repository, then the full relevant suite. Invoke $review-code against the fixed pre-implementation Git base and this Issue.
 
 Address confirmed review findings that are within scope, rerun affected verification, and repeat review until no P0 or P1 finding remains. Do not conceal residual P2 or P3 findings; record them.
+
+For a material boundary change, confirm that each new business rule has one authoritative owner, public interfaces do not leak unnecessary implementation details, and automated tests exercise stable seams rather than internal structure.
 
 ## Close or stop honestly
 

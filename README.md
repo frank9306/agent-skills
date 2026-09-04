@@ -15,10 +15,14 @@ A growing collection of reusable Agent Skills. Each Skill is self-contained unde
 | [`to-adr`](skills/engineering/to-adr/SKILL.md) | Engineering | Record confirmed architecture decisions as numbered ADRs. |
 | [`route-work`](skills/engineering/route-work/SKILL.md) | Engineering | Select the correct project workflow entry point. |
 | [`clarify-requirements`](skills/engineering/clarify-requirements/SKILL.md) | Engineering | Resolve ambiguity before creating local Issues. |
+| [`model-domain`](skills/engineering/model-domain/SKILL.md) | Engineering | Discover and stress-test domain concepts and invariants. |
+| [`design-modules`](skills/engineering/design-modules/SKILL.md) | Engineering | Design stable module ownership, interfaces, and test seams. |
 | [`tdd`](skills/engineering/tdd/SKILL.md) | Engineering | Implement behavior through red-green-refactor loops. |
 | [`implement-issue`](skills/engineering/implement-issue/SKILL.md) | Engineering | Implement and verify one ready local Issue. |
 | [`review-code`](skills/engineering/review-code/SKILL.md) | Engineering | Review Git changes against standards and requirements. |
+| [`review-architecture`](skills/engineering/review-architecture/SKILL.md) | Engineering | Review a codebase for evidence-backed structural problems. |
 | [`diagnose-bug`](skills/engineering/diagnose-bug/SKILL.md) | Engineering | Reproduce a bug and determine its root cause. |
+| [`write-agent-docs`](skills/engineering/write-agent-docs/SKILL.md) | Engineering | Write concise, scoped project instructions for agents. |
 | [`frontend-design`](skills/engineering/frontend-design/SKILL.md) | Engineering | Design, build, polish, and audit cohesive, reliable production frontends. |
 | [`dispatch-dsh-task`](skills/engineering/dispatch-dsh-task/SKILL.md) | Engineering | Dispatch audited my-knowledge work from Hermes to the restricted DSH runner. |
 | [`audit-codex-harness`](skills/engineering/audit-codex-harness/SKILL.md) | Engineering | Audit project-scoped Codex traces and score harness efficiency. |
@@ -43,10 +47,14 @@ npx skills add frank9306/agent-skills --skill maintain-context -g
 npx skills add frank9306/agent-skills --skill to-adr -g
 npx skills add frank9306/agent-skills --skill route-work -g
 npx skills add frank9306/agent-skills --skill clarify-requirements -g
+npx skills add frank9306/agent-skills --skill model-domain -g
+npx skills add frank9306/agent-skills --skill design-modules -g
 npx skills add frank9306/agent-skills --skill tdd -g
 npx skills add frank9306/agent-skills --skill implement-issue -g
 npx skills add frank9306/agent-skills --skill review-code -g
+npx skills add frank9306/agent-skills --skill review-architecture -g
 npx skills add frank9306/agent-skills --skill diagnose-bug -g
+npx skills add frank9306/agent-skills --skill write-agent-docs -g
 npx skills add frank9306/agent-skills --skill frontend-design -g
 npx skills add frank9306/agent-skills --skill dispatch-dsh-task -g
 npx skills add frank9306/agent-skills --skill audit-codex-harness -g

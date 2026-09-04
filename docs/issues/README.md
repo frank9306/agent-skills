@@ -33,7 +33,10 @@ None.
 | [ISSUE-0008](ISSUE-0008-add-manage-cloudflare-skill.md) | Add manage-cloudflare skill |
 | [ISSUE-0009](ISSUE-0009-add-manage-tailscale-skill.md) | Add manage-tailscale skill |
 | [ISSUE-0010](ISSUE-0010-add-dispatch-dsh-task-hermes-skill-and-dispatcher-runtime.md) | Add dispatch-dsh-task Hermes skill and dispatcher runtime |
+| [ISSUE-0011](ISSUE-0011-add-guarded-cloudflare-hostname-publication.md) | Add guarded Cloudflare hostname publication |
+| [ISSUE-0012](ISSUE-0012-retire-manage-credentials-and-preserve-owner-export.md) | Retire manage-credentials and preserve owner export |
 | [ISSUE-0013](ISSUE-0013-add-audit-codex-harness-skill.md) | Add audit-codex-harness skill |
+| [ISSUE-0014](ISSUE-0014-improve-ai-friendly-engineering-skills.md) | Improve AI-friendly engineering skills |
 
 ## Cancelled
 

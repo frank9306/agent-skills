@@ -1,0 +1,4 @@
+interface:
+  display_name: "Design Modules"
+  short_description: "Design stable module boundaries and interfaces"
+  default_prompt: "Use $design-modules to design a stable module boundary for this change before implementation."
