@@ -14,7 +14,7 @@ A growing collection of reusable Agent Skills. Each Skill is self-contained unde
 | [`maintain-context`](skills/engineering/maintain-context/SKILL.md) | Engineering | Maintain verified and durable project domain knowledge. |
 | [`to-adr`](skills/engineering/to-adr/SKILL.md) | Engineering | Record confirmed architecture decisions as numbered ADRs. |
 | [`route-work`](skills/engineering/route-work/SKILL.md) | Engineering | Select the correct project workflow entry point. |
-| [`clarify-requirements`](skills/engineering/clarify-requirements/SKILL.md) | Engineering | Resolve ambiguity before creating local Issues. |
+| [`grill-me`](skills/engineering/grill-me/SKILL.md) | Engineering | Resolve ambiguity before creating local Issues. |
 | [`model-domain`](skills/engineering/model-domain/SKILL.md) | Engineering | Discover and stress-test domain concepts and invariants. |
 | [`design-modules`](skills/engineering/design-modules/SKILL.md) | Engineering | Design stable module ownership, interfaces, and test seams. |
 | [`tdd`](skills/engineering/tdd/SKILL.md) | Engineering | Implement behavior through red-green-refactor loops. |
@@ -46,7 +46,7 @@ npx skills add frank9306/agent-skills --skill manage-issues -g
 npx skills add frank9306/agent-skills --skill maintain-context -g
 npx skills add frank9306/agent-skills --skill to-adr -g
 npx skills add frank9306/agent-skills --skill route-work -g
-npx skills add frank9306/agent-skills --skill clarify-requirements -g
+npx skills add frank9306/agent-skills --skill grill-me -g
 npx skills add frank9306/agent-skills --skill model-domain -g
 npx skills add frank9306/agent-skills --skill design-modules -g
 npx skills add frank9306/agent-skills --skill tdd -g

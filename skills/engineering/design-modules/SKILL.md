@@ -31,4 +31,4 @@ Stress-test the proposed boundary with representative changes: a new rule, a cha
 
 Return the proposed ownership, public interface, hidden decisions, dependencies, test seam, compatibility constraints, and rejected alternatives. Keep the result proportional to the decision; do not create a separate design artifact unless the project workflow requires one.
 
-Do not implement code. Record a confirmed, lasting boundary decision through `$to-adr` when available and authorized. Return unresolved behavior to `$clarify-requirements`; do not decide product policy from architectural preference.
+Do not implement code. Record a confirmed, lasting boundary decision through `$to-adr` when available and authorized. Return unresolved behavior to `$grill-me`; do not decide product policy from architectural preference.

@@ -17,7 +17,7 @@ Keep names to two components unless the artifact has an established compound nam
 | `capture-` | Bringing external source material into the project | `capture-meeting` |
 | `manage-` | Owning an artifact's complete lifecycle and indexes | `manage-issues` |
 | `maintain-` | Keeping durable project knowledge aligned with verified facts | `maintain-context` |
-| `clarify-` | Resolving requirement ambiguity before work is created | `clarify-requirements` |
+| `grill-` | Resolving requirement ambiguity before work is created | `grill-me` |
 | `model-` | Actively discovering and stress-testing a domain representation | `model-domain` |
 | `design-` | Shaping a bounded technical structure before implementation | `design-modules` |
 | `implement-` | Executing one bounded engineering artifact | `implement-issue` |
@@ -37,6 +37,7 @@ Keep names to two components unless the artifact has an established compound nam
 - `maintain-` Skills update only durable facts. They must not turn temporary progress or speculation into project truth.
 - Review and diagnosis Skills report findings unless their descriptions explicitly authorize remediation.
 - `route-` Skills select one primary owning Skill and preserve that Skill's authorization and stage gates.
+- `grill-me` is the owner-selected conversational name for requirement clarification; it is an explicit exception to the artifact-object convention.
 - Established engineering acronyms may stand alone when expansion would reduce recognition, such as `tdd`.
 
 ## Number and wording
@@ -55,7 +56,7 @@ Transform input into an artifact? to-
 Import external source material?  capture-
 Own a complete lifecycle?         manage-
 Maintain durable project truth?   maintain-
-Resolve requirement ambiguity?    clarify-
+Resolve requirement ambiguity?    grill-
 Discover a domain model?          model-
 Shape a technical structure?      design-
 Implement one bounded artifact?   implement-

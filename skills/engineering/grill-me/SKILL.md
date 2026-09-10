@@ -1,9 +1,9 @@
 ---
-name: clarify-requirements
+name: grill-me
 description: Clarify a project idea, meeting outcome, feature request, or ambiguous local Issue through focused questioning until it is ready to become one or more self-contained local Issues. Use before implementation when goals, behavior, boundaries, edge cases, decisions, or acceptance criteria remain unresolved.
 ---
 
-# Clarify Requirements
+# Grill Me
 
 Resolve uncertainty before creating work. Do not implement code or invent answers for product decisions.
 

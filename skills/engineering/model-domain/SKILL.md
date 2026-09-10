@@ -31,4 +31,4 @@ Ask the user only for domain decisions that repository evidence cannot settle. D
 
 Report the proposed glossary, boundaries, relationships, invariants, supporting evidence, conflicts, and unresolved questions. State which items are confirmed and which remain hypotheses.
 
-Use `$maintain-context` when available and authorized to record only confirmed durable knowledge. Use `$to-adr` for confirmed technical decisions. Return unresolved behavior that changes acceptance criteria to `$clarify-requirements` rather than encoding it in Context or code.
+Use `$maintain-context` when available and authorized to record only confirmed durable knowledge. Use `$to-adr` for confirmed technical decisions. Return unresolved behavior that changes acceptance criteria to `$grill-me` rather than encoding it in Context or code.

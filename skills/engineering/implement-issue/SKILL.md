@@ -30,7 +30,7 @@ Use $manage-issues to transition the Issue to in-progress and record the start.
 
 Map acceptance criteria to observable behaviors. Use $tdd for each behavior that can be automated. Keep changes inside the Issue boundary, run focused feedback frequently, and update implementation notes when a discovery changes the approach without changing scope.
 
-If implementation reveals a missing product decision or materially different scope, stop before guessing and return to $clarify-requirements. Route confirmed durable knowledge to $maintain-context and lasting technical decisions to $to-adr.
+If implementation reveals a missing product decision or materially different scope, stop before guessing and return to $grill-me. Route confirmed durable knowledge to $maintain-context and lasting technical decisions to $to-adr.
 
 ## Verify and review
 

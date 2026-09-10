@@ -1,0 +1,7 @@
+interface:
+  display_name: "Grill Me"
+  short_description: "Resolve ambiguity before creating local issues"
+  default_prompt: "Use $grill-me to question and resolve this requirement before implementation."
+
+policy:
+  allow_implicit_invocation: false

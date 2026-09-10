@@ -20,7 +20,7 @@ Use the first matching route:
 | Input or current state | Primary Skill |
 |---|---|
 | Ambiguous domain terminology or concept boundaries that materially affect behavior | `$model-domain` |
-| New or ambiguous requirement with unresolved behavior, boundaries, or acceptance | `$clarify-requirements` |
+| New or ambiguous requirement with unresolved behavior, boundaries, or acceptance | `$grill-me` |
 | Clear requirement that must be recorded or decomposed into local Issues | `$manage-issues` |
 | Explicit request to design module ownership, a public interface, or an architectural seam | `$design-modules` |
 | One local Issue whose status is `ready` and whose dependencies are done | `$implement-issue` |
@@ -42,7 +42,7 @@ Select exactly one primary Skill. Mention later workflow stages only as an expec
 
 ## Enforce stage gates
 
-Do not route implementation to `$implement-issue` unless one concrete Issue is `ready`, every dependency is done, and its desired outcome and acceptance criteria are actionable. Route unresolved requirements to `$clarify-requirements`; route a clear but unrecorded requirement to `$manage-issues`.
+Do not route implementation to `$implement-issue` unless one concrete Issue is `ready`, every dependency is done, and its desired outcome and acceptance criteria are actionable. Route unresolved requirements to `$grill-me`; route a clear but unrecorded requirement to `$manage-issues`.
 
 Do not route a reported failure directly to implementation while its root cause remains unconfirmed. Do not route an unconfirmed inference to `$maintain-context` or `$to-adr`. Route domain ambiguity to `$model-domain`; route only confirmed results onward to durable documentation.
 

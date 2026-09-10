@@ -38,6 +38,7 @@ None.
 | [ISSUE-0013](ISSUE-0013-add-audit-codex-harness-skill.md) | Add audit-codex-harness skill |
 | [ISSUE-0014](ISSUE-0014-improve-ai-friendly-engineering-skills.md) | Improve AI-friendly engineering skills |
 | [ISSUE-0015](ISSUE-0015-update-environment-synchronization-guidance.md) | Update environment synchronization guidance |
+| [ISSUE-0016](ISSUE-0016-rename-clarify-requirements-to-grill-me.md) | Rename clarify-requirements to grill-me |
 
 ## Cancelled
 
