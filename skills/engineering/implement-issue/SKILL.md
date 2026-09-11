@@ -9,7 +9,7 @@ Implement exactly one ready Issue. Do not reopen settled scope or combine unrela
 
 ## Preflight
 
-Read the Issue, root agent instructions, docs/agents/, Context, relevant ADRs, affected code, tests, and Git status. Read references/completion-gate.md.
+Read the Issue, root agent instructions, docs/agents/, Context, relevant ADRs, affected code, tests, and Git status. Read references/completion-gate.md. Before the first implementation slice, read [the module-depth gate](references/module-depth-gate.md) to decide whether the change needs a design pass.
 
 Require $manage-issues, $tdd, and $review-code to be available. If any is missing, stop and report the missing Skill instead of silently replacing its workflow.
 
@@ -20,7 +20,7 @@ Require:
 - Problem, desired outcome, and acceptance criteria are concrete.
 - The requested behavior fits the stated scope.
 
-When the Issue introduces a module, changes a public interface, moves business rules across boundaries, changes persistence ownership, or adds material cross-module behavior, require `$design-modules` to be available and use it before the first TDD slice. Routine behavior inside an established boundary does not need a separate design pass.
+Apply the module-depth gate to the concrete change, not to file size or abstract architectural preference. When it requires a design pass, require `$design-modules` to be available and use it before the first TDD slice. Routine behavior inside an established public contract does not need separate architecture work.
 
 Preserve unrelated uncommitted changes. If they overlap the required files and cannot be isolated safely, stop and report the collision.
 

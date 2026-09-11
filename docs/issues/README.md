@@ -39,6 +39,7 @@ None.
 | [ISSUE-0014](ISSUE-0014-improve-ai-friendly-engineering-skills.md) | Improve AI-friendly engineering skills |
 | [ISSUE-0015](ISSUE-0015-update-environment-synchronization-guidance.md) | Update environment synchronization guidance |
 | [ISSUE-0016](ISSUE-0016-rename-clarify-requirements-to-grill-me.md) | Rename clarify-requirements to grill-me |
+| [ISSUE-0017](ISSUE-0017-integrate-deep-module-gates-into-engineering-skills.md) | Integrate deep-module gates into engineering Skills |
 
 ## Cancelled
 

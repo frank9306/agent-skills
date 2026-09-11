@@ -11,6 +11,8 @@ Survey the requested codebase or subsystem and identify the few structural probl
 
 Read root agent instructions, project Context, relevant ADRs and Issues, dependency manifests, module entry points, representative callers, persistence boundaries, and tests. State the inspected scope and important areas not inspected.
 
+When the user does not select a subsystem and Git history is available, inspect recent changed paths before choosing representative flows. Prioritize active capabilities where a deeper boundary could reduce recurring change cost; do not recommend restructuring dormant code merely because it looks untidy.
+
 Do not infer architecture from directory names alone. Trace representative behavior across its actual call, data, and dependency paths before reporting a finding.
 
 ## Assess structural evidence
@@ -28,8 +30,10 @@ Look for:
 
 Distinguish confirmed evidence from hypotheses. Do not report aesthetic preferences, generic best practices, or a large-module finding without demonstrating the change cost it causes.
 
+Apply the deletion test before reporting a shallow-module candidate. The candidate qualifies only when removing or absorbing the current abstraction would allow related policy, sequencing, state, or failure handling to sit behind a smaller stable interface. If deletion would only duplicate or scatter implementation across callers, the abstraction is providing real leverage and should not be reported as shallow.
+
 ## Report candidates
 
-Order findings by expected impact and confidence. For each, provide exact code evidence, the change scenario it makes difficult, the knowledge or responsibility lacking one owner, a candidate boundary or seam, compatibility constraints, and the smallest useful next investigation.
+Order findings by expected impact and confidence. For each, provide exact code evidence, recent-change evidence when used, the change scenario it makes difficult, the knowledge or responsibility lacking one owner, the deletion-test result, a candidate boundary or seam, compatibility constraints, and the smallest useful next investigation.
 
 This Skill is read-only: do not modify code, create Issues, or record ADRs unless the user separately authorizes that action. Use `$review-code` for a fixed Git change range; use `$design-modules` after the user selects a candidate that needs a concrete boundary design.

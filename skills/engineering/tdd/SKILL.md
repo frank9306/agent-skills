@@ -11,6 +11,8 @@ Build one behavior at a time. Never batch all tests before all implementation.
 
 Read the requirement, affected code, existing tests, and project test commands. Select the highest stable public seam that can prove the behavior without coupling the test to internal structure. Read references/test-quality.md before adding a new testing mechanism or mock.
 
+When an owning module already exists, exercise its supported public entry. Do not export an internal helper or make implementation state public solely to make a narrow unit test convenient; prefer observable behavior at the module seam.
+
 If the change has no meaningful runtime behavior, explain why a new automated test would add no signal and use the project's applicable static or build checks instead.
 
 ## Red

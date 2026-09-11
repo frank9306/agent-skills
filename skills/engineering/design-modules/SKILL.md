@@ -25,7 +25,18 @@ Define:
 
 Prefer change locality over file-count reduction. Avoid interfaces that expose storage schemas, force callers to coordinate internal steps, duplicate policy across modules, or add pass-through layers without hiding knowledge.
 
-Stress-test the proposed boundary with representative changes: a new rule, a changed persistence detail, a failure path, and a second caller. Revise it when those changes would spread unnecessarily or bypass the owner.
+Evaluate the proposed module's depth explicitly:
+
+- Identify its single discoverable public entry and the smallest useful input, output, and failure contract.
+- State which sequencing, intermediate data, framework details, and failure handling become internal knowledge.
+- Apply the deletion test: removing a shallow abstraction should concentrate knowledge behind the proposed interface, not merely spread its code across callers.
+- Name the likely future changes that should remain local while the public contract stays stable.
+- Identify imports or dependency directions that callers must not use to bypass the owner.
+- Define a public behavior test that protects the seam without exposing an internal helper solely for testability.
+
+Do not infer depth from a long file, a large class, many internal files, or short functions. A directory or wrapper whose interface is nearly as complex as the implementation is still shallow.
+
+Stress-test the proposed boundary with a new rule, a changed persistence or third-party detail, a failure path, and a second caller. Revise it when those changes would spread unnecessarily, expose internal sequencing, or bypass the owner.
 
 ## Hand off the design
 
