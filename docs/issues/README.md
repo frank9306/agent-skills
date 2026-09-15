@@ -40,6 +40,7 @@ None.
 | [ISSUE-0015](ISSUE-0015-update-environment-synchronization-guidance.md) | Update environment synchronization guidance |
 | [ISSUE-0016](ISSUE-0016-rename-clarify-requirements-to-grill-me.md) | Rename clarify-requirements to grill-me |
 | [ISSUE-0017](ISSUE-0017-integrate-deep-module-gates-into-engineering-skills.md) | Integrate deep-module gates into engineering Skills |
+| [ISSUE-0018](ISSUE-0018-add-screenshot-fidelity-gates-to-frontend-design.md) | Add screenshot fidelity gates to frontend-design |
 
 ## Cancelled
 

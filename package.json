@@ -7,7 +7,7 @@
   "scripts": {
     "check": "node scripts/check-skills.mjs",
     "check:frontend": "node skills/engineering/frontend-design/scripts/verify-design.mjs .",
-    "test:frontend": "node --test skills/engineering/frontend-design/tests/*.test.mjs",
+    "test:frontend": "node --test skills/engineering/frontend-design/tests/*.test.mjs && python -m unittest discover -s skills/engineering/frontend-design/tests -p \"test_*.py\"",
     "test:read-web-content": "python -m unittest discover -s skills/content/read-web-content/tests -p \"test_*.py\"",
     "test:dispatch-dsh-task": "python -m unittest discover -s skills/engineering/dispatch-dsh-task/scripts/tests -p \"test_*.py\"",
     "test:audit-codex-harness": "python -m unittest discover -s skills/engineering/audit-codex-harness/scripts/tests -p \"test_*.py\"",

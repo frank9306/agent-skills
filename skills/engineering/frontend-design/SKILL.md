@@ -1,6 +1,6 @@
 ---
 name: frontend-design
-description: Design, build, reshape, polish, or audit production frontend interfaces and design systems. Use for pages, components, web apps, dashboards, responsive UI, screenshot refinement, visual consistency, accessibility, frontend architecture, state and API reliability, type safety, testing, performance, security boundaries, observability, dependency risk, or requests to remove generic AI-looking design. Supports new and existing products across frameworks while preserving project-owned conventions.
+description: Design, build, reproduce, reshape, polish, or audit production frontend interfaces and design systems. Use for pages, components, web apps, dashboards, reference-image or design-source reproduction, responsive UI, visual consistency, accessibility, frontend architecture, state and API reliability, type safety, testing, performance, security boundaries, observability, dependency risk, or requests to remove generic AI-looking design. Supports new and existing products across frameworks while preserving project-owned conventions.
 ---
 
 # Frontend Design
@@ -69,13 +69,15 @@ Choose the smallest matching route and load only its required references:
 | Create | New page, component, product, or visual direction | `design-philosophy.md`, `interaction-content.md`, `responsive-accessibility.md` |
 | Extend | Add a surface to an established product | `design-system.md`, `frontend-engineering.md`, `responsive-accessibility.md` |
 | Polish | Fix hierarchy, spacing, typography, density, or visual drift | `design-philosophy.md`, `visual-review.md` |
-| Screenshot | Reproduce or improve against visual evidence | `visual-review.md`, then the reference matching the observed problem |
+| Screenshot fidelity | Implement, reproduce, restore, or match a supplied screenshot or design source | `screenshot-fidelity.md`, `visual-review.md`, then the reference matching the observed problem |
 | System | Create, extract, or update a design system or `DESIGN.md` | `design-system.md` and `assets/DESIGN.template.md` |
 | Review | Audit without modifying implementation | `visual-review.md`, `responsive-accessibility.md`, `frontend-engineering.md` |
 | Engineering audit | Review architecture, state, API, business rules, types, tests, security, recovery, or dependency risk | Load only the matching engineering references listed below |
 | De-slop | Remove templated visual or copy patterns | `anti-slop.md`, `visual-review.md` |
 
 Load `data-visualization.md` for dashboards and chart-heavy interfaces. A task may use several routes, but avoid loading unrelated references.
+
+Requests to implement from a design image, reproduce a screenshot, restore a design, or achieve visual consistency must use Screenshot fidelity. This route is quantitative: style resemblance, functional correctness, lack of overflow, a clean console, or a passing static scan cannot establish fidelity. Do not call a result "high fidelity", "pixel perfect", "matching", or equivalent unless the baseline contract passes. Continue iterating while safe progress remains; otherwise report the measured ceiling and concrete blocker.
 
 For an engineering audit, load references by concern:
 
@@ -124,6 +126,8 @@ node <skill-directory>/scripts/verify-design.mjs <project-root>
 ```
 
 Use `--json` for structured output. Treat warnings as review leads, not proof of a visual defect. Never claim visual quality from static scanning alone.
+
+For Screenshot fidelity, the baseline viewport is a separate release gate. Run `scripts/visual_fidelity.py capture`, `compare`, and `report` against the case manifest described in `references/screenshot-fidelity.md`. All anchor, critical-region, overall-similarity, asset-completeness, and capture-stability gates must pass. Responsive views outside the supplied baseline are checked for usability and layout integrity, not compared pixel-for-pixel unless they have their own approved baseline.
 
 For audit work, classify every result as `observed`, `inferred`, or `unverified`. Confirm business rules against product evidence and API behavior; never infer them from field names. A passing static scan does not establish architectural quality, runtime safety, security, or business correctness.
 

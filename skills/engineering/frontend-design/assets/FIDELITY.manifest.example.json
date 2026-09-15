@@ -1,0 +1,51 @@
+{
+  "version": 1,
+  "case": "homepage-desktop",
+  "reference": { "path": "reference.png", "sha256": "REPLACE_WITH_REFERENCE_SHA256" },
+  "capture": {
+    "url": "http://127.0.0.1:4173/",
+    "projectRoot": "../..",
+    "viewport": { "width": 1440, "height": 900 },
+    "deviceScaleFactor": 1,
+    "colorScheme": "dark",
+    "locale": "en-US",
+    "timezoneId": "UTC",
+    "readySelector": "main",
+    "stableState": "initial-loaded",
+    "freezeCss": "",
+    "actions": [],
+    "stateAssertions": [{ "selector": "main", "visible": true }]
+  },
+  "assets": {
+    "status": "complete",
+    "inventory": { "fonts": true, "icons": true, "images": false },
+    "files": [
+      { "path": "../../public/brand.svg", "kind": "icon", "purpose": "brand mark", "required": true, "sha256": "REPLACE_WITH_ASSET_SHA256", "license": "project-owned" },
+      { "path": "../../public/brand-sans.woff2", "kind": "font", "purpose": "display typography", "required": true, "sha256": "REPLACE_WITH_FONT_SHA256", "license": "project-owned" }
+    ],
+    "fonts": [{ "family": "Brand Sans", "files": ["../../public/brand-sans.woff2"], "weights": [700], "styles": ["normal"], "required": true }]
+  },
+  "coverage": { "requiredAnchorRoles": ["canvas", "primary"], "requiredRegionRoles": ["primary"] },
+  "anchors": [{
+    "name": "canvas", "role": "canvas",
+    "selector": "main",
+    "expected": { "x": 0, "y": 0, "width": 1440, "height": 900 },
+    "tolerancePx": 2
+  }, {
+    "name": "headline", "role": "primary",
+    "selector": "[data-fidelity=\"headline\"]",
+    "expected": { "x": 80, "y": 64, "width": 1280, "height": 180 },
+    "tolerancePx": 2
+  }],
+  "geometryPoints": [],
+  "perspective": { "required": false, "planes": [] },
+  "regions": [{
+    "name": "headline", "role": "primary",
+    "rect": { "x": 60, "y": 44, "width": 1320, "height": 220 },
+    "threshold": 0.99,
+    "weight": 3
+  }],
+  "masks": [],
+  "thresholds": { "overall": 0.985, "critical": 0.99, "anchorTolerancePx": 2, "stabilityDelta": 0.001 },
+  "outputs": { "actual": "actual.png", "anchors": "anchors.json", "captureMeta": "capture-meta.json", "report": "report.json", "history": "history.json", "overlay": "overlay.png", "diff": "diff.png" }
+}
