@@ -1,0 +1,4 @@
+interface:
+  display_name: "Initialize Project Checks"
+  short_description: "Enforce TypeScript and Python module boundaries"
+  default_prompt: "Use $init-checks to establish project-owned structure checks, Codex Hooks, and CI verification."

@@ -1,40 +1,42 @@
 ---
 name: implement-issue
-description: Implement one repository-local Issue that is ready for work, driving behavior through TDD, running project verification, reviewing the resulting Git changes, and returning evidence to the Issue without automatically committing. Use when the user asks to build or complete a specific docs/issues/ISSUE-NNNN file.
+description: Implement one ready repository-local Issue or resume one authorized in-progress Issue, driving behavior through TDD, project verification, and review without automatically committing. Use for an explicitly authorized implementation or continuation request whose matching local Issue is unambiguous. Do not infer implementation authorization from discussion or design.
 ---
 
 # Implement a Local Issue
 
-Implement exactly one ready Issue. Do not reopen settled scope or combine unrelated work.
+Implement or resume exactly one actionable local Issue. Do not reopen settled scope or combine unrelated work.
 
 ## Preflight
 
-Read the Issue, root agent instructions, docs/agents/, Context, relevant ADRs, affected code, tests, and Git status. Read references/completion-gate.md. Before the first implementation slice, read [the module-depth gate](references/module-depth-gate.md) to decide whether the change needs a design pass.
+Read the Issue, root agent instructions, docs/agents/, Context, relevant ADRs, affected code, tests, and Git status. Read the project-owned architecture contract, boundary configuration, and fast/full verification commands; use `.architecture.json` and `.codex/checks.json` when the project has adopted `init-checks`, otherwise use its existing equivalents. Read references/completion-gate.md. Before the first implementation slice, read [the module-depth gate](references/module-depth-gate.md) to decide whether the change needs a design pass.
 
 Require $manage-issues, $tdd, and $review-code to be available. If any is missing, stop and report the missing Skill instead of silently replacing its workflow.
 
 Require:
 
-- Status is ready.
+- Status is ready for new implementation, or in-progress for an authorized continuation of the same scope.
 - Every dependency names a done Issue.
 - Problem, desired outcome, and acceptance criteria are concrete.
 - The requested behavior fits the stated scope.
 
 Apply the module-depth gate to the concrete change, not to file size or abstract architectural preference. When it requires a design pass, require `$design-modules` to be available and use it before the first TDD slice. Routine behavior inside an established public contract does not need separate architecture work.
 
+Confirm that structure checks cover every affected source root, public export, and dependency direction. If the requested implementation includes establishing missing checks, use `$init-checks`; otherwise report the missing contract or check as a verification gap instead of silently installing governance.
+
 Preserve unrelated uncommitted changes. If they overlap the required files and cannot be isolated safely, stop and report the collision.
 
-Use $manage-issues to transition the Issue to in-progress and record the start.
+Use $manage-issues to transition a ready Issue to in-progress and record the start. When resuming an in-progress Issue, read its implementation and verification notes, inspect the actual worktree, and record continuation without attempting an invalid same-state transition. Do not discard prior work or assume its checks passed.
 
 ## Implement one vertical slice at a time
 
-Map acceptance criteria to observable behaviors. Use $tdd for each behavior that can be automated. Keep changes inside the Issue boundary, run focused feedback frequently, and update implementation notes when a discovery changes the approach without changing scope.
+Map acceptance criteria to observable behaviors. Use $tdd for each behavior that can be automated. Keep changes inside the Issue boundary, run focused feedback frequently, and update implementation notes when a discovery changes the approach without changing scope. When adding a module, public export, or dependency, update the project-owned architecture contract and rules with the design. Run fast structure checks after meaningful edits; do not require the full suite after every partial TDD edit.
 
 If implementation reveals a missing product decision or materially different scope, stop before guessing and return to $grill-me. Route confirmed durable knowledge to $maintain-context and lasting technical decisions to $to-adr.
 
 ## Verify and review
 
-Run every project check required by the Issue and repository, then the full relevant suite. Invoke $review-code against the fixed pre-implementation Git base and this Issue.
+Run every project check required by the Issue and repository, including the fast structure check and full delivery check, then the full relevant suite. Require a fresh pass against the final inputs; missing tools, timeouts, or input changes during a check are not a pass. Do not widen exclusions, add baseline exceptions, or weaken dependency/export rules merely to make checks pass. Review an intentional contract change as part of the implementation. Invoke $review-code against the fixed pre-implementation Git base and this Issue.
 
 Address confirmed review findings that are within scope, rerun affected verification, and repeat review until no P0 or P1 finding remains. Do not conceal residual P2 or P3 findings; record them.
 

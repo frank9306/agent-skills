@@ -6,7 +6,7 @@ import { fileURLToPath } from "node:url";
 
 const repositoryRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const skillsRoot = path.join(repositoryRoot, "skills");
-const skillCategories = ["engineering", "content", "security", "environment"];
+const skillCategories = ["engineering", "content", "security"];
 const failures = [];
 
 function fail(skill, message) {

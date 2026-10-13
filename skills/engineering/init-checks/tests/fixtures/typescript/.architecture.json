@@ -1,0 +1,27 @@
+{
+  "schemaVersion": 1,
+  "profile": "typescript",
+  "sourceRoots": ["src", "tests"],
+  "modules": [
+    {
+      "name": "orders",
+      "path": "src/orders",
+      "public": ["src/orders/index.ts"],
+      "exports": { "src/orders/index.ts": ["placeOrder"] },
+      "allow": ["payments"],
+      "testPaths": ["tests/orders"]
+    },
+    {
+      "name": "payments",
+      "path": "src/payments",
+      "public": ["src/payments/index.ts"],
+      "exports": { "src/payments/index.ts": ["charge", "Receipt"] },
+      "allow": [],
+      "testPaths": ["tests/payments"]
+    }
+  ],
+  "externalOwners": {},
+  "dynamicLoaders": [],
+  "baseline": [],
+  "excludedPaths": []
+}

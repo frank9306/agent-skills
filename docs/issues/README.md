@@ -16,11 +16,15 @@ None.
 
 ## In progress
 
-None.
+| ID | Title |
+|---|---|
+| [ISSUE-0019](ISSUE-0019-add-project-owned-deep-module-checks-and-codex-feedback.md) | Add project-owned deep-module checks and Codex feedback |
 
 ## Blocked
 
-None.
+| ID | Title |
+|---|---|
+| [ISSUE-0020](ISSUE-0020-retire-environment-manager-and-align-skills-with-ai-playbook.md) | Retire environment manager and align skills with ai-playbook |
 
 ## Done
 

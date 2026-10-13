@@ -9,7 +9,7 @@ Build one behavior at a time. Never batch all tests before all implementation.
 
 ## Choose the seam
 
-Read the requirement, affected code, existing tests, and project test commands. Select the highest stable public seam that can prove the behavior without coupling the test to internal structure. Read references/test-quality.md before adding a new testing mechanism or mock.
+Read the requirement, affected code, existing tests, project-owned module boundaries, and project test/check commands. Preserve existing owners and public contracts during ordinary internal changes; use the available `$design-modules` workflow before introducing or materially reshaping a boundary. Do not add wrapper layers solely to satisfy a directory convention. Select the highest stable public seam that can prove the behavior without coupling the test to internal structure. Read references/test-quality.md before adding a new testing mechanism or mock.
 
 When an owning module already exists, exercise its supported public entry. Do not export an internal helper or make implementation state public solely to make a narrow unit test convenient; prefer observable behavior at the module seam.
 

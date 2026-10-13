@@ -1,0 +1,14 @@
+{
+  "name": "deep-modules-typescript-reference",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "check:structure": "node ../../../assets/typescript/check-architecture.mjs .",
+    "test": "node --experimental-strip-types --test tests/orders/contract.test.ts tests/payments/contract.test.ts",
+    "check": "npm run check:structure && npm test"
+  },
+  "devDependencies": {
+    "dependency-cruiser": "^18.6.0",
+    "typescript": "^5.9.3"
+  }
+}

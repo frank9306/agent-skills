@@ -9,7 +9,7 @@ Design the smallest stable boundary that keeps related knowledge together and ma
 
 ## Ground the design
 
-Read the requirement or Issue, root agent instructions, project Context, relevant ADRs, affected interfaces, callers, persistence code, and tests. Reuse the project's canonical domain terms and established boundaries unless evidence shows they no longer fit.
+Read the requirement or Issue, root agent instructions, project Context, relevant ADRs, affected interfaces, callers, persistence code, tests, and the project-owned architecture contract and check configuration when present. Reuse the project's canonical domain terms and established boundaries unless evidence shows they no longer fit.
 
 Identify the behavior being added, the knowledge required to implement it, and the component that should own that knowledge. Treat a new abstraction as justified only when it hides meaningful complexity or protects a stable seam.
 
@@ -27,11 +27,11 @@ Prefer change locality over file-count reduction. Avoid interfaces that expose s
 
 Evaluate the proposed module's depth explicitly:
 
-- Identify its single discoverable public entry and the smallest useful input, output, and failure contract.
+- Identify its small, discoverable public surface and the smallest useful input, output, and failure contract. Multiple cohesive entry points are valid; do not force a barrel file or expose internals to manufacture one entry.
 - State which sequencing, intermediate data, framework details, and failure handling become internal knowledge.
 - Apply the deletion test: removing a shallow abstraction should concentrate knowledge behind the proposed interface, not merely spread its code across callers.
 - Name the likely future changes that should remain local while the public contract stays stable.
-- Identify imports or dependency directions that callers must not use to bypass the owner.
+- Identify allowed dependencies, infrastructure access rights, and imports that callers must not use to bypass the owner. Translate enforceable decisions into project-owned rules rather than leaving them only in prose.
 - Define a public behavior test that protects the seam without exposing an internal helper solely for testability.
 
 Do not infer depth from a long file, a large class, many internal files, or short functions. A directory or wrapper whose interface is nearly as complex as the implementation is still shallow.
@@ -40,6 +40,6 @@ Stress-test the proposed boundary with a new rule, a changed persistence or thir
 
 ## Hand off the design
 
-Return the proposed ownership, public interface, hidden decisions, dependencies, test seam, compatibility constraints, and rejected alternatives. Keep the result proportional to the decision; do not create a separate design artifact unless the project workflow requires one.
+Return the proposed ownership, public interface and export list, hidden decisions, allowed dependencies, infrastructure access rights, test seam, compatibility constraints, enforceable rule changes, and rejected alternatives. Keep the result proportional to the decision; do not create a separate design artifact unless the project workflow requires one.
 
 Do not implement code. Record a confirmed, lasting boundary decision through `$to-adr` when available and authorized. Return unresolved behavior to `$grill-me`; do not decide product policy from architectural preference.

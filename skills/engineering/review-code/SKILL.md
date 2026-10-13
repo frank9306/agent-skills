@@ -11,13 +11,15 @@ Review only; do not modify files, fix findings, stage, commit, or push.
 
 Use the commit, branch, tag, or merge-base supplied by the caller. If none is supplied, infer the tracked default branch only when Git makes it unambiguous; otherwise ask for the base. Record the exact diff command and included commits.
 
-Read the related local Issue, root agent instructions, docs/agents/, Context, relevant ADRs, project standards, and test configuration. Read references/review-rubric.md.
+Read the related local Issue, root agent instructions, docs/agents/, Context, relevant ADRs, project standards, the project-owned architecture contract and check configuration, and test configuration. Use the project's existing tracker when there is no local Issue; do not require documentation initialization for review. Read references/review-rubric.md.
 
 ## Review two axes
 
 Standards review checks whether the diff follows documented project rules, established interfaces, data compatibility, security boundaries, and local conventions. For material structural changes, also check for duplicated business knowledge, leaky interfaces, caller-coordinated internal steps, terminology that conflicts with Context, unnecessary pass-through layers, change diffusion across unrelated modules, and tests coupled to internal structure. Report these only when the diff provides a concrete failure or maintenance scenario, not as aesthetic preference.
 
-When the diff adds a product capability, module, public interface, or cross-module dependency, also check module depth: whether callers have one discoverable domain-facing entry, can bypass required sequencing, receive leaked implementation concepts, or must change when an internal detail changes. Apply the deletion test to new abstractions and confirm that tests protect public behavior rather than making internal helpers part of the contract.
+When the diff adds a product capability, module, public interface, or cross-module dependency, also check module depth: whether callers have a small discoverable domain-facing public surface, can bypass required sequencing, receive leaked implementation concepts, or must change when an internal detail changes. Apply the deletion test to new abstractions and confirm that tests protect public behavior rather than making internal helpers part of the contract.
+
+Check that every source root, new module, public export, and cross-module dependency is covered by the actual checks. Inspect changes to rule configuration, export lists, exclusions, and exact legacy baselines for attempts to hide violations; passing a narrower scan is not evidence of compliance. Confirm that infrastructure access is confined to its declared owner and external contract tests use public seams.
 
 Requirements review checks whether the diff implements every acceptance criterion, respects out-of-scope boundaries, handles material edge cases, and provides evidence that would fail if the behavior regressed.
 

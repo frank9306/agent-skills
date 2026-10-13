@@ -14,6 +14,7 @@ Review in this order:
 3. Authentication, authorization, secret handling, and trust boundaries.
 4. Persisted data, API, configuration, and migration compatibility.
 5. Tests and observability that prove or expose behavior.
-6. Documented architecture and coding standards.
+6. Documented architecture and coding standards, public surfaces, authoritative ownership, dependency directions, and infrastructure access.
+7. Check coverage and changes to source scopes, exports, exclusions, or legacy exceptions that could make a violation invisible.
 
 Do not praise unaffected code, summarize the diff instead of reviewing it, or inflate speculative concerns into findings.

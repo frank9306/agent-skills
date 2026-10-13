@@ -1,0 +1,12 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "allowImportingTsExtensions": true,
+    "noEmit": true,
+    "baseUrl": ".",
+    "paths": { "@payments/*": ["src/payments/*"] }
+  },
+  "include": ["src/**/*.ts", "tests/**/*.ts"]
+}

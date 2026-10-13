@@ -1,0 +1,13 @@
+{
+  "schemaVersion": 1,
+  "profile": "python",
+  "sourceRoots": ["src"],
+  "modules": [
+    {"name": "orders", "path": "src/orders", "public": ["src/orders/__init__.py"], "exports": {"src/orders/__init__.py": ["place"]}, "allow": [], "testPaths": ["tests"]},
+    {"name": "billing", "path": "src/billing", "public": ["src/billing/__init__.py"], "exports": {"src/billing/__init__.py": ["invoice"]}, "allow": ["orders"], "testPaths": []}
+  ],
+  "externalOwners": {"sqlite3": ["orders"]},
+  "dynamicLoaders": [],
+  "baseline": [],
+  "excludedPaths": []
+}

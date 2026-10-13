@@ -5,7 +5,7 @@ description: Initialize a repository-owned AI engineering documentation workspac
 
 # Initialize Project Docs
 
-Create the durable documentation baseline once. Do not invent domain knowledge, issues, meetings, or architecture decisions.
+Create the durable documentation baseline once. Documentation setup does not install lint tools, structure checks, Hooks, or CI; use `$init-checks` when that work is requested. Do not invent domain knowledge, issues, meetings, or architecture decisions.
 
 ## Inspect the destination
 
@@ -25,4 +25,4 @@ If any destination file already differs, stop and report every conflicting path.
 
 ## Verify
 
-Run the initializer a second time and require an unchanged result. Confirm that all paths named by root `AGENTS.md` exist. Report created and unchanged files; never claim initialization succeeded if either run fails.
+Run the initializer a second time and require an unchanged result. Confirm that all paths named by root `AGENTS.md` exist. The workflow template must keep conditional module-design and project-owned check gates aligned with the engineering workflow. Add architecture/check pointers only after the actual project files and commands exist; never claim the template initialized executable checks. Report created and unchanged files; never claim initialization succeeded if either run fails.

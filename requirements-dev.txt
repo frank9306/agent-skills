@@ -1,0 +1,2 @@
+# Native Python dependency engine used by init-checks acceptance tests.
+import-linter==2.15
