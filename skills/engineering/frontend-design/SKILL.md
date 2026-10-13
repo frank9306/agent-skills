@@ -105,6 +105,12 @@ Before substantial implementation, resolve from evidence or state a reasonable a
 
 Ask only when an unresolved choice would materially change the result. Do not use vague directions such as "clean and modern" without translating them into concrete type, spacing, surface, color, and motion decisions.
 
+## Before generating implementation
+
+For any implementation route, apply the shared [pre-generation module design gate](../implement-issue/references/module-depth-gate.md) before generating implementation code or behavior tests. Reuse a valid project design or an upstream gate result. `DESIGN.md` owns visual/product decisions and does not replace the project module contract; skipping a design-image preview does not skip this gate. Read-only routes remain read-only.
+
+If this Skill is installed alone and the sibling reference is missing, read its [canonical source](https://github.com/frank9306/agent-skills/blob/main/skills/engineering/implement-issue/references/module-depth-gate.md) before implementation; an unavailable reference is a missing prerequisite, not permission to skip the gate.
+
 ## Implement the interface
 
 - Use real content or clearly marked realistic placeholders.

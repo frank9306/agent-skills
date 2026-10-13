@@ -1,6 +1,6 @@
 # Agent Skills
 
-Reusable Agent Skills for engineering, content, and service operations. Personal Agent setup and usage guides are maintained in [ai-playbook](https://github.com/frank9306/ai-playbook); this repository owns executable Skills and their development records. Each Skill is self-contained under `skills/<category>/<name>` and uses progressive disclosure: a concise `SKILL.md`, optional references, deterministic scripts, and reusable assets.
+Reusable Agent Skills for engineering, content, and service operations. Personal Agent setup and usage guides are maintained in [ai-playbook](https://github.com/frank9306/ai-playbook); this repository owns executable Skills and their development records. Each Skill is packaged under `skills/<category>/<name>` and uses progressive disclosure: a concise `SKILL.md`, optional references, deterministic scripts, and reusable assets.
 
 ## Skills
 
@@ -32,7 +32,7 @@ Reusable Agent Skills for engineering, content, and service operations. Personal
 
 ## Development workflow
 
-Use `route-work` for the current stage, `grill-me` for unresolved behavior, and `model-domain` only for material terminology uncertainty. Resolve new or changed module boundaries through the project's own architecture workflow; use `tdd` at stable public seams and `review-code` before delivery. Routine internal changes preserve the existing boundary. `implement-issue` owns ready local Markdown Issues; other trackers keep their own lifecycle.
+Use `route-work` for the current stage, `grill-me` for unresolved behavior, and `model-domain` only for material terminology uncertainty. Before generating implementation or behavior tests, apply the shared [pre-generation module design gate](skills/engineering/implement-issue/references/module-depth-gate.md), reusing valid project contracts. `tdd` uses those public seams and `review-code` checks the design evidence and delivered behavior. `implement-issue` owns ready local Markdown Issues; other trackers keep their own lifecycle.
 
 `init-docs` and `init-checks` are separate opt-in setup tasks. Scaffold new projects with the requested framework's native tooling. Installing a Skill does not initialize project governance, enable native Hooks, or make CI required. The unfinished `init-checks` rollout remains tracked in [ISSUE-0019](docs/issues/ISSUE-0019-add-project-owned-deep-module-checks-and-codex-feedback.md); use its templates only after project-specific validation.
 

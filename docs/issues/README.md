@@ -46,6 +46,7 @@ None.
 | [ISSUE-0017](ISSUE-0017-integrate-deep-module-gates-into-engineering-skills.md) | Integrate deep-module gates into engineering Skills |
 | [ISSUE-0018](ISSUE-0018-add-screenshot-fidelity-gates-to-frontend-design.md) | Add screenshot fidelity gates to frontend-design |
 | [ISSUE-0021](ISSUE-0021-retire-init-project-and-design-modules-skills.md) | Retire init-project and design-modules skills |
+| [ISSUE-0022](ISSUE-0022-require-shared-deep-module-design-before-code-generation.md) | Require shared deep-module design before code generation |
 
 ## Cancelled
 

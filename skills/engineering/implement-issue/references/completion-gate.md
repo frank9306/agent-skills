@@ -2,6 +2,7 @@
 
 An Issue may become done only when:
 
+- The shared [pre-generation module design gate](module-depth-gate.md) passed with a recorded design or valid reuse reference before implementation and behavior-test generation.
 - Every acceptance criterion is checked and supported by evidence.
 - Each changed behavior has an appropriate automated test, or the documented reason for omission is sound.
 - Focused tests and the full relevant suite passed.

@@ -9,7 +9,7 @@ Implement or resume exactly one actionable local Issue. Do not reopen settled sc
 
 ## Preflight
 
-Read the Issue, root agent instructions, docs/agents/, Context, relevant ADRs, affected code, tests, and Git status. Read the project-owned architecture contract, boundary configuration, and fast/full verification commands; use `.architecture.json` and `.codex/checks.json` when the project has adopted `init-checks`, otherwise use its existing equivalents. Read references/completion-gate.md. Before the first implementation slice, read [the module-depth gate](references/module-depth-gate.md) to decide whether the change needs a design pass.
+Read the Issue, root agent instructions, docs/agents/, Context, relevant ADRs, affected code, tests, and Git status. Read the project-owned architecture contract, boundary configuration, and fast/full verification commands; use `.architecture.json` and `.codex/checks.json` when the project has adopted `init-checks`, otherwise use its existing equivalents. Read references/completion-gate.md. Before generating implementation code or behavior tests, apply the shared [pre-generation module design gate](references/module-depth-gate.md).
 
 Require $manage-issues, $tdd, and $review-code to be available. If any is missing, stop and report the missing Skill instead of silently replacing its workflow.
 
@@ -20,7 +20,7 @@ Require:
 - Problem, desired outcome, and acceptance criteria are concrete.
 - The requested behavior fits the stated scope.
 
-Apply the module-depth gate to the concrete change, not to file size or abstract architectural preference. When it identifies a material boundary change, resolve ownership, public contracts, hidden implementation knowledge and allowed dependencies within the project workflow before the first TDD slice. Routine behavior inside an established public contract does not need separate architecture work.
+Require the shared gate to pass with a recorded project design or a valid existing-contract reuse reference. Reuse that decision when handing off to $tdd; do not run a second design lifecycle or maintain a separate checklist here.
 
 Confirm that structure checks cover every affected source root, public export, and dependency direction. If the requested implementation includes establishing missing checks, use `$init-checks`; otherwise report the missing contract or check as a verification gap instead of silently installing governance.
 
