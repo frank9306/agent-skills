@@ -58,3 +58,7 @@ Issue created from the supplied project input.
 ## Completion summary
 
 Removed init-project and design-modules from source and local discovery, cleaned active callers and managed instructions, and synchronized both repositories to GitHub.
+
+## Final all-instance audit
+
+The final audit additionally found three old instance-local init-project installations outside the shared Skill directory. Removed their 18 package files and verified empty directories, and changed the three old instance-local route-work call sites to use native scaffolding directly. Audited every launcher instance and the default Codex Home for retired packages and call sites; archived backups remain outside active discovery. The five playbook-managed global Homes remain synchronized.
