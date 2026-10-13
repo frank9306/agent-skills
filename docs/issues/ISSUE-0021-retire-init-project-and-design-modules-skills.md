@@ -1,12 +1,11 @@
 ---
 id: ISSUE-0021
 title: "Retire init-project and design-modules skills"
-status: in-progress
+status: done
 priority: high
 created: 2026-10-13
 updated: 2026-10-13
-closed:
-sources: []
+closed: 2026-10-13
 related_adrs: []
 depends_on: []
 ---
@@ -26,7 +25,7 @@ Remove both Skills from source and local discovery, clean active dependencies an
 - [x] Both Skill packages are removed from the source repository and active local discovery.
 - [x] Remaining Skills and generated project instructions no longer call or require either retired Skill.
 - [x] ai-playbook catalogs 23 source Skills and its managed global instructions have no retired call sites.
-- [ ] Related validation passes, historical records remain intact, and the bounded retirement is synchronized through the previously authorized GitHub publication flow.
+- [x] Related validation passes, historical records remain intact, and the bounded retirement is synchronized through the previously authorized GitHub publication flow.
 
 ## Out of scope
 
@@ -42,7 +41,7 @@ Removed all eight package files from source and the corresponding shared local i
 
 ## Verification
 
-The repository validator passes for 23 Skills across three categories. All six initialization tests pass, including generated TypeScript/Python project checks and conflict/idempotency protection. All eight ai-playbook synchronization tests pass. Active source, installed Skills and managed global instructions were checked for retired call sites; retired source/install paths are absent. Local Markdown links and UTF-8 content were checked. Both workspaces pass git diff --check. GitHub publication is the remaining step before closure.
+23 Skills validated; six initialization tests and eight synchronization tests passed; 177 active text files and local links checked; five Codex Homes synchronized; remote commits and 23-Skill source tree verified.
 
 ## Activity log
 
@@ -54,6 +53,8 @@ Issue created from the supplied project input.
 
 ### 2026-10-13 — Status changed from ready to in-progress.
 
+### 2026-10-13 — Status changed from in-progress to done.
+
 ## Completion summary
 
-Not completed.
+Removed init-project and design-modules from source and local discovery, cleaned active callers and managed instructions, and synchronized both repositories to GitHub.

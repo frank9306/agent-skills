@@ -19,7 +19,6 @@ None.
 | ID | Title |
 |---|---|
 | [ISSUE-0019](ISSUE-0019-add-project-owned-deep-module-checks-and-codex-feedback.md) | Add project-owned deep-module checks and Codex feedback |
-| [ISSUE-0021](ISSUE-0021-retire-init-project-and-design-modules-skills.md) | Retire init-project and design-modules skills |
 
 ## Blocked
 
@@ -46,6 +45,7 @@ None.
 | [ISSUE-0016](ISSUE-0016-rename-clarify-requirements-to-grill-me.md) | Rename clarify-requirements to grill-me |
 | [ISSUE-0017](ISSUE-0017-integrate-deep-module-gates-into-engineering-skills.md) | Integrate deep-module gates into engineering Skills |
 | [ISSUE-0018](ISSUE-0018-add-screenshot-fidelity-gates-to-frontend-design.md) | Add screenshot fidelity gates to frontend-design |
+| [ISSUE-0021](ISSUE-0021-retire-init-project-and-design-modules-skills.md) | Retire init-project and design-modules skills |
 
 ## Cancelled
 
