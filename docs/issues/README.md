@@ -19,6 +19,7 @@ None.
 | ID | Title |
 |---|---|
 | [ISSUE-0019](ISSUE-0019-add-project-owned-deep-module-checks-and-codex-feedback.md) | Add project-owned deep-module checks and Codex feedback |
+| [ISSUE-0021](ISSUE-0021-retire-init-project-and-design-modules-skills.md) | Retire init-project and design-modules skills |
 
 ## Blocked
 

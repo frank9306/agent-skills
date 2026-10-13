@@ -6,7 +6,6 @@ Reusable Agent Skills for engineering, content, and service operations. Personal
 
 | Skill | Category | Purpose |
 |---|---|---|
-| [`init-project`](skills/engineering/init-project/SKILL.md) | Engineering | Create minimal React, Tauri, Typer, and FastAPI projects with official scaffolds. |
 | [`init-docs`](skills/engineering/init-docs/SKILL.md) | Engineering | Initialize repository-owned AI engineering documentation. |
 | [`init-checks`](skills/engineering/init-checks/SKILL.md) | Engineering | Enforce project-owned TypeScript/Python module contracts through checks, Codex Hooks, and CI. |
 | [`capture-meeting`](skills/engineering/capture-meeting/SKILL.md) | Engineering | Convert meeting content into a structured project record. |
@@ -17,7 +16,6 @@ Reusable Agent Skills for engineering, content, and service operations. Personal
 | [`route-work`](skills/engineering/route-work/SKILL.md) | Engineering | Select the correct project workflow entry point. |
 | [`grill-me`](skills/engineering/grill-me/SKILL.md) | Engineering | Resolve ambiguity before creating local Issues. |
 | [`model-domain`](skills/engineering/model-domain/SKILL.md) | Engineering | Discover and stress-test domain concepts and invariants. |
-| [`design-modules`](skills/engineering/design-modules/SKILL.md) | Engineering | Design stable module ownership, interfaces, and test seams. |
 | [`tdd`](skills/engineering/tdd/SKILL.md) | Engineering | Implement behavior through red-green-refactor loops. |
 | [`implement-issue`](skills/engineering/implement-issue/SKILL.md) | Engineering | Implement and verify one ready local Issue. |
 | [`review-code`](skills/engineering/review-code/SKILL.md) | Engineering | Review Git changes against standards and requirements. |
@@ -34,9 +32,9 @@ Reusable Agent Skills for engineering, content, and service operations. Personal
 
 ## Development workflow
 
-Use `route-work` for the current stage, `grill-me` for unresolved behavior, and `model-domain` only for material terminology uncertainty. Design new or changed module boundaries with `design-modules`; use `tdd` at stable public seams and `review-code` before delivery. Routine internal changes preserve the existing boundary. `implement-issue` owns ready local Markdown Issues; other trackers keep their own lifecycle.
+Use `route-work` for the current stage, `grill-me` for unresolved behavior, and `model-domain` only for material terminology uncertainty. Resolve new or changed module boundaries through the project's own architecture workflow; use `tdd` at stable public seams and `review-code` before delivery. Routine internal changes preserve the existing boundary. `implement-issue` owns ready local Markdown Issues; other trackers keep their own lifecycle.
 
-`init-project`, `init-docs`, and `init-checks` are separate opt-in setup tasks. Installing a Skill does not initialize project governance, enable native Hooks, or make CI required. The unfinished `init-checks` rollout remains tracked in [ISSUE-0019](docs/issues/ISSUE-0019-add-project-owned-deep-module-checks-and-codex-feedback.md); use its templates only after project-specific validation.
+`init-docs` and `init-checks` are separate opt-in setup tasks. Scaffold new projects with the requested framework's native tooling. Installing a Skill does not initialize project governance, enable native Hooks, or make CI required. The unfinished `init-checks` rollout remains tracked in [ISSUE-0019](docs/issues/ISSUE-0019-add-project-owned-deep-module-checks-and-codex-feedback.md); use its templates only after project-specific validation.
 
 See [the personal development handbook](https://github.com/frank9306/ai-playbook/blob/main/docs/development-workflow.md) for adoption and day-to-day examples. Do not maintain a second personal handbook or global instruction source here.
 
@@ -45,7 +43,6 @@ See [the personal development handbook](https://github.com/frank9306/ai-playbook
 Install one Skill globally with the Skills CLI:
 
 ```bash
-npx skills add frank9306/agent-skills --skill init-project -g
 npx skills add frank9306/agent-skills --skill init-docs -g
 npx skills add frank9306/agent-skills --skill init-checks -g
 npx skills add frank9306/agent-skills --skill capture-meeting -g
@@ -56,7 +53,6 @@ npx skills add frank9306/agent-skills --skill to-adr -g
 npx skills add frank9306/agent-skills --skill route-work -g
 npx skills add frank9306/agent-skills --skill grill-me -g
 npx skills add frank9306/agent-skills --skill model-domain -g
-npx skills add frank9306/agent-skills --skill design-modules -g
 npx skills add frank9306/agent-skills --skill tdd -g
 npx skills add frank9306/agent-skills --skill implement-issue -g
 npx skills add frank9306/agent-skills --skill review-code -g

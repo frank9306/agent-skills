@@ -65,6 +65,6 @@ Use `tests/fixtures/typescript` as a small legal reference. Run its normal comma
 
 This adapter reads the root `tsconfig.json`. Projects requiring webpack/Babel-only resolution, several incompatible TS configurations, Yarn PnP, or non-JS/TS source formats need their existing native resolver/checker configured and equivalent bypass tests before rollout. Do not silently weaken the contract to accommodate unsupported resolution.
 
-Structural success does not prove semantic module depth. `design-modules` and `review-code` still assess ownership, caller orchestration, hidden implementation knowledge, and behavior-test quality.
+Structural success does not prove semantic module depth. The project design workflow and `review-code` still assess ownership, caller orchestration, hidden implementation knowledge, and behavior-test quality.
 
 Sources: [dependency-cruiser API](https://github.com/sverweij/dependency-cruiser/blob/main/doc/api.md), [resolution and type-dependency options](https://github.com/sverweij/dependency-cruiser/blob/main/doc/options-reference.md).

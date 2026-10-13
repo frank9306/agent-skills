@@ -20,7 +20,7 @@ Require:
 - Problem, desired outcome, and acceptance criteria are concrete.
 - The requested behavior fits the stated scope.
 
-Apply the module-depth gate to the concrete change, not to file size or abstract architectural preference. When it requires a design pass, require `$design-modules` to be available and use it before the first TDD slice. Routine behavior inside an established public contract does not need separate architecture work.
+Apply the module-depth gate to the concrete change, not to file size or abstract architectural preference. When it identifies a material boundary change, resolve ownership, public contracts, hidden implementation knowledge and allowed dependencies within the project workflow before the first TDD slice. Routine behavior inside an established public contract does not need separate architecture work.
 
 Confirm that structure checks cover every affected source root, public export, and dependency direction. If the requested implementation includes establishing missing checks, use `$init-checks`; otherwise report the missing contract or check as a verification gap instead of silently installing governance.
 

@@ -82,7 +82,7 @@ def prepare(project: Path, profile: str, contract: Path, full: list[str], quick:
     wrapped = f"node scripts/{runner}" if profile == "typescript" else f"python scripts/{runner}"
     block = (f"{BEGIN}\n## Project structure checks\n\n"
              "Read `.architecture.json` before code changes. Preserve module ownership, declared public entries, "
-             "allowed dependencies, and public behavior test seams. Use `$design-modules` before materially "
+             "allowed dependencies, and public behavior test seams. Clarify ownership, public contracts and dependencies before materially "
              "changing those boundaries. Follow the project's existing task tracker; local Issues are not required.\n\n"
              f"Run `{wrapped} --run quick` during implementation and `{wrapped} --run full` before delivery. "
              "The full command runs structure checks before the existing project suite. Failing or skipped checks "

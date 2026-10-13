@@ -36,4 +36,4 @@ Apply the deletion test before reporting a shallow-module candidate. The candida
 
 Order findings by expected impact and confidence. For each, provide exact code evidence, recent-change evidence when used, the change scenario it makes difficult, the knowledge or responsibility lacking one owner, the deletion-test result, a candidate boundary or seam, compatibility constraints, and the smallest useful next investigation.
 
-This Skill is read-only: do not modify code, create Issues, or record ADRs unless the user separately authorizes that action. Use `$review-code` for a fixed Git change range; use `$design-modules` after the user selects a candidate that needs a concrete boundary design.
+This Skill is read-only: do not modify code, create Issues, or record ADRs unless the user separately authorizes that action. Use `$review-code` for a fixed Git change range; follow the project's architecture workflow after the user selects a candidate that needs a concrete boundary design.

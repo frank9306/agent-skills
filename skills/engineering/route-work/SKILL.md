@@ -23,7 +23,6 @@ Use the first matching route:
 | Ambiguous domain terminology or concept boundaries that materially affect behavior | `$model-domain` |
 | New or ambiguous requirement with unresolved behavior, boundaries, or acceptance | `$grill-me` |
 | Clear, unrecorded requirement in a project using local Issues | `$manage-issues` |
-| Explicit request to design module ownership, a public interface, or an architectural seam | `$design-modules` |
 | One local Issue whose status is `ready`, or `in-progress` for an authorized continuation, with dependencies done and actionable scope | `$implement-issue` |
 | Authorized concrete implementation in a project using another tracker, with behavior and any bug root cause confirmed and its own readiness gates met | `$tdd`, with the project's design, structure-check, and review gates |
 | Reported failure whose root cause is not confirmed | `$diagnose-bug` |
@@ -34,13 +33,14 @@ Use the first matching route:
 | Verified durable domain knowledge | `$maintain-context` |
 | Confirmed lasting technical decision | `$to-adr` |
 | Explicit request to initialize missing AI engineering documentation | `$init-docs` |
-| Explicit request to scaffold a supported new project | `$init-project` |
 | Explicit request to create or revise project-facing agent instructions | `$write-agent-docs` |
 | Explicit frontend design, implementation, polish, or visual audit | `$frontend-design` |
 | Public URL content extraction | `$read-web-content` |
 | Evidence-led article creation | `$write-articles` |
 
-Select exactly one primary Skill for the current stage; do not invoke several Skills in advance. Re-route after it completes when the user already authorized a larger goal. Creating an Issue or completing a design does not by itself finish an implementation request. For example, route a ready Issue to `$implement-issue`, which owns its use of `$tdd`, `$review-code`, and `$manage-issues`.
+Select one applicable primary Skill for the current stage; do not invoke several Skills in advance. Re-route after it completes when the user already authorized a larger goal. Creating an Issue or completing a design does not by itself finish an implementation request. For example, route a ready Issue to `$implement-issue`, which owns its use of `$tdd`, `$review-code`, and `$manage-issues`.
+
+For module design and project scaffolding, use the project's architecture workflow and the requested framework's native tools directly. No dedicated Skill is required for those tasks. Preserve the user's authorization and project verification requirements.
 
 ## Enforce stage gates
 

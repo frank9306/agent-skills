@@ -13,7 +13,7 @@ Read project instructions, Git status, source roots, public entry points, caller
 
 Read [adoption and verification](references/adoption.md), then only the relevant [TypeScript](references/typescript.md) or [Python](references/python.md) reference. For a mixed repository, integrate each language through the project's existing verification command; initialize one declared profile per contract rather than pretending that one scanner covers both languages.
 
-Establish owners, public exports, allowed dependencies, infrastructure access, and test boundaries from actual behavior and architecture decisions. Use `$design-modules` when a material boundary is unresolved and the Skill is available. Never infer ownership solely from folders or generate permissive rules merely to make a repository pass.
+Establish owners, public exports, allowed dependencies, infrastructure access, and test boundaries from actual behavior and architecture decisions. Resolve material boundary questions from the project requirements and architecture workflow before writing the contract. Never infer ownership solely from folders or generate permissive rules merely to make a repository pass.
 
 Prefer the project's existing boundary tool. Reuse its quick command only after deliberate violations prove that it covers the agreed contract. Otherwise use the supplied profile checker and the language reference's project-local dependencies. The initializer itself requires Python; generated TypeScript checks use Node, and generated Python checks use Python without adding the other runtime to that project.
 
