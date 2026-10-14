@@ -1,0 +1,23 @@
+{
+  "version": 1,
+  "id": "workspace-full",
+  "url": "http://localhost:3000/tasks?testState=full",
+  "viewport": { "width": 1280, "height": 720 },
+  "colorScheme": "light",
+  "state": "full",
+  "ready": "[data-ui-state=full]",
+  "inputs": ["src/tasks.tsx", "src/theme.css", "test/fixtures/tasks.json"],
+  "targets": {
+    "main": "[data-ui=main]",
+    "nav": "[data-ui=nav]",
+    "toolbar": "[data-ui=toolbar]",
+    "last": "[data-ui=last-action]"
+  },
+  "checks": [
+    { "id": "page-width", "type": "page-overflow" },
+    { "id": "main-scroll", "type": "scroll", "target": "main", "axis": "y", "stationary": ["document", "nav"] },
+    { "id": "toolbar", "type": "pinned", "target": "toolbar", "scroller": "main", "axis": "y" },
+    { "id": "last-action", "type": "reachable", "target": "last", "scroller": "main", "stationary": ["document"] },
+    { "id": "dialog", "type": "not-applicable", "reason": "This case has no open dialog; the project tests opening and closing separately." }
+  ]
+}

@@ -1,28 +1,19 @@
 # Design Philosophy
 
-## Ground the work
+## Derive a direction
 
-Derive visual language from the product's subject, users, vocabulary, environment, and content. A finance operations console, children's learning tool, research archive, and music event should not converge on the same page with different colors.
+Inventory distinctive content, material, constraints, vocabulary and user rituals. Choose references where product evidence leaves a real question. Decompose them into hierarchy, density, typography, surfaces and interaction; a brand name is not a direction.
 
-Define a visual thesis in concrete terms. Name the material and behavior: "dense editorial workspace with ink-like typography and restrained vermilion status accents" is actionable; "premium and modern" is not.
+For public pages, organize sections as claims with actual supporting content. For workspaces, orient, reveal status and enable the repeated task. A tool need not begin with a marketing hero. Carry the product's character beyond its first viewport.
 
-## Make intentional choices
+State a concrete thesis: density, type roles, surfaces, color use and energy. Review it against the brief before building. If it fits any competitor unchanged, seek a subject-specific decision; reusable utility UI can intentionally remain quiet.
 
-- Let the first viewport communicate the surface's primary job.
-- Use typography to establish character and hierarchy, not merely to carry text.
-- Make structural devices encode real relationships. Do not add numbering, badges, dividers, or cards without information value.
-- Spend boldness in one place. Keep supporting surfaces disciplined.
-- Match complexity to the direction. Minimalism needs exact spacing and type; maximalism needs controlled rhythm and performance awareness.
-- Use motion for causality, continuity, feedback, or atmosphere. Remove ornamental motion from frequent workflows.
+## Explore when uncertain
 
-## Avoid stylistic autopilot
+Use two or three runnable options differing in layout, hierarchy or density, not just color. Show real header/sidebar/data context. Preserve known brand tokens while exploring the uncertain axis. Pick with the user, record why and complete production states. Image concepts are useful when requested; translate fonts, assets and geometry into implementable decisions.
 
-Do not start by choosing a named trend. Start from the product. A reference product is evidence only after decomposing it into concrete properties such as density, radius, depth, type hierarchy, and accent behavior.
+## Make and critique
 
-Generate alternatives only when the direction is materially uncertain. Alternatives must differ in information density, typography, layout, or interaction—not just accent color.
+Typography establishes hierarchy. Structural devices encode relationships: numbers for sequences, cards for groups, labels for orientation. Familiar conventions can serve the task. Choose imagery from available material and label samples; reference libraries broaden options without imposing pictures or animation quotas.
 
-## Practice restraint
-
-Remove decoration that cannot be justified. Test whether hierarchy still works without shadows or color. Prefer one memorable, product-specific element over a collection of fashionable effects.
-
-Creative risk never overrides legibility, accessibility, platform expectations, or established product identity.
+Make the still composition work before adding motion that explains changes or serves a chosen creative direction. Inspect screenshots at declared viewports. Identify consequential drift in hierarchy, type, density, content or interaction. Remove unsupported decoration while preserving substance: a stripped, underbuilt page is not improved just because it has fewer common patterns.

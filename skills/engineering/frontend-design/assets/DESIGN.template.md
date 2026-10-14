@@ -1,73 +1,37 @@
----
-version: alpha
-name: Product Design System
-tokens:
-  colors: {}
-  typography: {}
-  spacing: {}
-  radii: {}
-  elevation: {}
-  motion: {}
----
-
 # Product Design System
 
 ## Overview
 
-Describe the product, audience, visual thesis, and the one quality that makes the interface recognizable.
+Record audience, primary tasks, visual thesis and approved direction. Distinguish facts from unresolved decisions.
+
+## Sources of Truth
+
+Link to runtime tokens/generation source, canonical components/variants, layout shell and verification entrypoints. Those files own values and commands.
 
 ## Colors
 
-Define semantic roles, values, contrast expectations, and usage boundaries.
+Describe semantic roles, theme mappings and usage boundaries; reference values at their owner.
 
 ## Typography
 
-Define families, roles, scale, weight, line height, tracking, and fallback behavior.
+Describe roles, script coverage, fallback, scale and wrapping.
 
 ## Layout
 
-Define spacing rhythm, density, containers, grids, breakpoints, and content-width rules.
-
-## Elevation & Depth
-
-Define how surfaces separate through background steps, borders, and shadows.
-
-## Shapes
-
-Define radii, border weights, icon geometry, and intentional exceptions.
+Describe density, content growth, containers, alignment, breakpoints, scroll ownership, fixed/sticky and overlay behavior.
 
 ## Components
 
-Define component variants, sizes, anatomy, and states. Reference canonical implementations.
+Link to canonical examples, variants and states. Explain exceptions.
 
-## Interaction
+## Interaction and Accessibility
 
-Define navigation, feedback, focus management, destructive actions, and recovery behavior.
+Record focus, feedback, recovery, motion/reduced-motion and accessibility targets.
 
-## Motion
+## Responsive and Content States
 
-Define duration, easing, reduced-motion behavior, and where motion is intentionally absent.
-
-## Responsive Behavior
-
-Define supported widths, reflow priorities, touch behavior, and content-stress expectations.
-
-## Content & Terminology
-
-Define voice, action labels, domain terms, error structure, and localization requirements.
-
-## Accessibility
-
-Define contrast target, keyboard expectations, semantic conventions, and assistive-technology requirements.
-
-## Product States
-
-Define loading, empty, partial, stale, offline, error, disabled, permission, success, and destructive states.
-
-## Data Visualization
-
-Define chart palette, number formatting, interaction, accessible alternatives, and canonical chart components.
+Record reflow, narrow/low-height behavior, localization, data pressure and state-specific changes.
 
 ## Do's and Don'ts
 
-Record specific positive rules and negative constraints that protect the product identity.
+Keep product-specific constraints and the reasons they protect this identity.

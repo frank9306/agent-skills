@@ -22,7 +22,7 @@ Reusable Agent Skills for engineering, content, and service operations. Personal
 | [`review-architecture`](skills/engineering/review-architecture/SKILL.md) | Engineering | Review a codebase for evidence-backed structural problems. |
 | [`diagnose-bug`](skills/engineering/diagnose-bug/SKILL.md) | Engineering | Reproduce a bug and determine its root cause. |
 | [`write-agent-docs`](skills/engineering/write-agent-docs/SKILL.md) | Engineering | Write concise, scoped project instructions for agents. |
-| [`frontend-design`](skills/engineering/frontend-design/SKILL.md) | Engineering | Design, build, polish, and audit cohesive, reliable production frontends. |
+| [`frontend-design`](skills/engineering/frontend-design/SKILL.md) | Engineering | Design and verify product aesthetics, design systems, layout, scrolling, and accessible interaction. |
 | [`dispatch-dsh-task`](skills/engineering/dispatch-dsh-task/SKILL.md) | Engineering | Dispatch audited my-knowledge work from Hermes to the restricted DSH runner. |
 | [`audit-codex-harness`](skills/engineering/audit-codex-harness/SKILL.md) | Engineering | Audit project-scoped Codex traces and score harness efficiency. |
 | [`read-web-content`](skills/content/read-web-content/SKILL.md) | Content | Read and extract useful content from public URLs with privacy-aware fallbacks. |
@@ -84,7 +84,9 @@ python -m unittest discover -s skills/engineering/audit-codex-harness/scripts/te
 
 The `init-checks` Skill adds project-owned executable contracts and two verification entry points, reusing existing tools. Preview setup with `python skills/engineering/init-checks/scripts/init_checks.py --project <absolute-project-root> --profile typescript|python --contract <absolute-contract-json> --full-command <json-argv> --plan`. Generated TypeScript checks use Node; generated Python checks use Python. The full wrapper always runs structure checks before the supplied project verification command. Its acceptance tests run with `npm run test:init-checks` and are included in `npm test` (the Python checker requires the pinned Import Linter environment); follow its setup instructions to validate a real project with a deliberate violation and subsequent repair. Project Hooks require native Codex trust, and required CI status checks must be enabled in the repository host before claiming merge protection.
 
-The frontend verifier and article checks report review leads. They do not replace browser inspection, visual review, factual verification, accessibility checks, or project-owned test evidence.
+Frontend browser acceptance also requires an existing Playwright runtime and Chromium. FRONTEND_PLAYWRIGHT_ROOT selects that runtime (default: this repository); FRONTEND_BROWSER_CHANNEL optionally selects installed chrome or msedge. Missing runtime fails rather than skipping tests. See the [frontend usage and migration guide](https://github.com/frank9306/ai-playbook/blob/main/docs/frontend-design.md).
+
+The static frontend verifier and article checks report review leads. They do not replace browser inspection, visual review, factual verification, accessibility checks, or project-owned test evidence.
 
 ## Structure
 

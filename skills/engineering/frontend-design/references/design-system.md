@@ -1,40 +1,17 @@
 # Design System
 
-Use `DESIGN.md` as durable project memory: the Skill stores the method; the project stores its design decisions.
+## Authority
 
-## Discover before defining
+DESIGN.md explains decisions and links to owners. Runtime values belong to token/theme files or their generation source; components own anatomy, variants and states; the shell owns common layout. Avoid duplicate numeric authorities. Projects generating CSS from Google's DESIGN.md follow its actual format/linter rather than this skill's Markdown template.
 
-Extract evidence from tokens, CSS variables, Tailwind configuration, component variants, theme files, screenshots, and repeated patterns. Do not invent a clean-room system when a coherent one already exists.
+Primitive tokens hold scales, semantic tokens express intent, and component tokens capture stable distinctions. Application code prefers semantic roles. Preserve legitimate chart, media and geometry literals instead of banning every number.
 
-## Maintain three token layers
+## Evolution
 
-1. Primitive tokens describe raw values such as palette steps and numeric scales.
-2. Semantic tokens describe intent such as `action-primary`, `surface-raised`, or `text-muted`.
-3. Component tokens describe durable component decisions such as `button-primary-background`.
+Inspect same-class components before extending. Compare copy, density, type, semantic colors, radii, depth and interaction. Add shared variants for stable needs. Record exceptions with scope/reason. Before changing shared tokens, identify consumers, themes and states.
 
-Prefer semantic tokens in application code. Add a component token only when a component needs a stable distinction that semantic tokens cannot express. Avoid one-off tokens named after a page or temporary feature.
+New products and lasting visual changes maintain DESIGN.md. Local repairs reuse design evidence; read-only reviews record missing authority without creating files. Separate facts, unresolved decisions and proposals.
 
-## Keep DESIGN.md useful
+## Consumption
 
-For a new multi-surface product, use `assets/DESIGN.template.md`. For an existing product, update only evidence-backed sections. Capture both values and rationale:
-
-- overview and visual identity
-- colors and usage boundaries
-- typography roles and hierarchy
-- layout, density, spacing, and breakpoints
-- elevation, depth, borders, and shapes
-- component variants and states
-- interaction and motion
-- responsive behavior
-- content terminology
-- accessibility baseline
-- data visualization when applicable
-- explicit do and don't rules
-
-Use prose for judgment and tokens for stable values. Negative constraints are valuable when they protect identity.
-
-## Control evolution
-
-Before adding a token or variant, check whether an existing semantic distinction fits. Before changing a shared token, inspect all consumers. Record deliberate exceptions with scope and rationale instead of silently forking the system.
-
-When the project adopts Google's `design.md` CLI, use its lint, diff, and export commands as project-owned checks. Do not install it or alter dependencies without authorization. Static conformance does not replace rendered review.
+Source lint checks declared conventions; browser assertions compare named same-class components or expected properties within a theme/variant/state. Buttons need not all be identical. Check light/dark mapping, font fallback, long labels and affected consumers. A valid document alone does not establish that running CSS consumes it.

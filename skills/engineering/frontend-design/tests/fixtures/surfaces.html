@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Material archive — UI verification fixture</title>
+<style>
+:root { color-scheme:light dark; --paper:#f6f3eb; --ink:#183c32; --line:#d7dbd0; --accent:#315f4a; }
+@media(prefers-color-scheme:dark) { :root { --paper:#182621; --ink:#edf1df; --line:#40534a; --accent:#bfd8a1; } }
+* { box-sizing:border-box; }
+body { margin:0; background:var(--paper); color:var(--ink); font:16px/1.5 Georgia,serif; }
+button { color:var(--ink); border:1px solid var(--line); background:transparent; padding:8px 16px; cursor:pointer; }
+button:focus-visible { outline:3px solid var(--accent); outline-offset:3px; }
+header { display:flex; align-items:center; justify-content:space-between; gap:12px; padding:16px 24px; border-bottom:1px solid var(--line); }
+h1 { font-size:clamp(40px,8vw,90px); line-height:1; font-weight:400; margin:32px 0; max-width:12ch; }
+p { max-width:60ch; }
+.label { font:12px/1.4 system-ui,sans-serif; text-transform:uppercase; letter-spacing:.12em; }
+.public { max-width:1100px; margin:auto; padding:40px 24px; }
+.hero { display:grid; grid-template-columns:1.3fr 1fr; gap:32px; align-items:end; padding-bottom:60px; }
+.specimen { min-height:260px; background:repeating-linear-gradient(8deg,#667b58 0 4px,#798a64 4px 11px); border-radius:48% 48% 5% 5%; position:relative; }
+.specimen span { position:absolute; bottom:20px; left:-12px; background:var(--paper); padding:6px 12px; border:1px solid var(--line); }
+.record { display:grid; grid-template-columns:100px minmax(0,1fr) 80px; gap:16px; border-top:1px solid var(--line); padding:20px 0; overflow-wrap:anywhere; }
+.record p { margin:4px 0; }
+.workbench { display:none; min-height:0; }
+body[data-surface=workspace] { height:100dvh; overflow:hidden; display:grid; grid-template-rows:auto minmax(0,1fr); font-family:system-ui,sans-serif; }
+body[data-surface=workspace] .public { display:none; }
+body[data-surface=workspace] .workbench { display:grid; grid-template-columns:140px minmax(0,1fr); }
+aside { border-right:1px solid var(--line); padding:16px; min-height:0; overflow:auto; }
+#queue { min-height:0; overflow:auto; overscroll-behavior:contain; padding:16px 24px; }
+#queue h1 { font-size:28px; margin:0 0 8px; max-width:none; }
+.actions { display:flex; gap:8px; flex-wrap:wrap; margin:20px 0; }
+@media(max-width:550px) { header { padding:12px; } .hero { grid-template-columns:1fr; } .public { padding:24px 16px; } .specimen { min-height:180px; } .record { grid-template-columns:40px minmax(0,1fr); } .record .year { display:none; } body[data-surface=workspace] .workbench { grid-template-columns:72px minmax(0,1fr); } aside { padding:12px 8px; font-size:12px; } #queue { padding:12px; } }
+</style>
+<header id="ready"><strong>Field notes</strong><span class="label">Material archive · fixture</span></header>
+<main class="public">
+  <div class="hero"><div><span class="label">Collected by hand / 2026</span><h1>Materials with a memory.</h1><p>An independent study of surfaces, makers and the places that shape them. These records are synthetic examples for browser verification.</p></div><div class="specimen" aria-label="Woven material study"><span class="label">Study 04 / woven flax</span></div></div>
+  <h2>From the collection</h2><div id="public-records"></div><div class="actions"><button id="public-last">Explore the collection</button></div>
+</main>
+<div class="workbench"><aside id="navigation">Collection<br><br>Intake<br><br>Sources</aside><main id="queue"><h1>Archive intake</h1><p id="state">Review the provenance before adding a record.</p><div class="actions"><button id="primary">Add record</button><button id="secondary">Export list</button></div><div id="work-records"></div><button id="work-last">Review final record</button></main></div>
+<script>
+const query=new URLSearchParams(location.search);
+document.body.dataset.surface=query.get('surface')||'public';
+const empty=query.get('state')==='empty';
+const names=['Woven flax, coastal workshop','Pressed clay, riverbank study','Charred timber, reclaimed beam'];
+for(const id of ['public-records','work-records']) {
+  const host=document.getElementById(id);
+  if(empty) { host.textContent='No records yet. Add the first material study.'; continue; }
+  for(let i=0;i<14;i++) {
+    const row=document.createElement('article'); row.className='record';
+    const label=query.get('state')==='stress'&&i===2?'本地化材料档案与超长来源标识'.repeat(18):names[i%names.length];
+    const number=document.createElement('span');number.className='label';number.textContent=String(i+1).padStart(2,'0');
+    const title=document.createElement('p');title.textContent=label;
+    const year=document.createElement('span');year.className='year label';year.textContent='2026';
+    row.append(number,title,year);host.append(row);
+  }
+}
+document.getElementById('ready').dataset.state=empty?'empty':'loaded';
+</script>
+</html>

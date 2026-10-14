@@ -47,6 +47,7 @@ None.
 | [ISSUE-0018](ISSUE-0018-add-screenshot-fidelity-gates-to-frontend-design.md) | Add screenshot fidelity gates to frontend-design |
 | [ISSUE-0021](ISSUE-0021-retire-init-project-and-design-modules-skills.md) | Retire init-project and design-modules skills |
 | [ISSUE-0022](ISSUE-0022-require-shared-deep-module-design-before-code-generation.md) | Require shared deep-module design before code generation |
+| [ISSUE-0023](ISSUE-0023-redesign-frontend-design-around-ui-quality-and-browser-contracts.md) | Redesign frontend-design around UI quality and browser contracts |
 
 ## Cancelled
 

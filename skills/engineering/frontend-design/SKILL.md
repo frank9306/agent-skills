@@ -1,150 +1,72 @@
 ---
 name: frontend-design
-description: Design, build, reproduce, reshape, polish, or audit production frontend interfaces and design systems. Use for pages, components, web apps, dashboards, reference-image or design-source reproduction, responsive UI, visual consistency, accessibility, frontend architecture, state and API reliability, type safety, testing, performance, security boundaries, observability, dependency risk, or requests to remove generic AI-looking design. Supports new and existing products across frameworks while preserving project-owned conventions.
+description: Design, extend, repair, or review interfaces for product-specific aesthetics, consistent components, layout, scrolling, responsive behavior, and accessibility. Use for new visual directions, existing-screen improvements, or UI quality checks.
 ---
 
 # Frontend Design
 
-Create interfaces with a specific point of view, preserve product coherence, implement production-quality code, and verify the rendered result. Treat design as the combined quality of visual direction, information architecture, interaction, content, accessibility, responsiveness, performance, and implementation craft.
+Deliver an interface whose choices serve the product and whose declared behavior is checked in a real browser. Project identity and observable usability guide the work; familiar styles can be deliberate and novel styles can be wrong.
 
-## Resolve authority
+## 1. Observe
 
-Apply guidance in this order:
+Read project instructions, Git state, the affected surface, tokens, sibling components, layout shell and verification entrypoints. Inspect the running UI or supplied screenshots when available. User requirements lead; project decisions and implementations follow; this skill supplies the method.
 
-1. Follow the user's explicit brief and constraints.
-2. Follow applicable repository instructions and the required root `DESIGN.md`.
-3. Reuse existing tokens, components, layouts, copy patterns, and sibling screens.
-4. Preserve accessibility, correctness, platform conventions, and framework constraints.
-5. Apply this Skill's design and engineering guidance.
+For a visual complaint, name the defect and affected viewport/state. Record the repair target, adjacent behavior to preserve and evidence of improvement. A read-only review remains read-only; missing DESIGN.md is a finding, not a reason to stop inspecting.
 
-Do not trade an established product identity for novelty. Do not use consistency as an excuse for repeating a broken pattern; explain the conflict and make the smallest coherent repair.
+**Complete:** current behavior, relevant owners and available evidence are identified. Separate observed defects, inferred risks and unverified behavior.
 
-## Require the design contract
+## 2. Frame the task
 
-Treat `<project-root>/DESIGN.md` as a hard prerequisite for every frontend design, implementation, polish, screenshot, system, review, engineering-audit, and de-slop task. Confirm that the file exists before analyzing or changing the frontend.
+Choose the applicable branches and load their references:
 
-If `DESIGN.md` is absent, create it from `assets/DESIGN.template.md` before continuing. For an existing product, replace template prompts with evidence from the repository and rendered product; mark genuinely unresolved decisions explicitly instead of inventing them. If the task is read-only or file creation is not authorized, stop and report the missing prerequisite. Do not substitute another design document, inferred conventions, or a verbal brief for the required root file.
+| Task | Read when this branch applies |
+|---|---|
+| New product or uncertain visual direction | [Design philosophy](references/design-philosophy.md) |
+| Extend a product or change shared visual rules | [Design system](references/design-system.md) |
+| Repair or review a templated-looking interface | [Anti-slop review](references/anti-slop.md) |
+| Components, feedback or state transitions | [Interface implementation](references/frontend-engineering.md) and [Interaction/content](references/interaction-content.md) |
+| Layout, scrolling, sticky regions or overlays | [Layout and scroll](references/layout-scroll.md) |
+| Responsive behavior, zoom, localization or accessibility | [Responsive/accessibility](references/responsive-accessibility.md) |
+| Data-dense/chart surfaces | [Data visualization](references/data-visualization.md) |
 
-## Gate new-surface implementation
+Before generating implementation, runnable prototypes or behavior tests, read the shared [pre-generation module gate](../implement-issue/references/module-depth-gate.md); reuse an existing valid record. If installed alone, use its [canonical source](https://github.com/frank9306/agent-skills/blob/main/skills/engineering/implement-issue/references/module-depth-gate.md).
 
-For every new page or site, require an explicit decision on whether the user wants to review a design image before implementation. If the request already says to show or skip a design image, use that answer. Otherwise ask, in the user's language, "Do you want to review a design image before implementation?" and stop until the user answers. Do not infer consent from silence and do not write implementation code before this gate is resolved.
+An established product's same-class components supply the direction. For a new direction, build two or three structurally different runnable prototypes with realistic content in the intended application context. Let the user select or combine them; record why. Respect a session preference for images or direct implementation instead. Prototype shortcuts do not become production code by default.
 
-If the user chooses preview-first:
+**Complete:** user, primary job, hierarchy and direction are settled; material choices are resolved. General architecture, API, security and dependency audits return to the project's engineering workflow.
 
-1. Capture the minimum product brief and create or update a provisional root `DESIGN.md` with the known direction and constraints.
-2. Generate one to three design images that differ materially in layout, typography, density, or interaction direction; do not produce color-only variants.
-3. Present the images with concise tradeoffs and wait for the user to select or revise a direction.
-4. Record the approved decisions in `DESIGN.md`, then implement against the approved image.
+## 3. Establish the contract
 
-If the user skips the preview, complete `DESIGN.md`, state the chosen direction, and proceed to implementation. A skipped preview does not waive the required design contract or rendered browser verification.
+Keep durable visual decisions and source pointers in DESIGN.md for new products or lasting system changes. Local repairs reuse valid tokens and components. Use the [Markdown template](assets/DESIGN.template.md) when needed. A project adopting Google's format uses its actual schema and checks instead.
 
-## Inspect before designing
+Name the runtime token authority, canonical variants and shell. State content-growth, wrapping, reflow, scrolling and overlay behavior for the affected surface. Read [layout and scroll](references/layout-scroll.md) before changing those behaviors. Small repairs need the relevant contract, not a new documentation system.
 
-After satisfying the design-contract prerequisite, inspect the repository, current changes, runtime, package manager, and verification commands. Locate:
+**Complete:** expected behavior and authority are concrete enough to test, including viewports, themes, content states and reasoned exceptions.
 
-- `AGENTS.md`, `DESIGN.md`, token and theme files
-- lockfiles, `packageManager`, `tsconfig.json`, and Tailwind configuration or CSS entry points
-- global styles, layout shells, routes, and same-class components
-- fonts, icons, imagery, component libraries, and existing states
-- screenshots or rendered output when available
+## 4. Design and implement
 
-For an existing surface, name the concrete visual or interaction problem before editing it. For a mature product, treat sibling components as the default design direction.
+Read-only reviews skip this implementation step and report proposed repairs. In verification, inspect and measure within the authorized read-only scope without applying fixes.
 
-## Prefer the frontend stack
+Use the product's material, vocabulary and real content to determine composition. Reuse components and semantic tokens. Expressive emphasis serves the primary task; supporting surfaces stay coherent. Distinguish sample content from facts, testimonials and business results.
 
-When starting a frontend project or when the project leaves the choice open, prefer:
+Preserve the established stack and public behavior. Build reachable loading, empty, partial, failure and permission states with useful next actions. Fix shared causes at their owner and inspect affected consumers instead of tuning each screenshot independently.
 
-1. `pnpm` for dependency installation and package scripts. Set and honor the project's `packageManager` field and commit the pnpm lockfile.
-2. TypeScript for application, component, configuration, and test code. Enable the strictest settings supported by the chosen framework and avoid weakening type safety for convenience.
-3. Tailwind CSS for styling. Express durable design decisions through project tokens, theme configuration, CSS variables, and reusable component variants rather than scattered arbitrary values.
+**Complete:** the interface and reachable states are implemented within the contract. Project feedback has no unresolved task-caused failure.
 
-These are defaults, not authorization to migrate an existing project. If a repository already establishes another package manager, language, or styling system, preserve it unless the user explicitly requests a migration. Do not install Tailwind CSS or any other dependency without approval when dependency addition requires approval.
+## 5. Verify in the browser
 
-## Route the task
+Read [visual review and executable verification](references/visual-review.md). Exercise the declared matrix, long content, narrow and low-height layouts, keyboard focus, actual scrolling and overlays. Use project browser tests; `checkUI(page, contract)` supplies reusable assertions without owning authentication or data setup. The CLI supports already-prepared URL states.
 
-Choose the smallest matching route and load only its required references:
+When browser access is unavailable, complete the other authorized work and mark runtime checks unverified.
 
-| Route | Typical request | Required references |
-|---|---|---|
-| Create | New page, component, product, or visual direction | `design-philosophy.md`, `interaction-content.md`, `responsive-accessibility.md` |
-| Extend | Add a surface to an established product | `design-system.md`, `frontend-engineering.md`, `responsive-accessibility.md` |
-| Polish | Fix hierarchy, spacing, typography, density, or visual drift | `design-philosophy.md`, `visual-review.md` |
-| Screenshot fidelity | Implement, reproduce, restore, or match a supplied screenshot or design source | `screenshot-fidelity.md`, `visual-review.md`, then the reference matching the observed problem |
-| System | Create, extract, or update a design system or `DESIGN.md` | `design-system.md` and `assets/DESIGN.template.md` |
-| Review | Audit without modifying implementation | `visual-review.md`, `responsive-accessibility.md`, `frontend-engineering.md` |
-| Engineering audit | Review architecture, state, API, business rules, types, tests, security, recovery, or dependency risk | Load only the matching engineering references listed below |
-| De-slop | Remove templated visual or copy patterns | `anti-slop.md`, `visual-review.md` |
+Review actual screenshots against the brief. In implementation tasks, repair consequential defects, then rerun affected checks. Repeated numerical tuning without improvement calls for re-examining structure. Static `scripts/verify-design.mjs <project> --json` yields review leads only. Project visual regression uses approved rendered baselines; baseline changes are design decisions.
 
-Load `data-visualization.md` for dashboards and chart-heavy interfaces. A task may use several routes, but avoid loading unrelated references.
+**Complete:** every declared check has measured evidence or an explicit gap. Missing tooling, readiness failures and untouched states are unverified. Image resemblance is not a pass criterion; browser evidence does not verify pure native UI.
 
-Requests to implement from a design image, reproduce a screenshot, restore a design, or achieve visual consistency must use Screenshot fidelity. This route is quantitative: style resemblance, functional correctness, lack of overflow, a clean console, or a passing static scan cannot establish fidelity. Do not call a result "high fidelity", "pixel perfect", "matching", or equivalent unless the baseline contract passes. Continue iterating while safe progress remains; otherwise report the measured ceiling and concrete blocker.
+## 6. Hand off evidence
 
-For an engineering audit, load references by concern:
+Report separately: design-system consistency; layout/scroll/interaction results; screenshot-based aesthetic judgment; and project visual regression when configured. Include checked scope, changes, commands, evidence paths and remaining gaps. Revalidate file-bound reports after inputs change.
 
-- Architecture and reuse: `architecture-review.md`
-- State and effects: `state-and-effects.md`
-- API integration: `api-reliability.md`
-- Business transitions and exceptional paths: `business-correctness.md`
-- Type boundaries: `type-runtime-safety.md`
-- Tests and mocks: `testing-reliability.md`
-- Browser security boundaries: `frontend-security.md`
-- Error recovery and telemetry: `observability-recovery.md`
-- Dependencies and project configuration: `dependency-config-risk.md`
+Return results to the owning workflow. Installing this skill does not configure project dependencies, Hooks or CI. Provenance and deliberate departures from upstream defaults live in [sources](references/sources.md).
 
-## Lock the direction
-
-Before substantial implementation, resolve from evidence or state a reasonable assumption for:
-
-1. User and usage context.
-2. The surface's single primary job.
-3. Visual thesis: mood, material, typography, and energy.
-4. Content hierarchy: orientation, status, actions, details, and recovery.
-5. One signature element; use `none` for quiet utility UI.
-6. Interaction thesis; high-frequency actions should usually be immediate and restrained.
-7. Hard constraints: framework, responsiveness, accessibility, performance, and localization.
-
-Ask only when an unresolved choice would materially change the result. Do not use vague directions such as "clean and modern" without translating them into concrete type, spacing, surface, color, and motion decisions.
-
-## Before generating implementation
-
-For any implementation route, apply the shared [pre-generation module design gate](../implement-issue/references/module-depth-gate.md) before generating implementation code or behavior tests. Reuse a valid project design or an upstream gate result. `DESIGN.md` owns visual/product decisions and does not replace the project module contract; skipping a design-image preview does not skip this gate. Read-only routes remain read-only.
-
-If this Skill is installed alone and the sibling reference is missing, read its [canonical source](https://github.com/frank9306/agent-skills/blob/main/skills/engineering/implement-issue/references/module-depth-gate.md) before implementation; an unavailable reference is a missing prerequisite, not permission to skip the gate.
-
-## Implement the interface
-
-- Use real content or clearly marked realistic placeholders.
-- Build semantic structure before decoration.
-- Derive values from project tokens; introduce a new token only for a durable distinction.
-- Include loading, empty, error, disabled, success, permission, and destructive states when the flow can reach them.
-- Keep component APIs explicit and cohesive. Detect the framework before applying framework-specific rules.
-- Prefer the smallest owner-aligned change. Do not add dependencies or replace a component system without approval.
-- Update `DESIGN.md` only when the work establishes a reusable project decision, not for a one-off exception.
-
-## Verify rendered behavior
-
-Open the interface in a real browser when the environment supports it. Inspect at the project's supported breakpoints and at 375px unless the product targets a different minimum. Exercise keyboard navigation and relevant interaction states. Check console errors, overflow, near-wraps, localization stress, reduced motion, and loading or failure behavior.
-
-Run project-owned lint, typecheck, tests, build, and browser checks appropriate to the changed surface. The bundled cross-platform static helper is supplementary:
-
-```bash
-node <skill-directory>/scripts/verify-design.mjs <project-root>
-```
-
-Use `--json` for structured output. Treat warnings as review leads, not proof of a visual defect. Never claim visual quality from static scanning alone.
-
-For Screenshot fidelity, the baseline viewport is a separate release gate. Run `scripts/visual_fidelity.py capture`, `compare`, and `report` against the case manifest described in `references/screenshot-fidelity.md`. All anchor, critical-region, overall-similarity, asset-completeness, and capture-stability gates must pass. Responsive views outside the supplied baseline are checked for usability and layout integrity, not compared pixel-for-pixel unless they have their own approved baseline.
-
-For audit work, classify every result as `observed`, `inferred`, or `unverified`. Confirm business rules against product evidence and API behavior; never infer them from field names. A passing static scan does not establish architectural quality, runtime safety, security, or business correctness.
-
-## Review and hand off
-
-Re-read the brief and visual thesis against the final rendering. Fix material drift before handoff. Report:
-
-- chosen direction and why it fits the product
-- reused and newly introduced design decisions
-- responsive, accessibility, state, and browser evidence
-- commands actually exercised and any unverified areas
-- remaining placeholders, risks, or decisions requiring the user
-
-Stop after handoff. Do not publish, deploy, or alter shared state unless requested.
+**Complete:** the user and owning workflow can locate the evidence, scope and remaining gaps.
