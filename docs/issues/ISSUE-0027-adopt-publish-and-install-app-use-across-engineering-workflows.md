@@ -1,12 +1,11 @@
 ---
 id: ISSUE-0027
 title: "Adopt publish and install app-use across engineering workflows"
-status: in-progress
+status: done
 priority: high
 created: 2026-10-26
 updated: 2026-10-26
-closed:
-sources: []
+closed: 2026-10-26
 related_adrs: []
 depends_on: [ISSUE-0024, ISSUE-0025, ISSUE-0026]
 ---
@@ -25,7 +24,7 @@ Integrate workflows, preserve testing rules, publish verified changes and instal
 
 - [x] Integrate route-work, implement-issue, diagnose-bug, frontend-design, tdd and review-code with narrow app-use pointers.
 - [x] Preserve installed 2026-10-23 global rules while adding default UI routing in ai-playbook source and usage guide.
-- [ ] Final checks/review and scope-only commit/push; install changed Skills and synchronize current Codex Home with backups and hash verification.
+- [x] Final checks/review and scope-only commit/push; install changed Skills and synchronize current Codex Home with backups and hash verification.
 
 ## Out of scope
 
@@ -51,6 +50,8 @@ ai-playbook node --check and 8 real filesystem sync tests PASS; changed local li
 
 Read-only fixed-base review covers the six narrow Skill pointers, test/case evidence ownership, source/manual separation and sync changes. No remaining P0/P1 in the tested scope; ESM/C# architecture scan, Edge and DPI transitions remain explicit gaps. Fetch found ai-playbook remote additions; preserve both histories through ordinary merge and rerun its checks before publication.
 
+Publication verified on 2026-10-26: agent-skills implementation commit 49d1c63c238c4d4687f3566286bf5316fdcc3e88 pushed to origin/main and confirmed with git ls-remote. ai-playbook task commit 1292525 was merged normally with remote e0e8ade (only a date conflict, resolved to 2026-10-26; every remote rule preserved), producing 66a63d3bda946d17c7765fbe6d83ba2ffe035eda. It was pushed and its remote hash confirmed. Eight sync tests, node syntax and --check=in-sync reran after the merge. No branch switch, force push or PR. Both worktrees were clean after those pushes. The credential helper printed a stale-helper warning but authenticated push and remote hash verification succeeded; no Git configuration was modified.
+
 ## Activity log
 
 ### 2026-10-26 — Created
@@ -61,6 +62,8 @@ Issue created from the supplied project input.
 
 ### 2026-10-26 — Status changed from ready to in-progress.
 
+### 2026-10-26 — Status changed from in-progress to done.
+
 ## Completion summary
 
-Not completed.
+Integrated app-use across six engineering Skills, published both repositories, preserved and synchronized global rules, installed seven verified Skill copies with backups; remaining platform/check gaps are explicit.
