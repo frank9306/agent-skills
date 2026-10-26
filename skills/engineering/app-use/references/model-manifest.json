@@ -1,0 +1,13 @@
+{
+  "sourceRepository": "convaiinnovations/laya-multilingual",
+  "sourceRevision": "1720e3e3357cfe1e281542e223f8273b0890ca34",
+  "checkpointSha256": "9d628fd971b700382ac6f65920a86f149777b2e748e0c955fb3b19695aa8f204",
+  "exporterRevision": "6f0496f797dc7127265d62e1543a62de507d943c",
+  "files": {
+    "model.onnx": "2e21511089c4603716c727d175b42412e1f27583113b6daa284dc16996bca7d3",
+    "model.onnx.data": "f01238e183ace77661282e4eb2dd9b872c7044cb9678f904cf409e6cc1146d09",
+    "rl_agent_config.json": "25061739243b617ad88d1219ba6f8a9c86c5881ca28df024fa2d9b3b2fcc30c6",
+    "tokenizer/tokenizer.json": "609d8f4c067cd3950f88594c5a802616cea245823836ef5848ee4fc40aab5b6f",
+    "tokenizer/tokenizer_config.json": "2c0c4d82d4b4bc6b4ac40b2375e067a1645f78b381a9774248d47915f33d751f"
+  }
+}

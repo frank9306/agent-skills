@@ -19,6 +19,7 @@ None.
 | ID | Title |
 |---|---|
 | [ISSUE-0019](ISSUE-0019-add-project-owned-deep-module-checks-and-codex-feedback.md) | Add project-owned deep-module checks and Codex feedback |
+| [ISSUE-0027](ISSUE-0027-adopt-publish-and-install-app-use-across-engineering-workflows.md) | Adopt publish and install app-use across engineering workflows |
 
 ## Blocked
 
@@ -48,6 +49,9 @@ None.
 | [ISSUE-0021](ISSUE-0021-retire-init-project-and-design-modules-skills.md) | Retire init-project and design-modules skills |
 | [ISSUE-0022](ISSUE-0022-require-shared-deep-module-design-before-code-generation.md) | Require shared deep-module design before code generation |
 | [ISSUE-0023](ISSUE-0023-redesign-frontend-design-around-ui-quality-and-browser-contracts.md) | Redesign frontend-design around UI quality and browser contracts |
+| [ISSUE-0024](ISSUE-0024-implement-app-use-sessions-and-windows-desktop-control.md) | Implement app-use sessions and Windows desktop control |
+| [ISSUE-0025](ISSUE-0025-connect-app-use-to-the-existing-chromium-browser.md) | Connect app-use to the existing Chromium browser |
+| [ISSUE-0026](ISSUE-0026-run-frozen-app-use-ui-cases-and-bounded-laya-branches.md) | Run frozen app-use UI cases and bounded Laya branches |
 
 ## Cancelled
 

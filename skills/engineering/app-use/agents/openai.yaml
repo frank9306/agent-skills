@@ -1,0 +1,4 @@
+interface:
+  display_name: "App Use"
+  short_description: "Operate browser and Windows UI with verified local evidence"
+  default_prompt: "Use $app-use to operate this application and verify the requested result."

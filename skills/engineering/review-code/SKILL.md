@@ -27,6 +27,8 @@ Requirements review checks whether the diff implements every acceptance criterio
 
 Inspect the diff before relying on test results. Treat passing tests as evidence only for behavior they actually cover.
 
+For UI changes, inspect [app-use](../app-use/SKILL.md) evidence against the final source/tool inputs, declared target/build readback and literal assertions; revalidate layout reports through frontend-design's `verifyUIReport`. Missing assertions, all N/A, stale inputs and screenshots without assertions cannot establish a pass. Review remains read-only: inspect or measure within scope, without fixes or unauthorized business writes. UI evidence supplements the existing unit/integration and TDD evidence.
+
 ## Report findings
 
 Report only actionable findings, ordered by severity. Give each finding a short title, exact file and tight line range, concrete failure scenario, and why existing verification does not protect against it. Do not report style preferences unless a project standard requires them.

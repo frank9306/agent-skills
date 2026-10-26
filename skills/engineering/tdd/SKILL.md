@@ -31,4 +31,6 @@ Refactor only while green and within the recorded contract; the shared design ga
 
 ## Close the loop
 
+When the change needs browser/desktop acceptance, use [app-use](../app-use/SKILL.md) at a meaningful UI milestone after the focused behavior is green. Freeze the case and literal goal assertions before replay, then return evidence to the owning workflow. This complements stable unit/integration tests; do not replace them or run the full UI suite on every red-green cycle.
+
 Run affected test files, typechecking or linting required by the project, and the full relevant suite once at the end. Report each red observation, the behavior added, commands actually run, skipped checks, and remaining risks. Never claim TDD if the initial failure was not observed.

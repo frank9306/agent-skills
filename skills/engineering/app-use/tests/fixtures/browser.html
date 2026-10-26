@@ -1,0 +1,18 @@
+<!doctype html><meta charset="utf-8"><title>app-use acceptance fixture</title>
+<style>
+body{margin:0;font:16px Arial;height:calc(100vh + 600px)}
+.shell{height:100vh;display:grid;grid-template-rows:40px minmax(0,1fr);overflow:hidden}
+.panes{display:grid;grid-template-columns:160px minmax(0,1fr);min-height:0}
+#main,#side{min-height:0;overflow:auto;overscroll-behavior:contain}.long{height:1600px}
+button{height:32px;color:rgb(1,2,3)}#apply{width:140px}#result{display:block}
+#cover{display:none;position:fixed;inset:0;background:#bbb;z-index:10}
+#modal{display:none;position:fixed;top:60px;left:200px;width:280px;height:240px;overflow:auto;overscroll-behavior:contain;background:white;z-index:11}
+</style>
+<div class="shell"><header id="header">Toolbar</header><div class="panes"><aside id="side"><div class="long">Navigation</div></aside><main id="main">
+<h1 id="ready">Ready v1</h1><input aria-label="Fixture input" id="input"><button id="apply">Apply fixture</button><output id="result">Pending</output><button id="open">Open dialog</button><div class="long">Tasks</div><button id="last">Last action</button>
+</main></div></div><div id="cover"></div><section id="modal" role="dialog"><button id="inside">Close dialog</button><div class="long">Dialog content</div></section>
+<script>
+document.querySelector('#apply').onclick=()=>document.querySelector('#result').textContent=document.querySelector('#input').value;
+document.querySelector('#open').onclick=()=>{document.querySelector('#cover').style.display='block';document.querySelector('#modal').style.display='block';document.body.style.overflow='hidden';document.querySelector('#inside').focus();};
+document.querySelector('#inside').onclick=()=>{document.querySelector('#cover').style.display='none';document.querySelector('#modal').style.display='none';document.body.style.overflow='auto';document.querySelector('#open').focus();};
+</script>

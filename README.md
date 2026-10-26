@@ -23,6 +23,7 @@ Reusable Agent Skills for engineering, content, and service operations. Personal
 | [`diagnose-bug`](skills/engineering/diagnose-bug/SKILL.md) | Engineering | Reproduce a bug and determine its root cause. |
 | [`write-agent-docs`](skills/engineering/write-agent-docs/SKILL.md) | Engineering | Write concise, scoped project instructions for agents. |
 | [`frontend-design`](skills/engineering/frontend-design/SKILL.md) | Engineering | Design and verify product aesthetics, design systems, layout, scrolling, and accessible interaction. |
+| [`app-use`](skills/engineering/app-use/SKILL.md) | Engineering | Operate the existing Chromium/Windows UI and replay bounded UI cases with local evidence. |
 | [`dispatch-dsh-task`](skills/engineering/dispatch-dsh-task/SKILL.md) | Engineering | Dispatch audited my-knowledge work from Hermes to the restricted DSH runner. |
 | [`audit-codex-harness`](skills/engineering/audit-codex-harness/SKILL.md) | Engineering | Audit project-scoped Codex traces and score harness efficiency. |
 | [`read-web-content`](skills/content/read-web-content/SKILL.md) | Content | Read and extract useful content from public URLs with privacy-aware fallbacks. |

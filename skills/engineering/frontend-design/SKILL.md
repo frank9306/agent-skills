@@ -57,6 +57,8 @@ Preserve the established stack and public behavior. Build reachable loading, emp
 
 Read [visual review and executable verification](references/visual-review.md). Exercise the declared matrix, long content, narrow and low-height layouts, keyboard focus, actual scrolling and overlays. Use project browser tests; `checkUI(page, contract)` supplies reusable assertions without owning authentication or data setup. The CLI supports already-prepared URL states.
 
+Use [app-use](../app-use/SKILL.md) for interaction with the user's existing browser or Windows app. For browser contracts, its `createPageAdapter` implements the public subset consumed by this Skill's `checkUI`/`verifyUIReport`; keep rules, visual judgment and report verification here. Preserve project unit/integration tests and TDD. Native UI evidence uses app-use's own observations and assertions; browser layout checks cannot verify a native window.
+
 When browser access is unavailable, complete the other authorized work and mark runtime checks unverified.
 
 Review actual screenshots against the brief. In implementation tasks, repair consequential defects, then rerun affected checks. Repeated numerical tuning without improvement calls for re-examining structure. Static `scripts/verify-design.mjs <project> --json` yields review leads only. Project visual regression uses approved rendered baselines; baseline changes are design decisions.

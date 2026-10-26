@@ -1,0 +1,24 @@
+using System.Windows.Forms;
+using System.Drawing;
+
+Application.SetHighDpiMode(HighDpiMode.PerMonitorV2);
+Application.EnableVisualStyles();
+var form = new Form { Text = "app-use controlled fixture", Size = new Size(640, 460), StartPosition = FormStartPosition.CenterScreen };
+var menu = new MenuStrip();
+var file = new ToolStripMenuItem("Fixture");
+var dialog = new ToolStripMenuItem("Open dialog");
+dialog.Click += (_, _) => MessageBox.Show(form, "Controlled dialog", "app-use dialog", MessageBoxButtons.OK);
+file.DropDownItems.Add(dialog); menu.Items.Add(file); form.Controls.Add(menu);
+var input = new TextBox { AccessibleName = "Fixture input", Location = new Point(30, 70), Width = 240 };
+var select = new ComboBox { AccessibleName = "Fixture choice", Location = new Point(30, 120), Width = 240, DropDownStyle = ComboBoxStyle.DropDownList };
+select.Items.AddRange(["Alpha", "Beta"]); select.SelectedIndex = 0;
+var result = new TextBox { AccessibleName = "Fixture result", Location = new Point(30, 220), Width = 400, ReadOnly = true, Text = "Pending" };
+var button = new Button { AccessibleName = "Apply fixture", Text = "Apply fixture", Location = new Point(30, 170), Width = 160 };
+button.Click += (_, _) => result.Text = input.Text + ":" + select.Text;
+var disabled = new Button { Text = "Disabled fixture", AccessibleName = "Disabled fixture", Enabled = false, Location = new Point(300, 170), Width = 180 };
+var password = new TextBox { AccessibleName = "Fixture secret", UseSystemPasswordChar = true, Text = "CONTROLLED_SECRET", Location = new Point(30, 280), Width = 240 };
+var block = new Panel { AccessibleName = "Fixture blocker", BackColor = Color.DarkGray, Bounds = button.Bounds, Visible = false };
+var obstruct = new CheckBox { Text = "Obstruct action", AccessibleName = "Obstruct action", Location = new Point(300, 120), Width = 180 };
+obstruct.CheckedChanged += (_, _) => { block.Visible = obstruct.Checked; block.BringToFront(); };
+form.Controls.AddRange([input, select, result, button, disabled, password, obstruct, block]);
+Application.Run(form);

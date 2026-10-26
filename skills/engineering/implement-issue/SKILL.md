@@ -36,6 +36,8 @@ If implementation reveals a missing product decision or materially different sco
 
 ## Verify and review
 
+For UI acceptance, use [app-use](../app-use/SKILL.md) to observe the running target, freeze meaningful cases and retain assertion/evidence reports. Use frontend-design's checker for declared browser layout/scroll/focus contracts. UI acceptance supplements the existing unit/integration tests and TDD; run it at meaningful milestones, not after every red-green edit. A missing bridge or unverified report remains a verification gap.
+
 Run every project check required by the Issue and repository, including the fast structure check and full delivery check, then the full relevant suite. Require a fresh pass against the final inputs; missing tools, timeouts, or input changes during a check are not a pass. Do not widen exclusions, add baseline exceptions, or weaken dependency/export rules merely to make checks pass. Review an intentional contract change as part of the implementation. Invoke $review-code against the fixed pre-implementation Git base and this Issue.
 
 Address confirmed review findings that are within scope, rerun affected verification, and repeat review until no P0 or P1 finding remains. Do not conceal residual P2 or P3 findings; record them.
