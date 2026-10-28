@@ -26,6 +26,18 @@ export function dom(operation, args = {}) {
   }
   function signature(r){return JSON.stringify([r.role,r.name,r.value,r.enabled,r.visible,r.bounds]);}
   function element(id){const el=state.nodes.get(id)?.deref();if(!el?.isConnected)throw Error('target expired');return el;}
+  if(operation==='visual-viewport')return {width:innerWidth,height:innerHeight,scrollX,scrollY,dpr:devicePixelRatio,scale:visualViewport?.scale??1,offsetLeft:visualViewport?.offsetLeft??0,offsetTop:visualViewport?.offsetTop??0};
+  if(operation==='visual-probe') {
+    let el=document.elementFromPoint(args.x,args.y);
+    while(el?.shadowRoot){const child=el.shadowRoot.elementFromPoint(args.x,args.y);if(!child||child===el)break;el=child;}
+    if(!el)throw Error('visual point outside live document');
+    for(let n=el;n;n=n.parentElement||n.getRootNode()?.host) {
+      if(n.matches('iframe,frame'))throw Error('visual iframe targets unsupported');
+      if(sensitive(n))throw Error('visual target is sensitive');
+      if(n.matches(':disabled,[aria-disabled=true],[inert]'))throw Error('visual target disabled or inert');
+    }
+    const r=row(el);if(!r.visible)throw Error('visual target hidden');return r;
+  }
   if(operation==='sensitive') {
     const queue=[...document.querySelectorAll('*')];let checked=0;
     while(queue.length){const el=queue.shift();if(++checked>10000||sensitive(el))return true;if(el.shadowRoot)queue.push(...el.shadowRoot.querySelectorAll('*'));}return false;

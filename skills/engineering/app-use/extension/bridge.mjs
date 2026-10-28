@@ -1,10 +1,10 @@
 import { dom } from './dom.mjs';
 
 export class BrowserBridge {
-  constructor(api) {
-    this.api=api;this.sessions=new Map();this.tabs=new Map();this.ownership=new Map();
+  constructor(api,nativeFocus) {
+    this.api=api;this.nativeFocus=nativeFocus;this.sessions=new Map();this.tabs=new Map();this.ownership=new Map();
     api.debugger.onEvent.addListener((source,method,p)=>this.event(source,method,p));
-    api.debugger.onDetach.addListener(source=>{const s=this.tabs.get(source.tabId);if(s){s.stopped=true;s.observation=null;this.tabs.delete(source.tabId);this.sessions.delete(s.id);}});
+    api.debugger.onDetach.addListener(source=>{const s=this.tabs.get(source.tabId);if(s)this.stop(s,{},true).catch(()=>{});});
     api.tabs.onCreated.addListener(tab=>{const s=this.tabs.get(tab.openerTabId);if(s?.trackPopups&&s.activeAction){s.createdTabs.add(tab.id);s.allowedTabs.add(tab.id);}});
   }
   protect(s,value){let json=JSON.stringify(value);for(const secret of s.secrets||[])json=json.split(JSON.stringify(secret).slice(1,-1)).join('[redacted]');return JSON.parse(json);}
@@ -25,7 +25,7 @@ export class BrowserBridge {
     }
     if(method==='Runtime.executionContextDestroyed')for(const [k,c]of s.contexts)if(c.sessionId===sid&&c.defaultId===p.executionContextId)s.contexts.delete(k);
     if(method==='Runtime.executionContextsCleared')for(const [k,c]of s.contexts)if(c.sessionId===sid)s.contexts.delete(k);
-    if(['Runtime.executionContextsCleared','Page.frameNavigated','Page.frameDetached'].includes(method))s.observation=null;
+    if(['Runtime.executionContextsCleared','Page.frameNavigated','Page.frameDetached','Page.frameResized','Page.navigatedWithinDocument'].includes(method)){s.observation=null;s.visual=null;s.generation=(s.generation||0)+1;}
     if(method==='Target.attachedToTarget'&&p.targetInfo.type==='iframe') {
       const task=this.enable(s,p.sessionId).catch(e=>{s.frameError=e.message;});s.pending.push(task);
     }
@@ -83,7 +83,14 @@ export class BrowserBridge {
     return this.protect(s,{id,at:new Date().toISOString(),complete,identity,nodes,viewport,contexts:contexts.map(c=>({frameId:c.frameId,sessionId:c.sessionId})),...(s.frameError?{error:s.frameError}:{})});
   }
   async handle(method,p={}) {
-    if(p.expiresAt&&Date.now()>=p.expiresAt)throw Error('request expired before dispatch');
+    const s=this.sessions.get(p.session);
+    // Serialize a session across separate native requests; stop remains immediately interruptible.
+    if(!s||method==='stop')return this.dispatch(method,p);
+    const task=(s.queue||Promise.resolve()).catch(()=>{}).then(()=>this.dispatch(method,p));
+    s.queue=task;return task;
+  }
+  async dispatch(method,p={}) {
+    if(p.expiresAt&&Date.now()>=p.expiresAt){if(method==='visual-click'){const s=this.sessions.get(p.session);if(s)s.visual=null;}throw Error('request expired before dispatch');}
     if(method==='sessions')return (await this.api.tabs.query({})).filter(t=>/^https?:|^file:|^about:blank$/.test(t.url||'')).map(t=>({kind:'browser',tabId:t.id,windowId:t.windowId,title:t.title,url:(()=>{try{const u=new URL(t.url);return u.origin+u.pathname;}catch{return 'unavailable';}})(),session:this.tabs.get(t.id)?.id}));
     if(method==='prepare') {
       let created;
@@ -101,7 +108,10 @@ export class BrowserBridge {
       try{await this.enable(s);return await this.identity(s);}catch(e){await this.stop(s);throw e;}
     }
     const s=this.sessions.get(p.session);if(!s||s.stopped)throw Error('session unavailable or disconnected');
+    if(method!=='visual-click')s.visual=null;
     if(method==='stop')return this.stop(s,p);
+    if(method==='visual-observe')return this.visualObserve(s,p);
+    if(method==='visual-click')return this.visualClick(s,p);
     if(method==='observe')return this.observe(s,p);
     if(method==='capture') {
       if(!s.observation)throw Error('observe before capture');
@@ -117,11 +127,145 @@ export class BrowserBridge {
     s.activeAction=true;
     try{return await this.act(s,p);}finally{s.activeAction=false;}
   }
-  async stop(s,p={}) {
-    s.stopped=true;s.observation=null;this.sessions.delete(s.id);this.tabs.delete(s.tabId);
-    try{await this.api.debugger.detach({tabId:s.tabId});}catch{}
+  async cleanupFocusTab(s) {
+    if(s.focusCleanup)return s.focusCleanup;
+    const id=s.focusTab;if(!id)return;
+    const cleanup=(async()=>{
+      await this.api.tabs.remove(id);
+      if(await this.api.tabs.get(id).catch(()=>null))throw Error('native activation marker was not removed');
+      s.focusTab=null;
+    })();
+    s.focusCleanup=cleanup;
+    try{await cleanup;}finally{if(s.focusCleanup===cleanup)s.focusCleanup=null;}
+  }
+  async stop(s,p={},detached=false) {
+    s.stopped=true;s.observation=null;s.visual=null;this.sessions.delete(s.id);this.tabs.delete(s.tabId);
+    if(s.focusTab)try{await this.cleanupFocusTab(s);}catch{}
+    if(!detached)try{await this.api.debugger.detach({tabId:s.tabId});}catch{}
     if(p.closeCreated){for(const id of s.createdTabs)try{await this.api.tabs.remove(id);}catch{}for(const [tab,owned]of this.ownership)if(owned===s.createdTabs)this.ownership.delete(tab);}
     return {stopped:true};
+  }
+  async visualCapture(s,p) {
+    const generation=s.generation||0;
+    const guard=()=>{if(s.stopped||p.expiresAt&&Date.now()>=p.expiresAt)throw Error('stopped or expired before visual dispatch');};
+    guard();
+    const tab=await this.api.tabs.get(s.tabId);
+    if(!s.origins.has(new URL(tab.url).origin))throw Error('visual origin outside declared scope');
+    if(!tab.active||!(await this.api.windows.get(tab.windowId)).focused)throw Error('visual operation requires focused active tab; explicitly focus first');
+    if(s.dialog)throw Error('close dialog before visual observation');
+    if(s.secrets?.length)throw Error('visual capture refused: session contains sensitive input');
+    for(let depth=0;s.pending.length&&depth<10;depth++)await Promise.all(s.pending.splice(0));
+    const tree=(await this.command(s,'Page.getFrameTree')).frameTree,frames=[];
+    const collect=t=>{frames.push(t.frame.id);for(const child of t.childFrames||[])collect(child);};collect(tree);
+    const contexts=[...s.contexts.values()];
+    if(frames.some(id=>!contexts.some(c=>c.frameId===id)))throw Error('visual capture refused: frame coverage incomplete');
+    for(const c of contexts)if(await this.evaluate(s,c,dom,['sensitive']))throw Error('visual capture refused: sensitive fields present');
+    const context=contexts.find(c=>c.frameId===tree.frame.id);if(!context)throw Error('main frame unavailable');
+    const viewport=await this.evaluate(s,context,dom,['visual-viewport']);
+    if(!Number.isFinite(viewport.width)||!Number.isFinite(viewport.height)||viewport.width<=0||viewport.height<=0||viewport.scale!==1||viewport.offsetLeft!==0||viewport.offsetTop!==0)throw Error('visual viewport unsupported; reset pinch zoom');
+    const scale=Math.min(1,1600/(viewport.width*viewport.dpr),1200/(viewport.height*viewport.dpr));
+    guard();const {data}=await this.command(s,'Page.captureScreenshot',{format:'png',fromSurface:true,captureBeyondViewport:false,clip:{x:viewport.scrollX,y:viewport.scrollY,width:viewport.width,height:viewport.height,scale}});
+    if(data.length>900000)throw Error('visual screenshot exceeds Native Messaging limit');
+    const bytes=Uint8Array.from(atob(data),c=>c.charCodeAt(0));
+    if(bytes.length<24||[137,80,78,71,13,10,26,10].some((b,i)=>bytes[i]!==b))throw Error('invalid visual PNG');
+    const view=new DataView(bytes.buffer),width=view.getUint32(16),height=view.getUint32(20);
+    if(!width||!height)throw Error('empty visual PNG');
+    // Do not return pixels if privacy or the surface changed while CDP acquired them.
+    for(let depth=0;s.pending.length&&depth<10;depth++)await Promise.all(s.pending.splice(0));
+    frames.length=0;collect((await this.command(s,'Page.getFrameTree')).frameTree);
+    if(frames.some(id=>![...s.contexts.values()].some(c=>c.frameId===id)))throw Error('visual capture refused: frame coverage incomplete after capture');
+    for(const c of s.contexts.values())if(await this.evaluate(s,c,dom,['sensitive']))throw Error('visual capture refused: sensitive fields appeared during capture');
+    const after=await this.api.tabs.get(s.tabId),afterViewport=await this.evaluate(s,context,dom,['visual-viewport']);
+    if(!after.active||!(await this.api.windows.get(after.windowId)).focused)throw Error('visual capture lost focused active tab');
+    if((s.generation||0)!==generation||JSON.stringify([after.id,after.windowId,after.url,afterViewport])!==JSON.stringify([tab.id,tab.windowId,tab.url,viewport]))throw Error('visual surface changed during capture');
+    guard();
+    return {image:{mime:'image/png',data,width,height},viewport,context,identity:await this.identity(s),binding:JSON.stringify([tab.id,tab.windowId,tab.url,viewport,generation])};
+  }
+  async visualObserve(s,p) {
+    s.observation=null;
+    const shot=await this.visualCapture(s,p),id=crypto.randomUUID();
+    s.visual={...shot,id,at:Date.now()};
+    return {id,at:new Date().toISOString(),identity:shot.identity,coordinateSpace:'image-pixels',image:shot.image};
+  }
+  async visualClick(s,p) {
+    const o=s.visual;s.visual=null;s.observation=null;
+    if(!o||o.id!==p.observation||Date.now()-o.at>60000)throw Error('stale or consumed visual observation; visual-observe again');
+    const t=p.target;
+    if(!t||typeof t.description!=='string'||!t.description.trim()||t.description.length>200||['x','y','width','height'].some(k=>!Number.isFinite(t[k]))||t.x<0||t.y<0||t.width<=0||t.height<=0||t.x+t.width>o.image.width||t.y+t.height>o.image.height)throw Error('visual target needs a description and a bounded image-pixel rectangle');
+    const current=await this.visualCapture(s,p);
+    if(current.binding!==o.binding)throw Error('visual geometry or navigation changed; visual-observe again');
+    if(current.image.data!==o.image.data)throw Error('visual screenshot changed; visual-observe again');
+    const x=(t.x+t.width/2)*o.viewport.width/o.image.width,y=(t.y+t.height/2)*o.viewport.height/o.image.height;
+    const hit=await this.evaluate(s,current.context,dom,['visual-probe',{x,y}]);
+    const tab=await this.api.tabs.get(s.tabId);
+    if(!tab.active||!(await this.api.windows.get(tab.windowId)).focused)throw Error('visual click lost focused active tab');
+    const viewport=await this.evaluate(s,current.context,dom,['visual-viewport']);
+    if(JSON.stringify([tab.id,tab.windowId,tab.url,viewport,s.generation||0])!==o.binding)throw Error('visual geometry or identity changed before click');
+    if(s.stopped||Date.now()-o.at>60000||p.expiresAt&&Date.now()>=p.expiresAt)throw Error('stopped or expired before visual click');
+    await this.command(s,'Input.dispatchMouseEvent',{type:'mouseMoved',x,y});
+    await new Promise(r=>setTimeout(r,80));
+    const hovered=await this.visualCapture(s,p);
+    if(hovered.binding!==o.binding||hovered.image.data!==o.image.data)throw Error('visual screenshot changed after pointer movement; visual-observe again');
+    await this.evaluate(s,hovered.context,dom,['visual-probe',{x,y}]);
+    if(s.stopped||Date.now()-o.at>60000||p.expiresAt&&Date.now()>=p.expiresAt)throw Error('stopped or expired before visual click');
+    s.activeAction=true;
+    try {
+      try{await this.command(s,'Input.dispatchMouseEvent',{type:'mousePressed',x,y,button:'left',clickCount:1});}
+      finally{if(!s.stopped)await this.command(s,'Input.dispatchMouseEvent',{type:'mouseReleased',x,y,button:'left',clickCount:1});}
+      await new Promise(r=>setTimeout(r,80));
+      const result={actionExecuted:true,goalVerified:false,diagnostics:{visual:{observation:o.id,target:t,x,y,hit}}};
+      try{return {...result,observation:await this.observe(s)};}catch(e){return {...result,observation:null,observationError:e.message};}
+    } finally {s.activeAction=false;}
+  }
+  async focus(s,p) {
+    const guard=()=>{if(s.stopped||p.expiresAt&&Date.now()>=p.expiresAt)throw Error('stopped or expired before foreground activation');};
+    guard();
+    const tab=await this.api.tabs.get(s.tabId),windowId=tab.windowId;
+    if(!s.origins.has(new URL(tab.url).origin))throw Error('focus origin outside declared scope');
+    const waitFocused=async()=>{
+      const until=Date.now()+250;
+      do {
+        guard();
+        const current=await this.api.tabs.get(s.tabId),w=await this.api.windows.get(windowId);
+        if(current.windowId!==windowId)throw Error('target window changed during foreground activation');
+        if(!s.origins.has(new URL(current.url).origin))throw Error('focus origin changed outside declared scope');
+        if(current.active&&w.focused&&w.state!=='minimized')return true;
+        await new Promise(r=>setTimeout(r,25));
+      }while(Date.now()<until);
+      return false;
+    };
+    let chromeError;
+    try {
+      const win=await this.api.windows.get(windowId);
+      if(win.state==='minimized'){guard();await this.api.windows.update(windowId,{state:'normal'});}
+      guard();await this.api.tabs.update(s.tabId,{active:true});
+      guard();await this.api.windows.update(windowId,{focused:true});
+    }catch(e){guard();chromeError=e.message;}
+    const chromeFocused=await waitFocused();
+    if(!this.nativeFocus) {
+      if(chromeFocused)return {verified:true,windowId,tabId:s.tabId,method:'chrome'};
+      throw Error('cannot acquire browser foreground; native activation unavailable; focus was not verified');
+    }
+    const marker=crypto.randomUUID();let native;
+    try {
+      guard();
+      const current=await this.api.tabs.get(s.tabId);
+      if(current.windowId!==windowId)throw Error('target window changed before native activation');
+      const temp=await this.api.tabs.create({windowId,url:this.api.runtime.getURL('focus.html')+'#'+marker,active:true});
+      s.focusTab=temp.id;
+      guard();
+      native=await this.nativeFocus({session:s.id,marker,expiresAt:Math.min(p.expiresAt||Infinity,Date.now()+6000)});
+      guard();
+      if(native?.verified!==true)throw Error('native browser foreground was not verified');
+    } finally {
+      if(s.focusTab) {
+        const current=await this.api.tabs.get(s.tabId).catch(()=>null);
+        try {if(!s.stopped&&current?.windowId===windowId)await this.api.tabs.update(s.tabId,{active:true});}
+        finally {await this.cleanupFocusTab(s);}
+      }
+    }
+    if(!await waitFocused())throw Error('browser foreground lost after native activation');
+    return {verified:true,windowId,tabId:s.tabId,method:'native',native,markerRemoved:true,...(chromeError?{chromeError}:{})};
   }
   async act(s,p) {
     const diagnostics={};
@@ -131,11 +275,15 @@ export class BrowserBridge {
     const a=p.action;if(!a||typeof a.type!=='string')throw Error('action required');
     const tab=await this.api.tabs.get(s.tabId);
     if(!s.origins.has(new URL(tab.url).origin))throw Error('current origin outside declared scope; prepare a new authorized scope');
-    if(['click','fill','key','scroll','drag','files'].includes(a.type)&&!tab.active)throw Error('target tab is not active; explicitly focus first');
     s.observation=null;
     const guard=()=>{if(s.stopped||p.expiresAt&&Date.now()>=p.expiresAt)throw Error('stopped or expired before dispatch');};
     const allowed=['click','fill','key','scroll','select','drag','read','navigate','newTab','switchTab','focus','scrollIntoView','files','dialog'];
     if(!allowed.includes(a.type))throw Error('unsupported browser action');
+    if(['click','fill','key','scroll','select','drag','files'].includes(a.type)) {
+      const win=await this.api.windows.get(tab.windowId);
+      if(!tab.active||!win.focused||win.state==='minimized')diagnostics.foreground=await this.focus(s,p);
+      guard();
+    }
     if(a.type==='dialog') {
       if(!s.dialog)throw Error('no dialog');guard();await this.command(s,'Page.handleJavaScriptDialog',{accept:a.accept===true,...(a.text?{promptText:a.text}:{})});
     } else if(a.type==='navigate'||a.type==='newTab') {
@@ -149,7 +297,7 @@ export class BrowserBridge {
       guard();const previous=s.tabId;await this.api.debugger.detach({tabId:previous});s.stopped=false;this.sessions.set(s.id,s);this.tabs.delete(previous);s.tabId=a.tabId;this.ownership.set(s.tabId,s.createdTabs);s.contexts.clear();s.pending=[];s.frameError=null;
       await this.api.debugger.attach({tabId:s.tabId},'1.3');this.tabs.set(s.tabId,s);await this.enable(s);
     } else if(a.type==='focus') {
-      guard();const tab=await this.api.tabs.get(s.tabId);await this.api.windows.update(tab.windowId,{focused:true});await this.api.tabs.update(s.tabId,{active:true});
+      diagnostics.foreground=await this.focus(s,p);
     } else if(a.type==='key') {
       const c=[...s.contexts.values()].find(c=>!c.sessionId);if(!c)throw Error('main context unavailable');
       guard();await this.press(s,a.key,c.sessionId);
@@ -194,7 +342,15 @@ export class BrowserBridge {
       }
     }
     await new Promise(r=>setTimeout(r,80));guard();
-    return {actionExecuted:true,goalVerified:false,observation:await this.observe(s),diagnostics};
+    const observation=await this.observe(s);
+    if(a.type==='focus') {
+      guard();const current=await this.api.tabs.get(s.tabId),win=await this.api.windows.get(current.windowId);
+      if(current.windowId!==diagnostics.foreground.windowId||!current.active||!win.focused||win.state==='minimized') {
+        s.observation=null;throw Error('browser foreground lost before focus result; observe again');
+      }
+      if(!s.origins.has(new URL(current.url).origin)){s.observation=null;throw Error('focus origin changed outside declared scope');}
+    }
+    return {actionExecuted:true,goalVerified:false,observation,diagnostics};
   }
   async press(s,key,sid) {
     const parts=key?.split('+');if(!parts?.length)throw Error('key required');

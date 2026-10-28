@@ -47,6 +47,11 @@ internal sealed class Broker(string pipe)
                         link.Id = id;
                         await writer.WriteLineAsync(new JsonObject { ["connected"] = id }.ToJsonString());
                     }
+                    else if (link is not null && message["nativeRequest"] is { } nativeId)
+                    {
+                        var owner = link;
+                        _ = Task.Run(() => NativeFocusReply(owner, nativeId.GetValue<string>(), message));
+                    }
                     else if (link is not null) link.Complete(message);
                     else
                     {
@@ -68,6 +73,26 @@ internal sealed class Broker(string pipe)
                 }
             }
         }
+    }
+    async Task NativeFocusReply(Link link, string id, JsonObject message)
+    {
+        JsonObject reply;
+        try {
+            if (message["method"]?.GetValue<string>() != "activate-browser") throw new IOException("unsupported native browser operation");
+            var p = message["params"]!.AsObject();
+            var session = p["session"]!.GetValue<string>();
+            var expiry = p["expiresAt"]!.GetValue<long>();
+            void Guard() {
+                if (DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() >= expiry) throw new IOException("native activation expired");
+                if (!links.ContainsKey(link.Id) || !browserSessions.TryGetValue(session, out var owner) || owner != link.Id)
+                    throw new IOException("native activation session stopped or outside connection scope");
+            }
+            await desktopGate.WaitAsync();
+            try { Guard(); reply = new JsonObject { ["nativeReply"] = id, ["result"] = Foreground.ActivateBrowser(p["marker"]!.GetValue<string>(), Guard) }; }
+            finally { desktopGate.Release(); }
+        }
+        catch (Exception e) { reply = new JsonObject { ["nativeReply"] = id, ["error"] = e.Message }; }
+        try { await link.Send(reply); } catch { /* Disconnect already invalidates this connection's sessions. */ }
     }
     async Task<JsonNode?> Dispatch(string method, JsonObject p)
     {
@@ -110,15 +135,17 @@ internal sealed class Broker(string pipe)
             await desktopGate.WaitAsync();
             try
             {
-                if (p["expiresAt"] is { } expiry && DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() >= expiry.GetValue<long>()) throw new IOException("request expired before dispatch");
+                // Visual attempts consume their token inside the owner before its expiry guard.
+                if (method != "visual-click" && p["expiresAt"] is { } expiry && DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() >= expiry.GetValue<long>()) throw new IOException("request expired before dispatch");
                 return desktop.Execute(method, p);
             }
             finally { desktopGate.Release(); }
         }
         if (browserSessions.TryGetValue(session, out var c) && links.TryGetValue(c, out var link))
         {
-            var result = await link.Call(method, p);
+            // Stop invalidates an in-flight native activation before waiting on the extension.
             if (method == "stop") browserSessions.TryRemove(session, out _);
+            var result = await link.Call(method, p);
             return result;
         }
         throw new IOException("session unavailable or disconnected; prepare again");
@@ -135,12 +162,16 @@ internal sealed class Broker(string pipe)
             pending[id] = completion;
             try
             {
-                await writes.WaitAsync();
-                try { await writer.WriteLineAsync(new JsonObject { ["id"] = id, ["method"] = method, ["params"] = p.DeepClone() }.ToJsonString()); }
-                finally { writes.Release(); }
+                await Send(new JsonObject { ["id"] = id, ["method"] = method, ["params"] = p.DeepClone() });
                 return await completion.Task.WaitAsync(TimeSpan.FromSeconds(15));
             }
             finally { pending.TryRemove(id, out _); }
+        }
+        public async Task Send(JsonObject message)
+        {
+            await writes.WaitAsync();
+            try { await writer.WriteLineAsync(message.ToJsonString()); }
+            finally { writes.Release(); }
         }
         public void Complete(JsonObject message)
         {

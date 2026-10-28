@@ -52,6 +52,8 @@ None.
 | [ISSUE-0025](ISSUE-0025-connect-app-use-to-the-existing-chromium-browser.md) | Connect app-use to the existing Chromium browser |
 | [ISSUE-0026](ISSUE-0026-run-frozen-app-use-ui-cases-and-bounded-laya-branches.md) | Run frozen app-use UI cases and bounded Laya branches |
 | [ISSUE-0027](ISSUE-0027-adopt-publish-and-install-app-use-across-engineering-workflows.md) | Adopt publish and install app-use across engineering workflows |
+| [ISSUE-0028](ISSUE-0028-add-screenshot-bound-visual-clicking-to-app-use.md) | Add screenshot-bound visual clicking to app-use |
+| [ISSUE-0029](ISSUE-0029-make-app-use-foreground-activation-reliable-and-verified.md) | Make app-use foreground activation reliable and verified |
 
 ## Cancelled
 

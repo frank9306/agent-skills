@@ -1,0 +1,19 @@
+<!doctype html>
+<html lang="en"><meta charset="utf-8"><title>app-use visual fixture</title>
+<style>body{margin:24px;background:#f1f5fa;font:18px Arial;color:#142333}h1{font-size:24px}canvas,img{display:block;margin:16px 0;border:2px solid #50667a;background:white}output{display:block;margin:12px 0}button{margin-right:10px}</style>
+<h1>Controlled visual fixture</h1><p id="build">app-use-visual-v1</p>
+<canvas id="surface" width="520" height="180"></canvas>
+<output id="canvas-result">Canvas pending</output>
+<img id="raster" width="520" height="160">
+<output id="image-result">Image pending</output>
+<button id="repaint">Repaint fixture</button><button id="reset">Reset fixture</button>
+<script>
+const surface=document.querySelector('#surface'),ctx=surface.getContext('2d');
+function circle(g,x,y,r,color){g.fillStyle=color;g.beginPath();g.arc(x,y,r,0,Math.PI*2);g.fill();}
+function paint(){ctx.fillStyle='#fff';ctx.fillRect(0,0,520,180);circle(ctx,130,90,52,'#087e61');ctx.fillStyle='white';ctx.beginPath();ctx.moveTo(115,60);ctx.lineTo(115,120);ctx.lineTo(160,90);ctx.closePath();ctx.fill();circle(ctx,380,90,52,'#334a75');ctx.fillStyle='white';ctx.fillRect(360,62,14,56);ctx.fillRect(387,62,14,56);}
+paint();surface.onclick=e=>{const r=surface.getBoundingClientRect(),x=(e.clientX-r.x)*520/r.width,y=(e.clientY-r.y)*180/r.height;if((x-130)**2+(y-90)**2<52**2)document.querySelector('#canvas-result').textContent='Canvas play selected';else if((x-380)**2+(y-90)**2<52**2)document.querySelector('#canvas-result').textContent='Canvas pause selected';};
+const raster=document.querySelector('#raster'),buffer=document.createElement('canvas');buffer.width=520;buffer.height=160;const g=buffer.getContext('2d');g.fillStyle='white';g.fillRect(0,0,520,160);circle(g,130,80,48,'#2371d3');g.strokeStyle='white';g.lineWidth=11;g.beginPath();g.moveTo(106,80);g.lineTo(123,98);g.lineTo(157,61);g.stroke();circle(g,380,80,48,'#c64357');g.beginPath();g.moveTo(360,60);g.lineTo(400,100);g.moveTo(400,60);g.lineTo(360,100);g.stroke();raster.src=buffer.toDataURL('image/png');
+raster.onclick=e=>{const r=raster.getBoundingClientRect(),x=(e.clientX-r.x)*520/r.width,y=(e.clientY-r.y)*160/r.height;if((x-130)**2+(y-80)**2<48**2)document.querySelector('#image-result').textContent='Image check selected';else if((x-380)**2+(y-80)**2<48**2)document.querySelector('#image-result').textContent='Image cross selected';};
+document.querySelector('#repaint').onclick=()=>{ctx.fillStyle='#ffcc22';ctx.fillRect(0,0,40,40);};
+document.querySelector('#reset').onclick=()=>{paint();document.querySelector('#canvas-result').textContent='Canvas pending';document.querySelector('#image-result').textContent='Image pending';};
+</script></html>

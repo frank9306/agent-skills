@@ -18,6 +18,7 @@ try {
   }
   const p = flags['--request'] ? JSON.parse(await fs.readFile(flags['--request'], 'utf8')) : {};
   for (const k of ['session','kind','connection','hwnd','pid','tabId']) if (flags[`--${k}`] !== undefined) p[k] = ['pid','tabId'].includes(k) ? Number(flags[`--${k}`]) : flags[`--${k}`];
+  if (command === 'visual-observe' && (typeof flags['--out'] !== 'string' || !flags['--out'].trim())) throw new Error('visual-observe requires --out <PNG-file>');
   let result;
   if (command === 'prepare' && flags['--runtime']) {
     result = await prepareRuntime({ dotnet: flags['--dotnet'] || 'dotnet', laya:flags['--laya']===true,packages:flags['--packages'],source:flags['--package-source'],...(flags['--runtime-dir']?{out:flags['--runtime-dir']}:{}) });
@@ -47,14 +48,22 @@ try {
       process.once('SIGINT', () => controller.abort(new Error('stopped')));
       const judge=Object.values(p.states||{}).some(s=>s.judge)?await LocalLaya.create(flags['--model-dir']):undefined;
       try{result = await runCase(client, p, { signal: controller.signal, outDir: flags['--out'],judge });}finally{judge?.close();}
-    } else if (['doctor','sessions','prepare','observe','act','stop'].includes(command)) {
+    } else if (['doctor','sessions','prepare','observe','act','stop','visual-observe','visual-click'].includes(command)) {
       if (command === 'act' && p.action?.secretEnv) {
         const secret = process.env[p.action.secretEnv];
         if (secret === undefined) throw new Error('secret environment variable unavailable');
         p.action.text = secret;p.action.sensitive=true; delete p.action.secretEnv;
       }
       result = await client.request(command, p);
-    } else throw new Error('commands: doctor prepare sessions observe act validate run inspect stop; use --request JSON-file');
+      if (command === 'visual-observe') {
+        if (result?.image?.mime !== 'image/png' || typeof result.image.data !== 'string' || !result.image.data) throw new Error('visual-observe returned no PNG screenshot');
+        const imagePath=path.resolve(flags['--out']);
+        await fs.mkdir(path.dirname(imagePath),{recursive:true});
+        await fs.writeFile(imagePath,Buffer.from(result.image.data,'base64'),{flag:'wx'});
+        const {data,...image}=result.image;
+        result={...result,image:{...image,path:imagePath}};
+      }
+    } else throw new Error('commands: doctor prepare sessions observe act visual-observe visual-click validate run inspect stop; use --request JSON-file');
   }
   console.log(JSON.stringify(result));
   if (result?.status && !['pass'].includes(result.status)) process.exitCode = result.status === 'fail' ? 1 : 2;

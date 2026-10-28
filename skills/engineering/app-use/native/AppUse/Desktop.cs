@@ -10,7 +10,7 @@ using System.Windows.Automation;
 
 namespace AppUse;
 
-internal sealed class Desktop
+internal sealed partial class Desktop
 {
     public string Id { get; } = Guid.NewGuid().ToString("N");
     public volatile bool Stopped;
@@ -83,12 +83,18 @@ internal sealed class Desktop
     }
     JsonNode ExecuteLocked(string method, JsonObject p)
     {
+        var foregroundRequired = false;
         void Guard() {
             if (Stopped) throw new IOException("session stopped");
             if (p["expiresAt"] is { } expiry && DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() >= expiry.GetValue<long>()) throw new IOException("request expired before dispatch");
+            if (foregroundRequired && !ForegroundInScope()) throw new IOException("foreground lost before input; observe again");
         }
+        var priorVisual = visual;
+        visual = null;
         Guard();
         Alive();
+        if (method == "visual-observe") { observation = ""; return VisualObserve(); }
+        if (method == "visual-click") { observation = ""; return VisualClick(p, priorVisual, Guard); }
         if (method == "observe") { if (p.ContainsKey("scope")) scope = p["scope"]?.DeepClone().AsObject(); return Observe(); }
         if (method == "capture") return Capture();
         if (method != "act") throw new IOException("unsupported desktop method");
@@ -96,8 +102,15 @@ internal sealed class Desktop
             throw new IOException("stale observation; observe again");
         var a = p["action"]!.AsObject();
         var type = a["type"]!.GetValue<string>();
+        JsonObject? foreground = null;
         // Consume observations before dispatch, including partially failed actions.
         observation = "";
+        if (type is "click" or "fill" or "key" or "scroll" or "select" or "drag" or "invoke")
+        {
+            if (!ForegroundInScope()) foreground = Foreground.Activate(hwnd, () => { Guard(); Alive(); });
+            foregroundRequired = true;
+            Guard();
+        }
         AutomationElement? target = null;
         if (a["target"] is { } targetId)
         {
@@ -111,17 +124,7 @@ internal sealed class Desktop
         }
         if (type == "focus")
         {
-            if (!ForegroundInScope())
-            {
-                Guard(); ShowWindow(hwnd, 9);
-                var foregroundThread = GetWindowThreadProcessId(GetForegroundWindow(), out _);
-                var currentThread = GetCurrentThreadId();
-                var attached = foregroundThread != currentThread && AttachThreadInput(currentThread, foregroundThread, true);
-                try { Guard(); SetForegroundWindow(hwnd); }
-                finally { if (attached) AttachThreadInput(currentThread, foregroundThread, false); }
-                for (var retry = 0; retry < 25 && !ForegroundInScope(); retry++) Thread.Sleep(20);
-            }
-            if (!ForegroundInScope()) throw new IOException($"cannot acquire foreground (target {(long)hwnd}, actual {(long)GetForegroundWindow()})");
+            foreground = Foreground.Activate(hwnd, () => { Guard(); Alive(); });
         }
         else if (type == "move")
         {
@@ -199,9 +202,16 @@ internal sealed class Desktop
             else throw new IOException("unsupported desktop action");
         }
         Thread.Sleep(80);
+        if (type == "focus") { Guard(); Alive(); }
         if (!IsWindow(hwnd)) return new JsonObject { ["actionExecuted"] = true, ["goalVerified"] = false, ["targetClosed"] = true, ["observation"] = null };
-        try { return new JsonObject { ["actionExecuted"] = true, ["goalVerified"] = false, ["observation"] = Observe() }; }
-        catch (Exception e) { return new JsonObject { ["actionExecuted"] = true, ["goalVerified"] = false, ["observation"] = null, ["observationError"] = e.Message }; }
+        var result = new JsonObject { ["actionExecuted"] = true, ["goalVerified"] = false, ["diagnostics"] = new JsonObject { ["foreground"] = foreground } };
+        try { result["observation"] = Observe(); }
+        catch (Exception e) { result["observation"] = null; result["observationError"] = e.Message; }
+        if (type == "focus") {
+            Guard(); Alive();
+            if (GetForegroundWindow() != hwnd) throw new IOException("foreground lost before focus result; observe again");
+        }
+        return result;
     }
     static void Need(AutomationElement? el) { if (el is null) throw new IOException("target required"); }
     bool ForegroundInScope() { var foreground = GetForegroundWindow(); return foreground == hwnd || GetAncestor(foreground, 3) == hwnd; }
@@ -256,21 +266,8 @@ internal sealed class Desktop
     }
     JsonObject Capture()
     {
-        if (secrets.Count > 0) throw new IOException("capture refused: session contains sensitive input; use a sanitized fixture");
-        var r = Root.Current.BoundingRectangle;
-        if (GetForegroundWindow() != hwnd || r.Width <= 0 || r.Height <= 0) throw new IOException("foreground window required for capture");
-        using var bitmap = new Bitmap((int)r.Width, (int)r.Height);
-        using (var g = Graphics.FromImage(bitmap))
-        {
-            g.CopyFromScreen((int)r.X, (int)r.Y, 0, 0, bitmap.Size);
-            foreach (AutomationElement e in Root.FindAll(TreeScope.Subtree, new PropertyCondition(AutomationElement.IsPasswordProperty, true)))
-            {
-                var b = e.Current.BoundingRectangle;
-                g.FillRectangle(Brushes.Black, (float)(b.X - r.X), (float)(b.Y - r.Y), (float)b.Width, (float)b.Height);
-            }
-        }
-        using var output = new MemoryStream(); bitmap.Save(output, ImageFormat.Png);
-        return new JsonObject { ["mime"] = "image/png", ["data"] = Convert.ToBase64String(output.ToArray()) };
+        var frame = CaptureFrame();
+        return new JsonObject { ["mime"] = "image/png", ["data"] = Convert.ToBase64String(frame.Bytes) };
     }
     static string Signature(AutomationElement e)
     {
@@ -297,10 +294,6 @@ internal sealed class Desktop
     [DllImport("user32.dll")] static extern bool IsWindowVisible(nint h);
     [DllImport("user32.dll")] static extern uint GetDpiForWindow(nint h);
     [DllImport("user32.dll")] static extern nint GetForegroundWindow();
-    [DllImport("user32.dll")] static extern bool SetForegroundWindow(nint h);
-    [DllImport("user32.dll")] static extern bool ShowWindow(nint h, int command);
-    [DllImport("kernel32.dll")] static extern uint GetCurrentThreadId();
-    [DllImport("user32.dll")] static extern bool AttachThreadInput(uint from, uint to, bool attach);
     [DllImport("user32.dll")] static extern bool SetCursorPos(int x, int y);
     [DllImport("user32.dll")] static extern nint WindowFromPoint(Point p);
     [DllImport("user32.dll")] static extern nint GetAncestor(nint h, uint flags);
