@@ -1,0 +1,4 @@
+interface:
+  display_name: "每日新闻"
+  short_description: "汇总 OpenAI、Anthropic、DeepSeek 官方更新、AI 前沿和国内外热点，附原文与简明解读"
+  default_prompt: "使用 $daily-news 按用户时区昨天 00:00 至本次截止时间生成中文日报，优先核验 OpenAI、Anthropic 与 DeepSeek 官方动态，补充 AI 前沿和国内外热点，附日期、原文链接及简短影响解读。"

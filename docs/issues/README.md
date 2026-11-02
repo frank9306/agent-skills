@@ -54,6 +54,9 @@ None.
 | [ISSUE-0027](ISSUE-0027-adopt-publish-and-install-app-use-across-engineering-workflows.md) | Adopt publish and install app-use across engineering workflows |
 | [ISSUE-0028](ISSUE-0028-add-screenshot-bound-visual-clicking-to-app-use.md) | Add screenshot-bound visual clicking to app-use |
 | [ISSUE-0029](ISSUE-0029-make-app-use-foreground-activation-reliable-and-verified.md) | Make app-use foreground activation reliable and verified |
+| [ISSUE-0031](ISSUE-0031-add-write-news-daily-ai-and-general-news-skill.md) | Add write-news daily AI and general news skill |
+| [ISSUE-0032](ISSUE-0032-rename-daily-news-and-use-previous-day-calendar-coverage.md) | Rename daily-news and use previous-day calendar coverage |
+| [ISSUE-0033](ISSUE-0033-expand-daily-news-official-sources-and-prioritize-deepseek.md) | Expand daily-news official sources and prioritize DeepSeek |
 
 ## Cancelled
 

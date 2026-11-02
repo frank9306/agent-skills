@@ -27,6 +27,7 @@ Reusable Agent Skills for engineering, content, and service operations. Personal
 | [`dispatch-dsh-task`](skills/engineering/dispatch-dsh-task/SKILL.md) | Engineering | Dispatch audited my-knowledge work from Hermes to the restricted DSH runner. |
 | [`audit-codex-harness`](skills/engineering/audit-codex-harness/SKILL.md) | Engineering | Audit project-scoped Codex traces and score harness efficiency. |
 | [`read-web-content`](skills/content/read-web-content/SKILL.md) | Content | Read and extract useful content from public URLs with privacy-aware fallbacks. |
+| [`daily-news`](skills/content/daily-news/SKILL.md) | Content | Produce a cited Chinese daily briefing on official AI updates, frontier research, and major headlines. |
 | [`write-articles`](skills/content/write-articles/SKILL.md) | Content | Write evidence-led articles with factual checks and blue engineering hand-drawn knowledge-card illustrations. |
 | [`manage-cloudflare`](skills/security/manage-cloudflare/SKILL.md) | Security | Safely inspect and manage Cloudflare Tunnel, DNS, and Access through the official API. |
 | [`manage-tailscale`](skills/security/manage-tailscale/SKILL.md) | Security | Automate Tailscale setup, authorized enrollment, private service routing, verification, and maintenance. |
