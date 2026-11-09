@@ -34,14 +34,14 @@ Use the first matching route:
 | Confirmed lasting technical decision | `$to-adr` |
 | Explicit request to initialize missing AI engineering documentation | `$init-docs` |
 | Explicit request to create or revise project-facing agent instructions | `$write-agent-docs` |
-| Explicit frontend design, implementation, polish, or visual audit | `$frontend-design` |
+| Explicit frontend design, implementation, polish, or visual audit | Adopted Impeccable workflow; use frontend-design only for existing project verification interfaces |
 | Public URL content extraction | `$read-web-content` |
-| Daily browser/desktop UI operation, or authoring/replaying a bounded UI case without a code/design change | `$app-use` |
+| Daily browser/desktop UI operation, or authoring/replaying a bounded UI case without a code/design change | Project-authorized browser/desktop tools and UI operation instructions |
 | Evidence-led article creation | `$write-articles` |
 
 Select one applicable primary Skill for the current stage; do not invoke several Skills in advance. Re-route after it completes when the user already authorized a larger goal. Creating an Issue or completing a design does not by itself finish an implementation request. For example, route a ready Issue to `$implement-issue`, which owns its use of `$tdd`, `$review-code`, and `$manage-issues`.
 
-For UI evidence within another route, use [app-use](../app-use/SKILL.md) at the relevant reproduction or acceptance milestone. Keep the primary workflow's authorization and verification gates. Frontend design and layout rules remain owned by `$frontend-design`; unit/integration tests and TDD remain required where applicable.
+For UI evidence within another route, use the project's authorized browser/desktop tools at the relevant reproduction or acceptance milestone. Read the project's UI operation instructions, bind the actual target/build, freeze meaningful cases and literal assertions, and retain the resulting evidence. Keep the primary workflow's authorization and verification gates. Follow the project's selected frontend design workflow for design and layout rules; unit/integration tests and TDD remain required where applicable.
 
 For authorized code generation, route the implementation owner through the shared [pre-generation module design gate](../implement-issue/references/module-depth-gate.md); the gate owns applicability and required evidence, so do not reproduce its procedure here. Framework-native scaffolding follows its authorization rules. No standalone design Skill or additional approval phase is required. If the local reference is missing, use its [canonical source](https://github.com/frank9306/agent-skills/blob/main/skills/engineering/implement-issue/references/module-depth-gate.md).
 
@@ -62,3 +62,5 @@ Invoke the selected Skill when it is available and the requested action is autho
 - The single next action needed to continue.
 
 Do not invent a substitute workflow, a Task or Worker artifact, or a second lifecycle beside the project's existing tracker. Requests for discussion, design, or review remain in that scope; stage continuation does not grant new implementation authorization.
+
+When a project-scoped plan already has an explicit implementation decision, cite its version and decision source and route directly to the first unmet implementation or verification stage. Children inherit only the authorized subset. Never infer approval from a draft or an unrelated plan.

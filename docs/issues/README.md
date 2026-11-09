@@ -57,6 +57,10 @@ None.
 | [ISSUE-0031](ISSUE-0031-add-write-news-daily-ai-and-general-news-skill.md) | Add write-news daily AI and general news skill |
 | [ISSUE-0032](ISSUE-0032-rename-daily-news-and-use-previous-day-calendar-coverage.md) | Rename daily-news and use previous-day calendar coverage |
 | [ISSUE-0033](ISSUE-0033-expand-daily-news-official-sources-and-prioritize-deepseek.md) | Expand daily-news official sources and prioritize DeepSeek |
+| [ISSUE-0034](ISSUE-0034-add-managed-dev-preview.md) | Add managed dev preview |
+| [ISSUE-0035](ISSUE-0035-remove-hardcoded-retired-ui-tool-dependency-from-five-engineering-skills.md) | Remove hardcoded retired UI tool dependency from five engineering skills |
+| [ISSUE-0036](ISSUE-0036-add-reusable-team-delivery-runtime-and-measured-verification.md) | Add reusable team delivery runtime and measured verification |
+| [ISSUE-0037](ISSUE-0037-keep-frontend-design-as-compatibility-verification-alongside-impeccable.md) | Keep frontend-design as compatibility verification alongside Impeccable |
 
 ## Cancelled
 

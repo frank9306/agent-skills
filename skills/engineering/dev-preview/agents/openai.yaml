@@ -1,0 +1,4 @@
+interface:
+  display_name: "Managed Dev Preview"
+  short_description: "Retain dev services and verify private acceptance URLs"
+  default_prompt: "Use $dev-preview to start the authorized project, verify its tests and preview, and retain it during owner acceptance."

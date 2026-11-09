@@ -1,0 +1,18 @@
+[Unit]
+Description=Fubufu managed dev preview gateway and reconciler
+After=docker.service fubufu-paperclip.service
+Requires=docker.service
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/python3 /opt/fubufu-dev-preview/gateway.py
+Restart=on-failure
+RestartSec=5
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+RestrictAddressFamilies=AF_INET AF_UNIX
+
+[Install]
+WantedBy=multi-user.target

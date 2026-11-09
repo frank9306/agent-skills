@@ -17,7 +17,7 @@ Write the observed behavior, expected behavior, environment, and known-good comp
 
 Reduce irrelevant inputs, layers, and timing without changing the failure. If a reliable reproduction cannot be established, report that limit and the highest-value evidence still needed; do not move on to confident causal claims.
 
-For a browser/desktop UI reproduction, use [app-use](../app-use/SKILL.md) to bind the actual target and retain observations, a frozen failing case and evidence. Keep preparation/restoration within the diagnosis authorization; do not perform unrequested business writes or implement a fix. A failed action, missing assertion and failed business assertion are different evidence.
+For a browser/desktop UI reproduction, use the project's authorized browser/desktop tools and UI operation instructions to bind the actual target/build and retain observations, a frozen failing case and evidence. Keep preparation/restoration within the diagnosis authorization; do not perform unrequested business writes or implement a fix. A failed action, missing assertion and failed business assertion are different evidence.
 
 ## Test hypotheses
 

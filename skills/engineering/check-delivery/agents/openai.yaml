@@ -1,0 +1,7 @@
+interface:
+  display_name: "Check Delivery"
+  short_description: "Check current delivery evidence and acceptance readiness"
+  default_prompt: "Use $check-delivery to inspect this delivery's evidence, gaps, and owner acceptance handoff."
+
+policy:
+  allow_implicit_invocation: true

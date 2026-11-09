@@ -1,0 +1,4 @@
+interface:
+  display_name: "Team Delivery"
+  short_description: "Run staged checks and verified team handoffs"
+  default_prompt: "Use $team-delivery for approved delivery mechanics while preserving independent QA and all required acceptance checks."
