@@ -103,7 +103,7 @@ export async function runCase(client,input,options={}){
         for(;;){const r=validateObservation(current,state.wait.assertion,{allowMissing:true});if(r.status==='pass')break;if(Date.now()>=until)throw Error('wait timed out');await pause(Math.min(interval,Math.max(1,until-Date.now())),undefined,{signal:stepSignal});current=await observe();}
         evidence.event('wait',{state:id,status:'ready'});id=state.next;
       }
-      else if(state.branch){let chosen=state.branch.otherwise;for(const rule of state.branch.rules)if(validateObservation(o,rule.when).status==='pass'){chosen=rule.next;break;}evidence.event('rule',{state:id,next:chosen});id=chosen;}
+      else if(state.branch){let chosen=state.branch.otherwise;for(const rule of state.branch.rules)if(validateObservation(o,rule.when,{allowMissing:true}).status==='pass'){chosen=rule.next;break;}evidence.event('rule',{state:id,next:chosen});id=chosen;}
       else if(state.judge){
         if(o.nodes.some(n=>n.truncated)){status='unverified';error='semantic observation has truncated text; declare a complete narrower scope';finished=true;continue;}
         if(!options.judge)throw Error('local Laya worker unavailable');

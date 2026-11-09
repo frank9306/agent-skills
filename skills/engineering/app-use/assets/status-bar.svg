@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="340" height="38" viewBox="0 0 340 38" role="img">
+  <title>app-use 状态条定稿基准图 · 执行中</title>
+  <desc>340x38 圆角 19 白色胶囊，1px 中性底描边与 2px 状态色行进段，含状态点、状态 chip、动作与计时</desc>
+  <rect x="1" y="1" width="338" height="36" rx="18" fill="#FFFFFF" stroke="#D3D1C7" stroke-width="1"/>
+  <rect x="1" y="1" width="338" height="36" rx="18" fill="none" stroke="#378ADD" stroke-width="2" stroke-linecap="round" stroke-dasharray="70 647" stroke-dashoffset="0"/>
+  <circle cx="23" cy="19" r="4.5" fill="#185FA5"/>
+  <rect x="35" y="11" width="56" height="16" rx="8" fill="#E6F1FB"/>
+  <text x="63" y="22.5" text-anchor="middle" font-family="system-ui, sans-serif" font-size="11" font-weight="500" fill="#0C447C">正在操作</text>
+  <line x1="100" y1="12" x2="100" y2="26" stroke="#D3D1C7" stroke-width="1"/>
+  <text x="110" y="23" font-family="system-ui, sans-serif" font-size="12" fill="#2C2C2A">click · 「提交订单」按钮</text>
+  <text x="326" y="23" text-anchor="end" font-family="ui-monospace, monospace" font-size="11" fill="#5F5E5A">00:02</text>
+</svg>

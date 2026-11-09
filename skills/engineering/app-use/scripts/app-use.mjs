@@ -7,6 +7,36 @@ import { AppClient, prepareRuntime, skillRoot, stateRoot } from './client.mjs';
 import { validateObservation } from './assertions.mjs';
 
 const execute = promisify(execFile);
+const KNOWN_FLAGS = new Set([
+  '--request','--session','--kind','--connection','--hwnd','--pid','--tabId',
+  '--out','--runtime','--dotnet','--laya','--packages','--package-source',
+  '--runtime-dir','--register','--registration-dir','--model-source',
+  '--model-out','--model-dir','--run','--no-statusbar'
+]);
+const COMMANDS = new Set(['doctor','prepare','sessions','observe','act','visual-observe','visual-click','validate','run','inspect','stop']);
+
+// Commands that trigger desktop/browser operations and should show the status bar
+const STATUSBAR_COMMANDS = new Set(['observe','act','visual-observe','visual-click','validate','run']);
+
+let statusBar = null;
+async function startStatusBar(session) {
+  if (statusBar) return;
+  try {
+    const { StatusBarHost } = await import('./statusbar-host.mjs');
+    statusBar = new StatusBarHost();
+    await statusBar.start({ session });
+    statusBar.push({ phase: 'armed', verb: 'prepare', target: 'session' });
+  } catch { /* status bar is non-fatal; silent fallback */ }
+}
+function pushStatus(phase, verb, extra = {}) {
+  statusBar?.push({ phase, verb, ...extra });
+}
+async function stopStatusBar() {
+  if (!statusBar) return;
+  const sb = statusBar; statusBar = null;
+  try { await sb.stop(); } catch {}
+}
+
 const args = process.argv.slice(2), command = args.shift();
 let client;
 try {
@@ -14,11 +44,14 @@ try {
   while (args.length) {
     const key = args.shift();
     if (!key.startsWith('--') || flags[key] !== undefined) throw new Error('expected unique --flag value');
+    if (!KNOWN_FLAGS.has(key)) throw new Error('unknown flag: ' + key);
     flags[key] = args[0] && !args[0].startsWith('--') ? args.shift() : true;
   }
+  if (!COMMANDS.has(command)) throw new Error('commands: doctor prepare sessions observe act visual-observe visual-click validate run inspect stop; use --request JSON-file');
   const p = flags['--request'] ? JSON.parse(await fs.readFile(flags['--request'], 'utf8')) : {};
   for (const k of ['session','kind','connection','hwnd','pid','tabId']) if (flags[`--${k}`] !== undefined) p[k] = ['pid','tabId'].includes(k) ? Number(flags[`--${k}`]) : flags[`--${k}`];
   if (command === 'visual-observe' && (typeof flags['--out'] !== 'string' || !flags['--out'].trim())) throw new Error('visual-observe requires --out <PNG-file>');
+  const useStatusBar = STATUSBAR_COMMANDS.has(command) && flags['--no-statusbar'] !== true;
   let result;
   if (command === 'prepare' && flags['--runtime']) {
     result = await prepareRuntime({ dotnet: flags['--dotnet'] || 'dotnet', laya:flags['--laya']===true,packages:flags['--packages'],source:flags['--package-source'],...(flags['--runtime-dir']?{out:flags['--runtime-dir']}:{}) });
@@ -37,24 +70,36 @@ try {
   } else if (command === 'inspect') {
     const { inspectRun } = await import('./evidence.mjs'); result = await inspectRun(flags['--run']);
   } else {
+    if (useStatusBar) await startStatusBar(p.session);
     client = await AppClient.connect();
     if (command === 'validate') {
+      if (useStatusBar) pushStatus('observe', 'observe');
       const observation = await client.request('observe', { session: p.session });
+      if (useStatusBar) pushStatus('validate', 'validate');
       result = validateObservation(observation, p.assertion);
+      if (useStatusBar) pushStatus(result.status === 'pass' ? 'verified' : 'blocked', 'validate');
     } else if (command === 'run') {
+      if (useStatusBar) pushStatus('observe', 'run');
       const { runCase } = await import('./runner.mjs');
       const { LocalLaya } = await import('./laya.mjs');
       const controller = new AbortController();
       process.once('SIGINT', () => controller.abort(new Error('stopped')));
       const judge=Object.values(p.states||{}).some(s=>s.judge)?await LocalLaya.create(flags['--model-dir']):undefined;
       try{result = await runCase(client, p, { signal: controller.signal, outDir: flags['--out'],judge });}finally{judge?.close();}
+      if (useStatusBar) pushStatus(result?.status === 'pass' ? 'verified' : 'blocked', 'run');
     } else if (['doctor','sessions','prepare','observe','act','stop','visual-observe','visual-click'].includes(command)) {
       if (command === 'act' && p.action?.secretEnv) {
         const secret = process.env[p.action.secretEnv];
         if (secret === undefined) throw new Error('secret environment variable unavailable');
         p.action.text = secret;p.action.sensitive=true; delete p.action.secretEnv;
       }
+      if (useStatusBar) {
+        const verb = command === 'visual-observe' ? 'visual-observe' : command === 'visual-click' ? 'visual-click' : command;
+        pushStatus('observe', verb, { target: p.action?.target || p.action?.name });
+        if (command === 'act') pushStatus('act', p.action?.type || 'act', { target: p.action?.target || p.action?.name, actionExecuted: true });
+      }
       result = await client.request(command, p);
+      if (useStatusBar && command === 'act') pushStatus('validate', 'validate');
       if (command === 'visual-observe') {
         if (result?.image?.mime !== 'image/png' || typeof result.image.data !== 'string' || !result.image.data) throw new Error('visual-observe returned no PNG screenshot');
         const imagePath=path.resolve(flags['--out']);
@@ -63,9 +108,12 @@ try {
         const {data,...image}=result.image;
         result={...result,image:{...image,path:imagePath}};
       }
+      if (useStatusBar && (command === 'act' || command === 'visual-click')) {
+        pushStatus(result?.actionExecuted === true ? 'verified' : 'blocked', command, { actionExecuted: result?.actionExecuted, goalVerified: result?.goalVerified });
+      }
     } else throw new Error('commands: doctor prepare sessions observe act visual-observe visual-click validate run inspect stop; use --request JSON-file');
   }
   console.log(JSON.stringify(result));
   if (result?.status && !['pass'].includes(result.status)) process.exitCode = result.status === 'fail' ? 1 : 2;
 } catch (e) { console.log(JSON.stringify({ status:'error', error:e.message })); process.exitCode = 2; }
-finally { client?.close(); }
+finally { client?.close(); await stopStatusBar(); }

@@ -27,6 +27,15 @@ async function toolDigest(root=skillRoot) {
   }
   await walk(root); return digest(JSON.stringify(entries));
 }
+export async function runningBinary() {
+  try {
+    const config = JSON.parse(await fs.readFile(path.join(stateRoot, 'runtime.json'), 'utf8'));
+    if (typeof config.executable !== 'string' || !config.executable) return null;
+    const file = await fs.realpath(config.executable);
+    return { path: file, sha256: digest(await fs.readFile(file)), pipe: config.pipe ?? null };
+  } catch { return null; }
+}
+
 export class Evidence {
   static async begin(script,{outDir=path.join(stateRoot,'runs'),secrets=[],runtime}={}) {
     await fs.mkdir(outDir,{recursive:true});
@@ -35,6 +44,7 @@ export class Evidence {
     e.root=await fs.realpath(script.projectRoot||process.cwd());
     e.report={version:1,status:'unverified',started:new Date().toISOString(),script:e.clean(script),toolRoot:skillRoot,toolSha256:await toolDigest(),projectRoot:e.root,inputs:await fingerprints(e.root,script.inputs||[]),events:[],artifacts:[],build:script.build||{status:'unverified',reason:'No running build readback declared'}};
     if(runtime)e.report.runtime=e.clean(runtime);
+    e.report.runtimeBinary=await runningBinary();
     await fs.writeFile(path.join(dir,'script.json'),JSON.stringify(e.report.script,null,2),'utf8');
     e.report.artifacts.push({path:'script.json',sha256:digest(await fs.readFile(path.join(dir,'script.json')))});
     await fs.writeFile(path.join(dir,'events.jsonl'),'','utf8');
@@ -58,10 +68,12 @@ export class Evidence {
     try{
       if(JSON.stringify(this.report.inputs)!==JSON.stringify(await fingerprints(this.root,this.report.inputs.map(x=>x.path))))throw Error('inputs changed during run');
       if(this.report.toolSha256!==await toolDigest())throw Error('tool changed during run');
+      if(this.report.runtimeBinary){const now=await runningBinary();if(!now||now.sha256!==this.report.runtimeBinary.sha256)throw Error('running broker binary changed or unavailable');}
     }catch(e){this.report.status='unverified';this.report.error=e.message;}
     this.report.artifacts.push({path:'events.jsonl',sha256:digest(await fs.readFile(path.join(this.dir,'events.jsonl')))});
     this.report.reportSha256=digest(JSON.stringify(this.report));
     await fs.writeFile(path.join(this.dir,'report.json'),JSON.stringify(this.report,null,2),'utf8');
+    try{appendFileSync(path.join(path.dirname(this.dir),'ledger.jsonl'),JSON.stringify({run:path.basename(this.dir),reportSha256:this.report.reportSha256,toolSha256:this.report.toolSha256,runtimeBinarySha256:this.report.runtimeBinary?.sha256??null,at:this.report.ended})+'\n','utf8');}catch{}
     return { ...this.report, runDir:this.dir };
   }
 }
@@ -73,6 +85,9 @@ export async function inspectRun(dir) {
     if(r.toolSha256!==await toolDigest(r.toolRoot))throw new Error('tool changed');
     if(JSON.stringify(r.inputs)!==JSON.stringify(await fingerprints(r.projectRoot,r.inputs.map(x=>x.path))))throw new Error('inputs changed');
     for(const item of r.artifacts)if(digest(await fs.readFile(await scoped(dir,item.path)))!==item.sha256)throw new Error('artifact changed');
-    return {...r,reportSha256:sha,integrity:'verified'};
+    let ledgerEntry=null;
+    try{for(const line of (await fs.readFile(path.join(path.dirname(path.resolve(dir)),'ledger.jsonl'),'utf8')).split('\n')){if(!line)continue;const x=JSON.parse(line);if(x.run===path.basename(path.resolve(dir)))ledgerEntry=x;}}catch{}
+    if(ledgerEntry&&ledgerEntry.reportSha256!==sha)throw new Error('report not in ledger');
+    return {...r,reportSha256:sha,integrity:'verified',ledger:ledgerEntry?'verified':'absent'};
   } catch(e) {return {status:'unverified',error:e.message};}
 }

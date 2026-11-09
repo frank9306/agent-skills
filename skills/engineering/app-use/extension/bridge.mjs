@@ -1,5 +1,7 @@
 import { dom } from './dom.mjs';
 
+const frameDrainLimit = 64;
+
 export class BrowserBridge {
   constructor(api,nativeFocus) {
     this.api=api;this.nativeFocus=nativeFocus;this.sessions=new Map();this.tabs=new Map();this.ownership=new Map();
@@ -15,6 +17,7 @@ export class BrowserBridge {
     if(!method.startsWith('Input.'))return pending;
     let release;
     const dialog=new Promise(resolve=>{release=resolve;s.dialogWaiters.add(resolve);});
+    pending.catch(()=>{});
     try{return await Promise.race([pending,dialog]);}finally{s.dialogWaiters.delete(release);}
   }
   event(source,method,p) {
@@ -43,7 +46,7 @@ export class BrowserBridge {
   }
   async context(s,c) {
     if(c.isolatedId)return c;
-    const world=await this.command(s,'Page.createIsolatedWorld',{frameId:c.frameId,worldName:'app-use.v1',grantUniveralAccess:false},c.sessionId);
+    const world=await this.command(s,'Page.createIsolatedWorld',{frameId:c.frameId,worldName:'app-use.v1',grantUniversalAccess:false},c.sessionId);
     c.isolatedId=world.executionContextId;return c;
   }
   async evaluate(s,c,fn,args=[],byValue=true) {
@@ -54,7 +57,7 @@ export class BrowserBridge {
   }
   async observe(s,p={}) {
     s.frameError=null;
-    for(let depth=0;s.pending.length&&depth<10;depth++)await Promise.all(s.pending.splice(0));
+    for(let depth=0;s.pending.length&&depth<frameDrainLimit;depth++)await Promise.all(s.pending.splice(0));
     const identity=await this.identity(s),id=crypto.randomUUID(),nodes=[],targets=new Map();
     if(s.dialog) {
       const node={id:'dialog',role:'dialog',name:s.dialog.message,context:'dialog',enabled:true,visible:true};
@@ -154,7 +157,7 @@ export class BrowserBridge {
     if(!tab.active||!(await this.api.windows.get(tab.windowId)).focused)throw Error('visual operation requires focused active tab; explicitly focus first');
     if(s.dialog)throw Error('close dialog before visual observation');
     if(s.secrets?.length)throw Error('visual capture refused: session contains sensitive input');
-    for(let depth=0;s.pending.length&&depth<10;depth++)await Promise.all(s.pending.splice(0));
+    for(let depth=0;s.pending.length&&depth<frameDrainLimit;depth++)await Promise.all(s.pending.splice(0));
     const tree=(await this.command(s,'Page.getFrameTree')).frameTree,frames=[];
     const collect=t=>{frames.push(t.frame.id);for(const child of t.childFrames||[])collect(child);};collect(tree);
     const contexts=[...s.contexts.values()];
@@ -171,7 +174,7 @@ export class BrowserBridge {
     const view=new DataView(bytes.buffer),width=view.getUint32(16),height=view.getUint32(20);
     if(!width||!height)throw Error('empty visual PNG');
     // Do not return pixels if privacy or the surface changed while CDP acquired them.
-    for(let depth=0;s.pending.length&&depth<10;depth++)await Promise.all(s.pending.splice(0));
+    for(let depth=0;s.pending.length&&depth<frameDrainLimit;depth++)await Promise.all(s.pending.splice(0));
     frames.length=0;collect((await this.command(s,'Page.getFrameTree')).frameTree);
     if(frames.some(id=>![...s.contexts.values()].some(c=>c.frameId===id)))throw Error('visual capture refused: frame coverage incomplete after capture');
     for(const c of s.contexts.values())if(await this.evaluate(s,c,dom,['sensitive']))throw Error('visual capture refused: sensitive fields appeared during capture');
@@ -343,6 +346,7 @@ export class BrowserBridge {
     }
     await new Promise(r=>setTimeout(r,80));guard();
     const observation=await this.observe(s);
+    if(s.dialog)return {actionExecuted:false,goalVerified:false,dialogPending:true,observation,diagnostics};
     if(a.type==='focus') {
       guard();const current=await this.api.tabs.get(s.tabId),win=await this.api.windows.get(current.windowId);
       if(current.windowId!==diagnostics.foreground.windowId||!current.active||!win.focused||win.state==='minimized') {

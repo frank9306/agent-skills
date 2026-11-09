@@ -71,7 +71,7 @@ npx skills add frank9306/agent-skills --skill manage-cloudflare -g
 
 ## Validate
 
-The Skill validator uses Node.js 18+. The complete acceptance suite also needs a supported dependency-cruiser runtime (Node 22.18+, 24, or 26+) and Python 3.10+ with the pinned test dependencies from requirements-dev.txt. Activate a project virtual environment before installing them; INIT_CHECKS_PYTHON may select an existing compatible Python environment for the checker tests. Native Hook and operating-system support still need their separate rollout evidence:
+The Skill validator uses Node.js 18+; the app-use runtime and its CLI require Node 20+ (see `skills/engineering/app-use/references/commands.md`). The complete acceptance suite also needs a supported dependency-cruiser runtime (Node 22.18+, 24, or 26+) and Python 3.10+ with the pinned test dependencies from requirements-dev.txt. Activate a project virtual environment before installing them; INIT_CHECKS_PYTHON may select an existing compatible Python environment for the checker tests. Native Hook and operating-system support still need their separate rollout evidence:
 
 ```bash
 python -m pip install -r requirements-dev.txt
@@ -87,6 +87,8 @@ python -m unittest discover -s skills/engineering/audit-codex-harness/scripts/te
 The `init-checks` Skill adds project-owned executable contracts and two verification entry points, reusing existing tools. Preview setup with `python skills/engineering/init-checks/scripts/init_checks.py --project <absolute-project-root> --profile typescript|python --contract <absolute-contract-json> --full-command <json-argv> --plan`. Generated TypeScript checks use Node; generated Python checks use Python. The full wrapper always runs structure checks before the supplied project verification command. Its acceptance tests run with `npm run test:init-checks` and are included in `npm test` (the Python checker requires the pinned Import Linter environment); follow its setup instructions to validate a real project with a deliberate violation and subsequent repair. Project Hooks require native Codex trust, and required CI status checks must be enabled in the repository host before claiming merge protection.
 
 Frontend browser acceptance also requires an existing Playwright runtime and Chromium. FRONTEND_PLAYWRIGHT_ROOT selects that runtime (default: this repository); FRONTEND_BROWSER_CHANNEL optionally selects installed chrome or msedge. Missing runtime fails rather than skipping tests. See the [frontend usage and migration guide](https://github.com/frank9306/ai-playbook/blob/main/docs/frontend-design.md).
+
+app-use browser acceptance is a separate path: it needs the installed unpacked MV3 extension and Native Messaging in the user's normal browser profile, not a Playwright runtime. Run `npm run test:app-use:live` for the opt-in real Chrome/Windows suites. The default `npm test` covers deterministic contracts only; a green run does not prove real-browser or real-desktop behavior. See [support and validation](skills/engineering/app-use/references/support.md) and the [status event contract](skills/engineering/app-use/references/status-events.md).
 
 The static frontend verifier and article checks report review leads. They do not replace browser inspection, visual review, factual verification, accessibility checks, or project-owned test evidence.
 
