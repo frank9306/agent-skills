@@ -61,6 +61,7 @@ None.
 | [ISSUE-0035](ISSUE-0035-remove-hardcoded-retired-ui-tool-dependency-from-five-engineering-skills.md) | Remove hardcoded retired UI tool dependency from five engineering skills |
 | [ISSUE-0036](ISSUE-0036-add-reusable-team-delivery-runtime-and-measured-verification.md) | Add reusable team delivery runtime and measured verification |
 | [ISSUE-0037](ISSUE-0037-keep-frontend-design-as-compatibility-verification-alongside-impeccable.md) | Keep frontend-design as compatibility verification alongside Impeccable |
+| [ISSUE-0038](ISSUE-0038-unify-frontend-design-and-acceptance.md) | Unify personal frontend design and acceptance |
 
 ## Cancelled
 

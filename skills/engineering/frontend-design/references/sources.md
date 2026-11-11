@@ -4,6 +4,7 @@ Original synthesis and checker implementation. Upstream material informed decisi
 
 | Source revision | Adopted | Deliberately not adopted |
 |---|---|---|
+| [Impeccable 4.8.0](https://github.com/pbakaus/impeccable), locally installed snapshot | Surface purpose guides design, refinement preserves the current identity, and final rendering is checked at relevant sizes | Standalone launcher, command catalog, shortcuts, and detector integration |
 | [Waza ui, 318d6c2](https://github.com/tw93/Waza/tree/318d6c2c219894798b09c2b39d7f83d0be1a313c/skills/ui) | Context inheritance, precise complaint/repair boundaries, sibling checks and measured screenshot iteration | Font blacklists, mandatory press scaling, component-count approval gates and universal CSS-combination bans |
 | [Anthropic, dbd4588](https://github.com/anthropics/skills/blob/dbd4588f9e1033efb41dad4bef2f7947c8993d44/skills/frontend-design/SKILL.md) | Subject-grounded direction, plan critique, typography, content and restraint | Treating a color/font/style as proof of a defect |
 | [ECC, b92f181](https://github.com/affaan-m/ECC/tree/b92f181b3b748d1abbc2afd94af6aa7d8c8fca29/skills/frontend-design-direction) | Viewport/state coverage and explicit evidence gaps | Self-declared pass records as verification; effect-count aesthetic scoring |

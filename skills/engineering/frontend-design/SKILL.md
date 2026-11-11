@@ -1,28 +1,28 @@
 ---
 name: frontend-design
-description: Verify existing frontend contracts using the bundled layout, scrolling, focus, responsive and accessibility checkers when a project explicitly depends on them. Use Impeccable for visual design and implementation direction; this compatibility skill does not select a new aesthetic or run a second design workflow.
+description: Design, redesign, refine, review, and verify user interfaces for websites, web apps, and native apps. Use for visual direction, interaction, layout, typography, motion, responsive behavior, accessibility, and UI acceptance.
 ---
 
-# Frontend Verification Compatibility
+# Frontend Design
 
-This package preserves existing project verification interfaces. Impeccable and the project's established design system own visual decisions. Do not load historical design references as a competing default workflow.
+Read the brief and project rules. Inspect the running surface and nearby screens, components, and tokens. Reuse the project’s PRODUCT.md, DESIGN.md, or equivalent when available. If the surface cannot run yet, use current code and trusted captures to guide decisions and record any missing acceptance evidence.
 
-## Read the declared contract
+## Choose the scope
 
-Read project instructions, the affected surface, design contract and verification commands. Identify the actual target, build, viewport, theme and content states. A read-only review remains read-only. Missing design documentation is a finding, not permission to create a new visual direction.
+- **Design or redesign.** Ground the visual direction in the audience, content, and intended action. For marketing, support the decision and next action. For tools, optimize task flow and scanning. For documentation, prioritize reading. For showcases, give the work room to lead. Choose hierarchy, layout, typography, color, imagery, and motion accordingly. Honor the brief and reuse relevant project components and tokens.
+- **Targeted refinement.** Preserve the visual identity and existing behavior outside the requested change. Inspect comparable screens, fix shared causes within scope, and check affected consumers.
+- **Read-only review.** Inspect and measure the actual surface. Report the issue, its impact, the evidence, and coverage gaps. Keep fixes within a separately authorized implementation request.
 
-For layout/scrolling read [layout and scroll](references/layout-scroll.md); for zoom, localization and access read [responsive/accessibility](references/responsive-accessibility.md). These references support the project's requirements. They do not enable Hooks, CI or new dependencies.
+Read [layout and scroll](references/layout-scroll.md) for layout and scroll ownership, [responsive and accessibility](references/responsive-accessibility.md) for reflow, zoom, localization, and access, and [design system](references/design-system.md) when defining or extending shared design rules.
 
-## Verify observable behavior
+## Define and verify acceptance
 
-Read [visual review and executable verification](references/visual-review.md). Reuse `checkUI(page, contract)` and `verifyUIReport` where the project depends on them. Preserve established public APIs, report schemas and source resources. The CLI accepts prepared URL states; it does not own authentication or test data setup.
+Before editing, define the actual entry point, action, and expected observable result for each required UI check. Select the viewports, themes, states, and input methods affected by the change. Keep the project’s unit and integration checks alongside UI verification.
 
-Use the project's currently authorized, available browser or desktop tooling. Bind evidence to the actual target/build and literal assertions. Browser layout checks do not verify native windows; native UI needs its own observations and assertions. Preserve unit/integration tests and TDD. Missing tooling, untested states and readiness failures remain unverified.
+Inspect the final render at the relevant sizes and exercise the required actions on the final build. Use authorized, available tools. Native UI needs observations and assertions from the actual window. Record the target and build, checks, observed results, and evidence. Rerun affected checks when relevant inputs change.
 
-`node scripts/verify-design.mjs <project> --json` produces static review leads, not aesthetic approval or runtime acceptance. Revalidate reports after their inputs change. Approved visual-regression baselines remain project design decisions.
+For existing browser contracts, read [visual review and executable verification](references/visual-review.md). Reuse checkUI, verifyUIReport, and the existing CLI and report formats. The CLI takes prepared URL states. The static verify-design.mjs scan supplies review leads. Runtime acceptance requires evidence from the actual target.
 
-## Return evidence
+If any required check lacks passing evidence, state that acceptance is incomplete (「验收未完成」 in Chinese) in the first sentence of the final reply. Keep the Issue in progress or blocked and identify the missing evidence.
 
-Report the checked contract, commands, measured layout/scroll/focus/accessibility results and remaining gaps. Refer aesthetic questions and implementation changes back to Impeccable and the project's owner. Historical design references and templates remain available for explicit existing consumers; they are not a second source of visual authority.
-
-Provenance remains in [sources](references/sources.md). Installing this package does not configure project governance.
+See [sources](references/sources.md) for provenance.

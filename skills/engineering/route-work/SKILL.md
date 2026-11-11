@@ -34,7 +34,7 @@ Use the first matching route:
 | Confirmed lasting technical decision | `$to-adr` |
 | Explicit request to initialize missing AI engineering documentation | `$init-docs` |
 | Explicit request to create or revise project-facing agent instructions | `$write-agent-docs` |
-| Explicit frontend design, implementation, polish, or visual audit | Adopted Impeccable workflow; use frontend-design only for existing project verification interfaces |
+| Explicit frontend design, implementation, polish, or visual audit | $frontend-design for design, refinement, and UI review; preserve project engineering and verification requirements |
 | Public URL content extraction | `$read-web-content` |
 | Daily browser/desktop UI operation, or authoring/replaying a bounded UI case without a code/design change | Project-authorized browser/desktop tools and UI operation instructions |
 | Evidence-led article creation | `$write-articles` |
