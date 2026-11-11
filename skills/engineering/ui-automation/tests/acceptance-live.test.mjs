@@ -44,5 +44,5 @@ test('normal browser: frozen cases and unchanged layout checker detect defects a
     await layout(modal,'pass');await page.evaluate(()=>document.body.style.overflow='auto');await layout(modal,'fail');await page.evaluate(()=>document.body.style.overflow='hidden');await layout(modal,'pass');
     await page.locator('#inside').evaluate(el=>el.click());await layout(make([{id:'focus-restored',type:'focus',target:'open',method:'current'}]),'pass');
     console.log('Acceptance evidence: '+JSON.stringify(logs));
-  }finally{await page?.dispose();if(session)await c.request('stop',{session,closeCreated:true});c.close();await new Promise(r=>server.close(r));}
+  }finally{await page?.dispose();if(session)await c.request('stop',{session,closeCreated:true});c.close();await new Promise(resolve => { server.close(resolve); server.closeAllConnections(); });}
 });

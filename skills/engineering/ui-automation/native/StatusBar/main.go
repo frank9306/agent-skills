@@ -1,660 +1,372 @@
-// status-bar.go — app-use StatusBar overlay window (Go native, Win32 API)
-//
-// Creates a topmost, no-activate, click-through, tool-window overlay
-// that renders the "行进描边胶囊" status bar at top-center of the screen.
-//
-// Window flags:
-//   WS_EX_NOACTIVATE    — does not steal foreground focus
-//   WS_EX_TRANSPARENT   — mouse clicks pass through to windows below
-//   WS_EX_TOOLWINDOW    — does not appear in Alt-Tab
-//   WS_EX_TOPMOST       — stays on top (session-scoped, destroyed on exit)
-//   WS_EX_LAYERED       — supports per-pixel alpha and smooth repaint
-//
-// The bar reads status events from stdin (one JSON object per line).
-// On heartbeat timeout (2s), switches to "unknown" state.
-// On extended silence (3s), hides the window.
-// On stdin EOF or "stop" event, destroys the window and exits.
-
 package main
 
 import (
 	"bufio"
 	"encoding/json"
 	"fmt"
-	"math"
 	"os"
-	"strings"
+	"runtime"
 	"syscall"
 	"time"
 	"unsafe"
 )
 
-// --- Win32 constants ---
-
-const (
-	WS_EX_NOACTIVATE   = 0x08000000
-	WS_EX_TRANSPARENT  = 0x00000020
-	WS_EX_TOOLWINDOW   = 0x00000080
-	WS_EX_TOPMOST      = 0x00000008
-	WS_EX_LAYERED      = 0x00080000
-	WS_POPUP           = 0x80000000
-	WS_VISIBLE         = 0x10000000
-	WS_CLIPSIBLINGS    = 0x04000000
-	WS_CLIPCHILDREN    = 0x02000000
-
-	SW_SHOWNOACTIVATE = 4
-	SW_HIDE           = 0
-
-	CW_USEDEFAULT = 0x80000000
-
-	WM_PAINT    = 0x000F
-	WM_TIMER    = 0x0113
-	WM_DESTROY  = 0x0002
-	WM_GETOBJECT = 0x003D
-
-	WM_APP = 0x8000
-
-	// Custom messages used to marshal window-affecting calls onto the
-	// window's own thread. ShowWindow called from another thread (or before
-	// the message loop starts) is silently dropped, which leaves the overlay
-	// created but never visible.
-	WM_APP_SHOW = 0x8001
-	WM_APP_HIDE = 0x8002
-
-	COLOR_WINDOW = 5
-
-	PS_SOLID       = 0
-	PS_DASH        = 1
-	PS_DASHDOT     = 3
-	PS_ENDCAP_ROUND = 0x00000000
-	PS_JOIN_ROUND   = 0x00000000
-
-	DT_SINGLELINE = 0x00000020
-	DT_VCENTER    = 0x00000004
-	DT_NOCLIP     = 0x0100
-
-	BUF_SIZE = 4096
+var (
+	user   = syscall.NewLazyDLL("user32.dll")
+	gdi    = syscall.NewLazyDLL("gdi32.dll")
+	kernel = syscall.NewLazyDLL("kernel32.dll")
 )
 
+type rect struct{ left, top, right, bottom int32 }
+type point struct{ x, y int32 }
+type message struct {
+	window  uintptr
+	id      uint32
+	w, l    uintptr
+	at      uint32
+	where   point
+	private uint32
+}
+type monitorInfo struct {
+	size         uint32
+	bounds, work rect
+	flags        uint32
+}
+type paintStruct struct {
+	dc              uintptr
+	erase           int32
+	bounds          rect
+	restore, update int32
+	reserved        [32]byte
+}
+type windowClass struct {
+	style                         uint32
+	procedure                     uintptr
+	classExtra, windowExtra       int32
+	instance, icon, cursor, brush uintptr
+	menu, name                    *uint16
+}
+type status struct {
+	Task, Action string
+	Hwnd         uintptr
+	Pid          uint32
+}
+
 const (
-	timerAnimate  = 1  // 33ms — marching ant animation (~30fps)
-	timerHeartbeat = 2 // 500ms — check for heartbeat timeout
+	wmPaint         = 0x000f
+	wmDestroy       = 0x0002
+	wmTimer         = 0x0113
+	wmDPIChanged    = 0x02e0
+	wmSettingChange = 0x001a
+	wmHitTest       = 0x0084
+	wmMouseActivate = 0x0021
+	wmUpdate        = 0x8001
+	wmClose         = 0x0010
+	windowStyles    = 0x080800a8 // no activate, layered, tool window, transparent, topmost
 )
 
-// --- Win32 structs ---
-
-type RECT struct {
-	Left, Top, Right, Bottom int32
+var labels = map[string]string{
+	"start": "正在准备", "click": "点击控件", "invoke": "调用控件", "fill": "填写内容",
+	"key": "发送按键", "scroll": "滚动", "select": "选择选项", "drag": "拖动", "read": "读取状态",
+	"focus": "定位目标", "move": "移动指针", "navigate": "打开页面", "newTab": "新建标签页",
+	"switchTab": "切换标签页", "scrollIntoView": "滚动到目标", "files": "选择文件", "dialog": "处理对话框",
+	"assert": "验证结果", "wait": "等待条件", "branch": "检查条件", "judge": "判断状态",
+	"capture": "保存证据", "pass": "已验证", "fail": "验证失败", "error": "运行出错",
+	"unverified": "未通过验证", "stopped": "已停止",
 }
 
-type POINT struct {
-	X, Y int32
-}
-
-type WNDCLASSEX struct {
-	Size       uint32
-	Style      uint32
-	WndProc    uintptr
-	ClsExtra   int32
-	WndExtra   int32
-	Instance   syscall.Handle
-	Icon       syscall.Handle
-	Cursor     syscall.Handle
-	Background syscall.Handle
-	MenuName   *uint16
-	ClassName  *uint16
-	IconSm     syscall.Handle
-}
-
-type PAINTSTRUCT struct {
-	Hdc         syscall.Handle
-	Erase       bool
-	PaintRect   RECT
-	Restore     bool
-	IncUpdate   bool
-	RgbReserved [32]byte
-}
-
-type LOGFONT struct {
-	Height         int32
-	Width          int32
-	Escapement     int32
-	Orientation    int32
-	Weight         int32
-	Italic         byte
-	Underline      byte
-	StrikeOut      byte
-	CharSet        byte
-	OutPrecision   byte
-	ClipPrecision  byte
-	Quality        byte
-	PitchAndFamily byte
-	FaceName       [32]uint16
-}
-
-type BLENDFUNCTION struct {
-	BlendOp             byte
-	BlendFlags          byte
-	SourceConstantAlpha byte
-	AlphaFormat         byte
-}
-
-// --- Win32 functions ---
+var updates = make(chan status, 1)
+var current status
+var lastUpdate, started time.Time
+var fallback uintptr
+var placement rect
+var dpi uint32
+var visible bool
+var lastPlacementCheck time.Time
 
 var (
-	user32                       = syscall.NewLazyDLL("user32.dll")
-	gdi32                        = syscall.NewLazyDLL("gdi32.dll")
-	kernel32                     = syscall.NewLazyDLL("kernel32.dll")
-	procRegisterClassEx          = user32.NewProc("RegisterClassExW")
-	procCreateWindowEx           = user32.NewProc("CreateWindowExW")
-	procDestroyWindow            = user32.NewProc("DestroyWindow")
-	procDefWindowProc            = user32.NewProc("DefWindowProcW")
-	procGetMessage               = user32.NewProc("GetMessageW")
-	procDispatchMessage          = user32.NewProc("DispatchMessageW")
-	procPostQuitMessage          = user32.NewProc("PostQuitMessage")
-	procBeginPaint               = user32.NewProc("BeginPaint")
-	procEndPaint                 = user32.NewProc("EndPaint")
-	procSetTimer                 = user32.NewProc("SetTimer")
-	procKillTimer                = user32.NewProc("KillTimer")
-	procShowWindow               = user32.NewProc("ShowWindow")
-	procGetSystemMetrics         = user32.NewProc("GetSystemMetrics")
-	procInvalidateRect           = user32.NewProc("InvalidateRect")
-	procSetLayeredWindowAttributes = user32.NewProc("SetLayeredWindowAttributes")
-	procCreateSolidBrush         = gdi32.NewProc("CreateSolidBrush")
-	procCreatePen                = gdi32.NewProc("CreatePen")
-	procDeleteObject             = gdi32.NewProc("DeleteObject")
-	procSelectObject             = gdi32.NewProc("SelectObject")
-	procFillRect                 = user32.NewProc("FillRect")
-	procRectangle                = gdi32.NewProc("Rectangle")
-	procRoundRect                = gdi32.NewProc("RoundRect")
-	procMoveToEx                 = gdi32.NewProc("MoveToEx")
-	procLineTo                   = gdi32.NewProc("LineTo")
-	procEllipse                  = gdi32.NewProc("Ellipse")
-	procSetTextAlign             = gdi32.NewProc("SetTextAlign")
-	procSetTextColor             = gdi32.NewProc("SetTextColor")
-	procSetBkMode                = gdi32.NewProc("SetBkMode")
-	procCreateFontIndirect       = gdi32.NewProc("CreateFontIndirectW")
-	procDrawText                 = user32.NewProc("DrawTextW")
-	procGetTextExtentPoint32     = gdi32.NewProc("GetTextExtentPoint32W")
-	procGetCurrentProcess        = kernel32.NewProc("GetCurrentProcess")
-	procGetCurrentThreadId       = kernel32.NewProc("GetCurrentThreadId")
-	procSetProcessDPIAware       = user32.NewProc("SetProcessDPIAware")
-	procPostMessage              = user32.NewProc("PostMessageW")
-	procSetWindowPos             = user32.NewProc("SetWindowPos")
+	monitorFromWindow = user.NewProc("MonitorFromWindow")
+	getWindowPID      = user.NewProc("GetWindowThreadProcessId")
+	getMonitorInfo    = user.NewProc("GetMonitorInfoW")
+	getDPI            = user.NewProc("GetDpiForWindow")
+	setPosition       = user.NewProc("SetWindowPos")
+	showWindow        = user.NewProc("ShowWindow")
+	invalidate        = user.NewProc("InvalidateRect")
+	setRegion         = user.NewProc("SetWindowRgn")
+	drawText          = user.NewProc("DrawTextW")
+	createBrush       = gdi.NewProc("CreateSolidBrush")
+	createPen         = gdi.NewProc("CreatePen")
+	createFont        = gdi.NewProc("CreateFontW")
+	deleteObject      = gdi.NewProc("DeleteObject")
+	selectObject      = gdi.NewProc("SelectObject")
+	compatibleDC      = gdi.NewProc("CreateCompatibleDC")
+	compatibleBitmap  = gdi.NewProc("CreateCompatibleBitmap")
+	deleteDC          = gdi.NewProc("DeleteDC")
+	bitBlt            = gdi.NewProc("BitBlt")
 )
 
-const (
-	SM_CXSCREEN = 0
-	SM_CYSCREEN = 1
-	TA_LEFT     = 0
-	TA_RIGHT    = 2
-	TA_CENTER   = 6
-	TRANSPARENT = 1
-)
+func wide(s string) *uint16              { return syscall.StringToUTF16Ptr(s) }
+func px(value int32, scale uint32) int32 { return (value*int32(scale) + 48) / 96 }
 
-// --- Status event ---
-
-type StatusEvent struct {
-	Session        string  `json:"session"`
-	Seq            int     `json:"seq"`
-	At             float64 `json:"at"`
-	Phase          string  `json:"phase"`
-	Verb           string  `json:"verb"`
-	Target         string  `json:"target"`
-	App            string  `json:"app"`
-	ActionExecuted bool    `json:"actionExecuted"`
-	GoalVerified   bool    `json:"goalVerified"`
-	ExpiresAt      float64 `json:"expiresAt"`
+func layout(work rect, scale uint32) rect {
+	margin := px(12, scale)
+	width := min(px(440, scale), max(1, work.right-work.left-2*margin))
+	height := px(44, scale)
+	x := work.left + (work.right-work.left-width)/2
+	y := work.top + margin
+	return rect{x, y, x + width, y + height}
 }
 
-// --- Status bar state ---
-
-type StatusBar struct {
-	hwnd        syscall.Handle
-	hdc         syscall.Handle
-	phase       string
-	verb        string
-	target      string
-	elapsed     string
-	animOffset  float64
-	perimeter   float64
-	startTime   time.Time
-	lastUpdate  time.Time
-	hidden      bool
-	barW        int32
-	barH        int32
-	radius      int32
-	screenW     int32
-	screenH     int32
+func reposition(window uintptr) {
+	monitor := fallback
+	if current.Hwnd != 0 {
+		var pid uint32
+		thread, _, _ := getWindowPID.Call(current.Hwnd, uintptr(unsafe.Pointer(&pid)))
+		if thread != 0 && pid == current.Pid {
+			monitor, _, _ = monitorFromWindow.Call(current.Hwnd, 2)
+		}
+	}
+	info := monitorInfo{size: uint32(unsafe.Sizeof(monitorInfo{}))}
+	ok, _, _ := getMonitorInfo.Call(monitor, uintptr(unsafe.Pointer(&info)))
+	if ok == 0 {
+		monitor, _, _ = monitorFromWindow.Call(window, 2)
+		ok, _, _ = getMonitorInfo.Call(monitor, uintptr(unsafe.Pointer(&info)))
+		if ok == 0 {
+			return
+		}
+	}
+	// Move to the destination before reading effective DPI for this PMv2 HWND.
+	if placement.left < info.work.left || placement.right > info.work.right ||
+		placement.top < info.work.top || placement.bottom > info.work.bottom || dpi == 0 {
+		width := max(1, placement.right-placement.left)
+		height := max(1, placement.bottom-placement.top)
+		x := info.work.left + (info.work.right-info.work.left-width)/2
+		setPosition.Call(window, 0, uintptr(x), uintptr(info.work.top), uintptr(width), uintptr(height), 0x0014)
+	}
+	raw, _, _ := getDPI.Call(window)
+	scale := uint32(raw)
+	if scale == 0 {
+		scale = 96
+	}
+	next := layout(info.work, scale)
+	if next == placement && scale == dpi {
+		return
+	}
+	placement, dpi = next, scale
+	w, h := next.right-next.left, next.bottom-next.top
+	setPosition.Call(window, ^uintptr(0), uintptr(next.left), uintptr(next.top), uintptr(w), uintptr(h), 0x0010)
+	region, _, _ := gdi.NewProc("CreateRoundRectRgn").Call(0, 0, uintptr(w+1), uintptr(h+1), uintptr(h), uintptr(h))
+	if ok, _, _ := setRegion.Call(window, region, 1); ok == 0 {
+		deleteObject.Call(region)
+	}
+	invalidate.Call(window, 0, 0)
 }
 
-type ColorScheme struct {
-	Stroke [3]uint8 // RGB
-	Point  [3]uint8
-	ChipBg [3]uint8
-	ChipFg [3]uint8
-	Dot    [3]uint8
+func rgb(r, g, b uint32) uintptr { return uintptr(r | g<<8 | b<<16) }
+
+func shape(dc uintptr, api *syscall.LazyProc, bounds rect, fill, edge uintptr, corner int32) {
+	brush, _, _ := createBrush.Call(fill)
+	pen, _, _ := createPen.Call(0, 1, edge)
+	oldBrush, _, _ := selectObject.Call(dc, brush)
+	oldPen, _, _ := selectObject.Call(dc, pen)
+	args := []uintptr{dc, uintptr(bounds.left), uintptr(bounds.top), uintptr(bounds.right), uintptr(bounds.bottom)}
+	if corner > 0 {
+		args = append(args, uintptr(corner), uintptr(corner))
+	}
+	api.Call(args...)
+	selectObject.Call(dc, oldPen)
+	selectObject.Call(dc, oldBrush)
+	deleteObject.Call(pen)
+	deleteObject.Call(brush)
 }
 
-var colors = map[string]ColorScheme{
-	"executing": {Stroke: [3]uint8{0x3B, 0x8A, 0xDD}, Point: [3]uint8{0x18, 0x5F, 0xA5}, ChipBg: [3]uint8{0xE6, 0xF1, 0xFB}, ChipFg: [3]uint8{0x0C, 0x44, 0x7C}, Dot: [3]uint8{0x37, 0x8A, 0xDD}},
-	"preview":   {Stroke: [3]uint8{0xEF, 0x9F, 0x27}, Point: [3]uint8{0xBA, 0x75, 0x17}, ChipBg: [3]uint8{0xFA, 0xEE, 0xDA}, ChipFg: [3]uint8{0x63, 0x38, 0x06}, Dot: [3]uint8{0xEF, 0x9F, 0x27}},
-	"verified":  {Stroke: [3]uint8{0x63, 0x99, 0x22}, Point: [3]uint8{0x3B, 0x6D, 0x11}, ChipBg: [3]uint8{0xEA, 0xF3, 0xDE}, ChipFg: [3]uint8{0x27, 0x50, 0x0A}, Dot: [3]uint8{0x63, 0x99, 0x22}},
-	"blocked":   {Stroke: [3]uint8{0xE2, 0x4B, 0x4A}, Point: [3]uint8{0xA3, 0x2D, 0x2D}, ChipBg: [3]uint8{0xFC, 0xEB, 0xEB}, ChipFg: [3]uint8{0x79, 0x1F, 0x1F}, Dot: [3]uint8{0xE2, 0x4B, 0x4A}},
-	"unknown":   {Stroke: [3]uint8{0x88, 0x87, 0x80}, Point: [3]uint8{0x5F, 0x5E, 0x5A}, ChipBg: [3]uint8{0xF1, 0xEF, 0xE8}, ChipFg: [3]uint8{0x44, 0x44, 0x41}, Dot: [3]uint8{0x88, 0x87, 0x80}},
+func text(dc uintptr, bounds rect, value string, size, weight int32, color, align uintptr) {
+	if bounds.right <= bounds.left {
+		return
+	}
+	font, _, _ := createFont.Call(uintptr(-px(size, dpi)), 0, 0, 0, uintptr(weight), 0, 0, 0, 1, 0, 0, 5, 0, uintptr(unsafe.Pointer(wide("Microsoft YaHei UI"))))
+	old, _, _ := selectObject.Call(dc, font)
+	gdi.NewProc("SetBkMode").Call(dc, 1)
+	gdi.NewProc("SetTextColor").Call(dc, color)
+	drawText.Call(dc, uintptr(unsafe.Pointer(wide(value))), ^uintptr(0), uintptr(unsafe.Pointer(&bounds)), 0x8824|align)
+	selectObject.Call(dc, old)
+	deleteObject.Call(font)
 }
 
-var chipText = map[string]string{
-	"executing": "执行中",
-	"preview":   "预告",
-	"verified":  "已验证",
-	"blocked":   "已阻止",
-	"unknown":   "未知",
+func paint(dc uintptr) {
+	w, h := placement.right-placement.left, placement.bottom-placement.top
+	if w <= 0 || h <= 0 {
+		return
+	}
+	sc := func(value int32) int32 { return px(value, dpi) }
+	bg, border := rgb(21, 28, 42), rgb(66, 81, 108)
+	fg, muted := rgb(248, 250, 252), rgb(184, 201, 224)
+	accent, label := rgb(102, 174, 255), labels[current.Action]
+	switch current.Action {
+	case "pass":
+		accent = rgb(102, 222, 162)
+		border = rgb(67, 112, 93)
+	case "wait", "fail", "error", "stopped", "unverified":
+		accent = rgb(250, 200, 112)
+	}
+	connected := time.Since(lastUpdate) < 2*time.Second
+	if !connected {
+		accent, label = muted, "连接中断"
+	}
+	shape(dc, gdi.NewProc("RoundRect"), rect{0, 0, w, h}, bg, border, h)
+	if connected && running(current.Action) {
+		paintLightband(dc, w, h, time.Since(started))
+	}
+	dotY := (h - sc(8)) / 2
+	shape(dc, gdi.NewProc("Ellipse"), rect{sc(16), dotY, sc(24), dotY + sc(8)}, accent, accent, 0)
+	divider := w * 53 / 100
+	task := current.Task
+	if task == "" {
+		task = "自动化任务"
+	}
+	text(dc, rect{sc(34), 0, divider - sc(12), h}, task, 14, 600, fg, 0)
+	shape(dc, gdi.NewProc("Rectangle"), rect{divider, sc(12), divider + max(1, sc(1)), h - sc(12)}, border, border, 0)
+	actionRight := w - sc(14)
+	if w >= sc(350) {
+		actionRight = w - sc(64)
+		elapsed := int(time.Since(started).Seconds())
+		text(dc, rect{w - sc(57), 0, w - sc(14), h}, fmt.Sprintf("%02d:%02d", elapsed/60, elapsed%60), 12, 400, muted, 2)
+	}
+	text(dc, rect{divider + sc(12), 0, actionRight, h}, label, 13, 400, muted, 0)
 }
 
-var sb *StatusBar
+func paintBuffered(dc uintptr) {
+	width, height := placement.right-placement.left, placement.bottom-placement.top
+	if width <= 0 || height <= 0 {
+		return
+	}
+	buffer, _, _ := compatibleDC.Call(dc)
+	if buffer == 0 {
+		paint(dc)
+		return
+	}
+	defer deleteDC.Call(buffer)
+	bitmap, _, _ := compatibleBitmap.Call(dc, uintptr(width), uintptr(height))
+	if bitmap == 0 {
+		paint(dc)
+		return
+	}
+	old, _, _ := selectObject.Call(buffer, bitmap)
+	paint(buffer)
+	bitBlt.Call(dc, 0, 0, uintptr(width), uintptr(height), buffer, 0, 0, 0x00cc0020)
+	selectObject.Call(buffer, old)
+	deleteObject.Call(bitmap)
+}
 
-// --- Window procedure ---
-
-func wndProc(hwnd syscall.Handle, msg uint32, wParam, lParam uintptr) uintptr {
-	switch msg {
-	case WM_PAINT:
-		var ps PAINTSTRUCT
-		hdc, _, _ := procBeginPaint.Call(uintptr(hwnd), uintptr(unsafe.Pointer(&ps)))
-		sb.hdc = syscall.Handle(hdc)
-		sb.paint()
-		procEndPaint.Call(uintptr(hwnd), uintptr(unsafe.Pointer(&ps)))
+func windowProc(window uintptr, event uint32, w, l uintptr) uintptr {
+	switch event {
+	case wmUpdate:
+		select {
+		case current = <-updates:
+		default:
+			return 0
+		}
+		lastUpdate = time.Now()
+		if started.IsZero() {
+			started = lastUpdate
+		}
+		reposition(window)
+		if !visible {
+			showWindow.Call(window, 4)
+			visible = true
+		}
+		invalidate.Call(window, 0, 0)
 		return 0
-
-	case WM_TIMER:
-		switch wParam {
-		case timerAnimate:
-			sb.animOffset = math.Mod(sb.animOffset+12.0, sb.perimeter)
-			if sb.shouldAnimate() {
-				r := RECT{0, 0, sb.barW, sb.barH}
-				procInvalidateRect.Call(uintptr(hwnd), uintptr(unsafe.Pointer(&r)), 0)
-			}
-		case timerHeartbeat:
-			elapsed := time.Since(sb.lastUpdate)
-			if elapsed >= 3*time.Second {
-				if !sb.hidden {
-					procPostMessage.Call(uintptr(hwnd), WM_APP_HIDE, 0, 0)
-					sb.hidden = true
-				}
-			} else if elapsed >= 2*time.Second {
-				if sb.phase != "unknown" {
-					sb.phase = "unknown"
-					r := RECT{0, 0, sb.barW, sb.barH}
-					procInvalidateRect.Call(uintptr(hwnd), uintptr(unsafe.Pointer(&r)), 0)
-				}
-			}
-			if sb.shouldAnimate() {
-				ts := time.Since(sb.startTime)
-				m := int(ts.Minutes())
-				s := int(ts.Seconds()) % 60
-				sb.elapsed = fmt.Sprintf("%02d:%02d", m, s)
-				r := RECT{0, 0, sb.barW, sb.barH}
-				procInvalidateRect.Call(uintptr(hwnd), uintptr(unsafe.Pointer(&r)), 0)
+	case wmTimer:
+		if !visible {
+			return 0
+		}
+		now := time.Now()
+		if now.Sub(lastUpdate) >= 3*time.Second {
+			showWindow.Call(window, 0)
+			visible = false
+		} else {
+			if now.Sub(lastPlacementCheck) >= 250*time.Millisecond {
+				lastPlacementCheck = now
+				reposition(window)
+				invalidate.Call(window, 0, 0)
+			} else if animationsEnabled && running(current.Action) && now.Sub(lastUpdate) < 2*time.Second {
+				invalidate.Call(window, 0, 0)
 			}
 		}
 		return 0
-
-	case WM_GETOBJECT:
-		// Return empty — remove from UIA observation tree
+	case wmSettingChange:
+		updateAnimationPreference()
+		invalidate.Call(window, 0, 0)
 		return 0
-
-	case WM_APP_SHOW:
-		// Runs on the window's own thread, inside the message pump
-		procShowWindow.Call(uintptr(hwnd), SW_SHOWNOACTIVATE)
-		// HWND_TOPMOST = (HWND)-1
-		procSetWindowPos.Call(uintptr(hwnd), uintptr(unsafe.Pointer(uintptr(0xffffffffffffffff))), 0, 0, 0, 0, 0x0001|0x0002|0x0010)
-		r := RECT{0, 0, sb.barW, sb.barH}
-		procInvalidateRect.Call(uintptr(hwnd), uintptr(unsafe.Pointer(&r)), 0)
+	case wmDPIChanged:
+		// Apply the work-area-centered geometry on the next message-loop tick.
 		return 0
-
-	case WM_APP_HIDE:
-		procShowWindow.Call(uintptr(hwnd), SW_HIDE)
+	case wmPaint:
+		var state paintStruct
+		dc, _, _ := user.NewProc("BeginPaint").Call(window, uintptr(unsafe.Pointer(&state)))
+		paintBuffered(dc)
+		user.NewProc("EndPaint").Call(window, uintptr(unsafe.Pointer(&state)))
 		return 0
-
-	case WM_DESTROY:
-		procKillTimer.Call(uintptr(hwnd), timerAnimate)
-		procKillTimer.Call(uintptr(hwnd), timerHeartbeat)
-		procPostQuitMessage.Call(0)
+	case wmHitTest:
+		return ^uintptr(0)
+	case wmMouseActivate:
+		return 3
+	case wmDestroy:
+		user.NewProc("PostQuitMessage").Call(0)
 		return 0
 	}
-
-	ret, _, _ := procDefWindowProc.Call(uintptr(hwnd), uintptr(msg), wParam, lParam)
-	return ret
+	result, _, _ := user.NewProc("DefWindowProcW").Call(window, uintptr(event), w, l)
+	return result
 }
 
-func (s *StatusBar) shouldAnimate() bool {
-	return s.phase == "executing" || s.phase == "preview"
-}
-
-func rgb(r, g, b uint8) uintptr {
-	return uintptr(uint32(b)<<16 | uint32(g)<<8 | uint32(r))
-}
-
-func (s *StatusBar) paint() {
-	c, ok := colors[s.phase]
-	if !ok {
-		c = colors["unknown"]
+func readStatus(window uintptr) {
+	post := user.NewProc("PostMessageW")
+	defer post.Call(window, wmClose, 0, 0)
+	scanner := bufio.NewScanner(os.Stdin)
+	for scanner.Scan() {
+		var next status
+		if json.Unmarshal(scanner.Bytes(), &next) != nil || labels[next.Action] == "" {
+			continue
+		}
+		select {
+		case <-updates:
+		default:
+		}
+		updates <- next
+		post.Call(window, wmUpdate, 0, 0)
 	}
-
-	hdc := uintptr(s.hdc)
-
-	// Set background mode to transparent for text
-	procSetBkMode.Call(hdc, TRANSPARENT)
-
-	// Background: white rounded rect
-	whiteBrush, _, _ := procCreateSolidBrush.Call(rgb(255, 255, 255))
-	borderPen, _, _ := procCreatePen.Call(PS_SOLID, 1, rgb(200, 200, 200))
-	oldPen, _, _ := procSelectObject.Call(hdc, uintptr(borderPen))
-	oldBrush, _, _ := procSelectObject.Call(hdc, uintptr(whiteBrush))
-	procRoundRect.Call(hdc, 1, 1, uintptr(s.barW)-1, uintptr(s.barH)-1, uintptr(s.radius*2), uintptr(s.radius*2))
-	procSelectObject.Call(hdc, oldBrush)
-	procSelectObject.Call(hdc, oldPen)
-	procDeleteObject.Call(whiteBrush)
-	procDeleteObject.Call(borderPen)
-
-	// Marching ant stroke or terminal state stroke
-	dashLen := 70.0
-	gapLen := s.perimeter - dashLen
-
-	if s.shouldAnimate() {
-		// Create a custom dash pen with offset
-		strokePen, _, _ := procCreatePen.Call(PS_SOLID|PS_ENDCAP_ROUND|PS_JOIN_ROUND, 2, rgb(c.Stroke[0], c.Stroke[1], c.Stroke[2]))
-		oldPen, _, _ = procSelectObject.Call(hdc, uintptr(strokePen))
-		// Draw partial arc to simulate marching ant
-		s.drawMarchingStroke(hdc, dashLen, gapLen)
-		procSelectObject.Call(hdc, oldPen)
-		procDeleteObject.Call(strokePen)
-	} else if s.phase == "verified" || s.phase == "blocked" {
-		// Full solid border
-		strokePen, _, _ := procCreatePen.Call(PS_SOLID|PS_ENDCAP_ROUND|PS_JOIN_ROUND, 2, rgb(c.Stroke[0], c.Stroke[1], c.Stroke[2]))
-		oldPen, _, _ = procSelectObject.Call(hdc, uintptr(strokePen))
-		procRoundRect.Call(hdc, 1, 1, uintptr(s.barW)-1, uintptr(s.barH)-1, uintptr(s.radius*2), uintptr(s.radius*2))
-		procSelectObject.Call(hdc, oldPen)
-		procDeleteObject.Call(strokePen)
-	} else {
-		// Unknown: dashed static
-		dashPen, _, _ := procCreatePen.Call(PS_DASH, 1, rgb(c.Stroke[0], c.Stroke[1], c.Stroke[2]))
-		oldPen, _, _ = procSelectObject.Call(hdc, uintptr(dashPen))
-		procRoundRect.Call(hdc, 1, 1, uintptr(s.barW)-1, uintptr(s.barH)-1, uintptr(s.radius*2), uintptr(s.radius*2))
-		procSelectObject.Call(hdc, oldPen)
-		procDeleteObject.Call(dashPen)
-	}
-
-	// Status dot (9px circle)
-	dotBrush, _, _ := procCreateSolidBrush.Call(rgb(c.Point[0], c.Point[1], c.Point[2]))
-	dotX := int32(18)
-	dotY := s.barH/2 - 4
-	oldBrush, _, _ = procSelectObject.Call(hdc, uintptr(dotBrush))
-	procEllipse.Call(hdc, uintptr(dotX), uintptr(dotY), uintptr(dotX+9), uintptr(dotY+9))
-	procSelectObject.Call(hdc, oldBrush)
-	procDeleteObject.Call(dotBrush)
-
-	// Status chip
-	chipStr := chipText[s.phase]
-	if chipStr == "" {
-		chipStr = "未知"
-	}
-	chipFont := createFont("Microsoft YaHei UI", 9, 0)
-	oldFont, _, _ := procSelectObject.Call(hdc, uintptr(chipFont))
-
-	// Measure chip text
-	var chipSize [2]int32
-	utf16Chip := syscall.StringToUTF16Ptr(chipStr)
-	procGetTextExtentPoint32.Call(hdc, uintptr(unsafe.Pointer(utf16Chip)), uintptr(len([]rune(chipStr))), uintptr(unsafe.Pointer(&chipSize[0])))
-
-	chipX := dotX + 14
-	chipY := (s.barH - chipSize[1]) / 2
-	chipW := chipSize[0] + 10
-	chipH := chipSize[1]
-
-	chipBgBrush, _, _ := procCreateSolidBrush.Call(rgb(c.ChipBg[0], c.ChipBg[1], c.ChipBg[2]))
-	chipPen, _, _ := procCreatePen.Call(PS_SOLID, 1, rgb(c.ChipBg[0], c.ChipBg[1], c.ChipBg[2]))
-	oldPen, _, _ = procSelectObject.Call(hdc, uintptr(chipPen))
-	oldBrush, _, _ = procSelectObject.Call(hdc, uintptr(chipBgBrush))
-	procRoundRect.Call(hdc, uintptr(chipX), uintptr(chipY), uintptr(chipX+chipW), uintptr(chipY+chipH), 8, 8)
-	procSelectObject.Call(hdc, oldBrush)
-	procSelectObject.Call(hdc, oldPen)
-	procDeleteObject.Call(chipBgBrush)
-	procDeleteObject.Call(chipPen)
-
-	// Chip text
-	procSetTextColor.Call(hdc, rgb(c.ChipFg[0], c.ChipFg[1], c.ChipFg[2]))
-	procSetTextAlign.Call(hdc, TA_CENTER)
-	chipRect := RECT{Left: chipX, Top: chipY, Right: chipX + chipW, Bottom: chipY + chipH}
-	procDrawText.Call(hdc, uintptr(unsafe.Pointer(utf16Chip)), uintptr(len([]rune(chipStr))), uintptr(unsafe.Pointer(&chipRect)), DT_SINGLELINE|DT_VCENTER|DT_NOCLIP)
-	procSelectObject.Call(hdc, oldFont)
-	procDeleteObject.Call(uintptr(chipFont))
-
-	// Separator line
-	sepX := chipX + chipW + 8
-	sepPen, _, _ := procCreatePen.Call(PS_SOLID, 1, rgb(220, 220, 220))
-	oldPen, _, _ = procSelectObject.Call(hdc, uintptr(sepPen))
-	procMoveToEx.Call(hdc, uintptr(sepX), 10, 0)
-	procLineTo.Call(hdc, uintptr(sepX), uintptr(s.barH-10))
-	procSelectObject.Call(hdc, oldPen)
-	procDeleteObject.Call(sepPen)
-
-	// Action name (monospace)
-	actionText := s.verb
-	if s.target != "" {
-		actionText += " · " + truncate(s.target, 30)
-	}
-	monoFont := createFont("Consolas", 9, 0)
-	oldFont, _, _ = procSelectObject.Call(hdc, uintptr(monoFont))
-	procSetTextAlign.Call(hdc, TA_LEFT)
-	procSetTextColor.Call(hdc, rgb(51, 51, 51))
-	actionRect := RECT{Left: sepX + 8, Top: 0, Right: s.barW - 60, Bottom: s.barH}
-	utf16Action := syscall.StringToUTF16Ptr(actionText)
-	procDrawText.Call(hdc, uintptr(unsafe.Pointer(utf16Action)), uintptr(len([]rune(actionText))), uintptr(unsafe.Pointer(&actionRect)), DT_SINGLELINE|DT_VCENTER|DT_NOCLIP)
-	procSelectObject.Call(hdc, oldFont)
-	procDeleteObject.Call(uintptr(monoFont))
-
-	// Timer (monospace, right-aligned)
-	timerFont := createFont("Consolas", 9, 0)
-	oldFont, _, _ = procSelectObject.Call(hdc, uintptr(timerFont))
-	procSetTextAlign.Call(hdc, TA_RIGHT)
-	procSetTextColor.Call(hdc, rgb(128, 128, 128))
-	timerRect := RECT{Left: s.barW - 70, Top: 0, Right: s.barW - 14, Bottom: s.barH}
-	utf16Timer := syscall.StringToUTF16Ptr(s.elapsed)
-	procDrawText.Call(hdc, uintptr(unsafe.Pointer(utf16Timer)), uintptr(len([]rune(s.elapsed))), uintptr(unsafe.Pointer(&timerRect)), DT_SINGLELINE|DT_VCENTER|DT_NOCLIP)
-	procSelectObject.Call(hdc, oldFont)
-	procDeleteObject.Call(uintptr(timerFont))
 }
-
-// drawMarchingStroke draws a partial rounded-rect outline to simulate the marching ant effect.
-// Since GDI doesn't support custom dash patterns with offset on RoundRect,
-// we draw multiple short line segments along the rounded rectangle path.
-func (s *StatusBar) drawMarchingStroke(hdc uintptr, dashLen, gapLen float64) {
-	// We use a simpler approach: draw the full roundrect with a dash pattern
-	// GDI PS_DASH gives us fixed dashes; for the "marching" look we
-	// approximate by drawing the full outline and then overdrawing
-	// the "gap" section with the background color.
-	//
-	// For a more faithful rendering, we'd need GDI+ paths.
-	// This approximation draws a solid 2px outline (visible segment)
-	// which is close enough at 340x38.
-
-	c := colors[s.phase]
-	pen, _, _ := procCreatePen.Call(PS_SOLID|PS_ENDCAP_ROUND|PS_JOIN_ROUND, 2, rgb(c.Stroke[0], c.Stroke[1], c.Stroke[2]))
-	oldPen, _, _ := procSelectObject.Call(hdc, pen)
-	procRoundRect.Call(hdc, 1, 1, uintptr(s.barW)-1, uintptr(s.barH)-1, uintptr(s.radius*2), uintptr(s.radius*2))
-	procSelectObject.Call(hdc, oldPen)
-	procDeleteObject.Call(pen)
-}
-
-func createFont(faceName string, size int32, weight int32) syscall.Handle {
-	lf := LOGFONT{}
-	lf.Height = -size * int32(getDPI()) / 72
-	if lf.Height == 0 {
-		lf.Height = -12
-	}
-	lf.Weight = weight
-	if weight == 0 {
-		lf.Weight = 400 // FW_NORMAL
-	}
-	lf.CharSet = 1 // DEFAULT_CHARSET
-	lf.OutPrecision = 0
-	lf.ClipPrecision = 0
-	lf.Quality = 0
-	lf.PitchAndFamily = 0
-	utf16 := syscall.StringToUTF16(faceName)
-	copy(lf.FaceName[:], utf16)
-
-	h, _, _ := procCreateFontIndirect.Call(uintptr(unsafe.Pointer(&lf)))
-	return syscall.Handle(h)
-}
-
-func getDPI() int {
-	return 96 // Default DPI; SetProcessDPIAware makes this accurate
-}
-
-func truncate(s string, n int) string {
-	runes := []rune(s)
-	if len(runes) > n {
-		return string(runes[:n]) + "…"
-	}
-	return s
-}
-
-// --- Main ---
 
 func main() {
-	// Enable DPI awareness
-	procSetProcessDPIAware.Call()
-
-	// Get screen dimensions
-	screenW, _, _ := procGetSystemMetrics.Call(SM_CXSCREEN)
-	screenH, _, _ := procGetSystemMetrics.Call(SM_CYSCREEN)
-
-	barW := int32(340)
-	barH := int32(38)
-	radius := int32(19)
-
-	// Position: top center, 12px from top
-	x := (int32(screenW) - barW) / 2
-	y := int32(12)
-
-	// Calculate approximate perimeter of rounded rect
-	// P = 2(w-2r) + 2(h-2r) + 2π*r
-	w := float64(barW)
-	h := float64(barH)
-	r := float64(radius)
-	perimeter := 2*(w-2*r) + 2*(h-2*r) + 2*math.Pi*r
-
-	sb = &StatusBar{
-		phase:      "executing",
-		verb:       "observe",
-		elapsed:    "00:00",
-		animOffset: 0,
-		perimeter:  perimeter,
-		startTime:  time.Now(),
-		lastUpdate: time.Now(),
-		barW:       barW,
-		barH:       barH,
-		radius:     radius,
-		screenW:    int32(screenW),
-		screenH:    int32(screenH),
-	}
-
-	// Register window class
-	className := syscall.StringToUTF16Ptr("AppUseStatusBar")
-	hInst, _, _ := procGetCurrentProcess.Call()
-
-	wc := WNDCLASSEX{}
-	wc.Size = uint32(unsafe.Sizeof(wc))
-	wc.Style = 0
-	wc.WndProc = syscall.NewCallback(wndProc)
-	wc.Instance = syscall.Handle(hInst)
-	wc.Background = COLOR_WINDOW + 1
-	wc.ClassName = className
-
-	procRegisterClassEx.Call(uintptr(unsafe.Pointer(&wc)))
-
-	// Create window with all required extended styles
-	exStyle := WS_EX_NOACTIVATE | WS_EX_TRANSPARENT | WS_EX_TOOLWINDOW | WS_EX_TOPMOST | WS_EX_LAYERED
-	style := WS_POPUP | WS_CLIPSIBLINGS | WS_CLIPCHILDREN
-
-	hwnd, _, err := procCreateWindowEx.Call(
-		uintptr(exStyle),
-		uintptr(unsafe.Pointer(className)),
-		0, // no title
-		uintptr(style),
-		uintptr(x), uintptr(y),
-		uintptr(barW), uintptr(barH),
-		0, 0, uintptr(hInst), 0,
-	)
-
-	if hwnd == 0 {
-		fmt.Fprintf(os.Stderr, "CreateWindowEx failed: %v\n", err)
+	runtime.LockOSThread()
+	if result, _, err := user.NewProc("SetProcessDpiAwarenessContext").Call(^uintptr(3)); result == 0 {
+		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
 	}
-
-	sb.hwnd = syscall.Handle(hwnd)
-
-	// Set layered window attributes (opaque, no per-pixel alpha needed)
-	procSetLayeredWindowAttributes.Call(
-		uintptr(hwnd),
-		rgb(255, 255, 255), // color key: white background
-		255,                // alpha: fully opaque
-		2,                  // LWA_ALPHA
-	)
-
-	// Show window — marshalled onto the window's own thread
-	procPostMessage.Call(uintptr(hwnd), WM_APP_SHOW, 0, 0)
-
-	// Start timers
-	procSetTimer.Call(hwnd, timerAnimate, 33, 0)   // ~30fps
-	procSetTimer.Call(hwnd, timerHeartbeat, 500, 0) // heartbeat check
-
-	// Read events from stdin in a goroutine
-	go func() {
-		scanner := bufio.NewScanner(os.Stdin)
-		scanner.Buffer(make([]byte, 65536), 65536)
-		for scanner.Scan() {
-			line := strings.TrimSpace(scanner.Text())
-			if line == "" {
-				continue
-			}
-			var evt StatusEvent
-			if err := json.Unmarshal([]byte(line), &evt); err != nil {
-				continue
-			}
-			if evt.Phase == "stop" || evt.Verb == "stop" {
-				procDestroyWindow.Call(hwnd)
-				return
-			}
-			sb.phase = evt.Phase
-			if evt.Verb != "" {
-				sb.verb = evt.Verb
-			}
-			if evt.Target != "" {
-				sb.target = evt.Target
-			}
-			if evt.Seq > 0 {
-				sb.startTime = time.Now()
-			}
-			sb.lastUpdate = time.Now()
-			sb.hidden = false
-			procPostMessage.Call(hwnd, WM_APP_SHOW, 0, 0)
-			r := RECT{0, 0, barW, barH}
-			procInvalidateRect.Call(hwnd, uintptr(unsafe.Pointer(&r)), 0)
-		}
-		// stdin closed — destroy window
-		procDestroyWindow.Call(hwnd)
-	}()
-
-	// Message loop
-	var msg [28]byte // MSG struct
+	active, _, _ := user.NewProc("GetForegroundWindow").Call()
+	fallback, _, _ = monitorFromWindow.Call(active, 1)
+	instance, _, _ := kernel.NewProc("GetModuleHandleW").Call(0)
+	name := wide("UiAutomationTaskCapsule")
+	class := windowClass{procedure: syscall.NewCallback(windowProc), instance: instance, name: name}
+	user.NewProc("RegisterClassW").Call(uintptr(unsafe.Pointer(&class)))
+	window, _, err := user.NewProc("CreateWindowExW").Call(windowStyles, uintptr(unsafe.Pointer(name)), uintptr(unsafe.Pointer(wide("UI Automation"))), 0x80000000, 0, 0, 1, 1, 0, 0, instance, 0)
+	if window == 0 {
+		fmt.Fprintln(os.Stderr, err)
+		os.Exit(1)
+	}
+	user.NewProc("SetLayeredWindowAttributes").Call(window, 0, 255, 2)
+	updateAnimationPreference()
+	user.NewProc("SetTimer").Call(window, 1, 33, 0)
+	go readStatus(window)
+	getMessage := user.NewProc("GetMessageW")
+	dispatch := user.NewProc("DispatchMessageW")
+	var msg message
 	for {
-		ret, _, _ := procGetMessage.Call(uintptr(unsafe.Pointer(&msg[0])), 0, 0, 0)
-		if ret == 0 { // WM_QUIT
+		result, _, _ := getMessage.Call(uintptr(unsafe.Pointer(&msg)), 0, 0, 0)
+		if int32(result) <= 0 {
 			break
 		}
-		procDispatchMessage.Call(uintptr(unsafe.Pointer(&msg[0])))
+		dispatch.Call(uintptr(unsafe.Pointer(&msg)))
 	}
 }

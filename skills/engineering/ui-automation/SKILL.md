@@ -19,6 +19,10 @@ Reuse the user's browser and login state. Keep shared-state preparation and rest
 
 ## UI tests
 
+Use a frozen `run` for a multi-action task. The [task capsule](references/status-events.md) shows the current phase throughout the run when its prebuilt renderer is available.
+
+For an NSH app, use the [NSH testing and trace guide](https://nsh.dev/docs/testing-and-trace/). Run `nsh test` for TSX behavior, `cargo test` for Rust logic and bindings, and `nsh test --target windows` for Windows rendering where applicable. Exercise the installed Windows build through real UIA with an observable assertion and capture. Use the actual destination platform for macOS, mobile and Web acceptance.
+
 Read [script contract](references/scripts.md). Observe the app and derive a reproducible case from the user's test goal and expected behavior. Freeze actions, branch candidates and assertions before running. The runner owns execution budgets, cancellation, outcomes and evidence. Failure is evidence: change the product or correct a demonstrably mistaken case in a new run; retain the original failure. Model branches choose only declared candidates; unknown, incomplete or low-confidence input stops without inventing actions or lowering expectations.
 
 UI acceptance supplements unit/integration tests and TDD. Keep existing red-green-refactor, stable public behavior tests, real integration and delivery checks; select meaningful UI milestones rather than running the full UI suite on each red-green cycle.

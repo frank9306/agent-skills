@@ -50,5 +50,5 @@ test('normal Chrome visual click reaches painted Canvas and raster-image control
     const report=await evidence.finish('pass',{identity:o.identity,assertions:'Canvas and PNG-image real clicks, literal results, consumed token and actual repaint refusal'});
     assert.equal((await inspectRun(report.runDir)).integrity,'verified');console.log('Visual browser evidence: '+report.runDir);
   } catch(e){console.log('Visual browser failure: '+(await evidence.finish('error',{error:e.message})).runDir);throw e;}
-  finally{if(session)await c.request('stop',{session,closeCreated:true}).catch(()=>{});c.close();await new Promise(r=>server.close(r));}
+  finally{if(session)await c.request('stop',{session,closeCreated:true}).catch(()=>{});c.close();await new Promise(resolve => { server.close(resolve); server.closeAllConnections(); });}
 });

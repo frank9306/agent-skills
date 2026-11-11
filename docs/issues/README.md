@@ -19,6 +19,7 @@ None.
 | ID | Title |
 |---|---|
 | [ISSUE-0019](ISSUE-0019-add-project-owned-deep-module-checks-and-codex-feedback.md) | Add project-owned deep-module checks and Codex feedback |
+| [ISSUE-0040](ISSUE-0040-ui-automation-task-capsule.md) | Keep the UI automation capsule visible for a full task |
 
 ## Blocked
 

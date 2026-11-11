@@ -55,3 +55,20 @@ test('invalid future budgets are rejected before preparation and declared observ
   const scoped=base({goal:{assert:goal,next:'done'},done:{finish:'complete'}});scoped.observation={selector:'#test-root',limit:100};
   const d=boundary();await runCase(d,scoped,{outDir:await fs.mkdtemp(path.join(os.tmpdir(),'app-use-scope-'))});assert.ok(d.calls.filter(([m])=>m==='observe').every(([,p])=>p.selector==='#test-root'&&p.limit===100));
 });
+
+test('task progress covers actions, assertions, evidence, cleanup and final verdict', async () => {
+  const events = [];
+  const script = base({
+    click: { action: { type: 'click', match: { name: 'Apply' } }, next: 'goal' },
+    goal: { assert: goal, next: 'done' },
+    done: { finish: 'complete' },
+  });
+  script.cleanup = [{ type: 'key', key: 'Escape' }];
+  const result = await run(script, { onProgress: event => events.push(event) });
+  assert.equal(result.status, 'pass');
+  assert.deepEqual(events.map(event => event.action), [
+    'start', 'click', 'assert', 'capture', 'key', 'pass',
+  ]);
+  assert.deepEqual(events[1], { action: 'click' });
+  assert.equal(JSON.stringify(events).includes('Escape'), false);
+});

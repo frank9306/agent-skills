@@ -1,63 +1,25 @@
-# Status bar event contract
+# Task capsule
 
-状态条只消费本文件定义的事件。**事件只能由 .NET broker 在真实 dispatch 前后发出；CLI、扩展页面适配器与任何调用方都不得自报状态。** 原因是当前 `Broker.cs` 的桌面会话还缺调用方绑定，若允许客户端自报，状态条会变成可伪造的「正在操作」指示器；访问控制补齐前这条约束尤其重要。
+The capsule is an advisory progress display for one `app-use run`. A case starts after validation and stays visible through its actions, waits, assertions, capture, and cleanup. Individual commands remain available for diagnostics. Group a multi-action task into a frozen case to display its full lifetime. Use `--no-statusbar` for headless or intentionally silent runs.
 
-## Schema
+The runner provides only the validated desktop HWND/PID, allowlisted action categories, and its final outcome. The renderer's stdin is private to its launcher and carries only those fields and the operator-supplied case ID. Use a short, non-sensitive case ID. Do not pass request payloads, page content, window titles, or credentials. The display has no authority over dispatch or verification. Only the runner's final `pass` shows “已验证”. Evidence is authoritative.
 
-单行 JSON，字段白名单如下，其余字段一律丢弃（防止页面正文、`secretEnv` 值、凭据进入状态条）：
+The host refreshes the last state every 500 ms, including during waits. The window reports a lost connection after two seconds, hides after three seconds, and closes on EOF. It is click-through and uses the desktop target monitor's work area and effective DPI. Chromium session IDs are not Win32 handles. Without a validated desktop target, the capsule uses the foreground monitor recorded at launch.
 
-| 字段 | 类型 | 说明 |
-|---|---|---|
-| `session` | string | 必填，会话 id |
-| `runId` | string | 可选，冻结用例的 run id |
-| `seq` | integer ≥ 0 | 必填，broker 单调序号，用于丢弃乱序／重复事件 |
-| `at` | number | 必填，broker 时间戳（Unix ms） |
-| `phase` | enum | 必填：`armed` / `observe` / `act` / `validate` / `verified` / `blocked` / `unknown` |
-| `verb` | string ≤ 32 | 必填，动作白名单名，如 `click` / `validate` / `guard` |
-| `target` | string ≤ 80 | 可选，结构化目标短名，超长截断；不得放页面正文原文 |
-| `app` | string | 可选，绑定窗口／浏览器名 |
-| `actionExecuted` | boolean | 动作是否已发出，默认 false |
-| `goalVerified` | boolean | 目标是否经新观察验证，默认 false |
-| `expiresAt` | number | 可选，事件有效期；消费端丢弃过期事件 |
+The lightband runs clockwise on a three-second cycle during active work and waits. The capsule reads the Windows client-area animation preference and uses a stationary highlight when animations are disabled. Terminal results and heartbeat loss use a static border. Run the pixel-level motion check on an interactive desktop with `pwsh -File tests/statusbar-lightband-live.ps1 -Executable native/StatusBar/dist/status-bar.exe`.
 
-`phase` 与两个布尔值的语义必须分开：`actionExecuted:true, goalVerified:false` 只表示动作已发出，不代表目标达成。终态 `verified` / `blocked` 触发描边定格。
+## Windows x64 distribution
 
-## Transport and lifecycle
+Build once on a Windows x64 development machine from `native/StatusBar`:
 
-- broker 在 `prepare` 成功后发首个 `armed` 事件，在 `observe` / `act` / `validate` 前后各发一条，终态发 `verified` 或 `blocked`。
-- 无论有无动作，broker 每 500ms 发一次心跳（可复用最新 `seq` 的 `armed`/`act` 事件或专用 `heartbeat` 行）。
-- 事件同时写入 `evidence.mjs` 的 `events.jsonl`，与 `runId` 绑定，便于 `inspectRun` 回放。
-- 消费端 `scripts/statusbar-client.mjs` 负责：丢弃乱序／重复／过期事件、2s 无心跳转 `unknown`、3s 后隐藏、`stop` 立即隐藏。
-- **心跳静默时禁止保留行进动画**：`unknown` 一律用灰色静止虚线，绝不留下一条仍在跑的胶囊。
+```powershell
+go test ./...
+go build -trimpath -ldflags '-H=windowsgui -s -w' -o dist/status-bar.exe .
+```
 
-## Privacy
+Distribute the resulting executable at `native/StatusBar/dist/status-bar.exe` with the Skill. End users only run the executable. Windows application control must allow the binary. A missing or blocked renderer is reported on stderr while the automation retains its normal result and evidence contract.
 
-`verb` 走白名单，`target` 只放短名并在 broker 侧截断；密码字段、`secretEnv` 值、页面正文一律不发。`capture refused` 期间的截图不进入事件。状态条进程不接触明文。
-
-## Status
-
-**协议设计已定稿，broker 侧推送尚未实现**（需要 C# 改动与 .NET 10 SDK 构建）。`statusbar-client.mjs` 消费端已实现并有单元测试；在 broker 接入前不要把它接到生产 CLI，否则会因为没有事件源而一直处于隐藏状态。
-
-## Overlay backends（已实现）
-
-状态条的窗口由两个后端之一实现，事件协议完全一致，host 会自动选择：
-
-| 后端 | 文件 | 说明 |
-|---|---|---|
-| Go | `native/StatusBar/main.go` → `status-bar.exe` | Win32 + GDI 直接实现；机器允许运行未签名 exe 时优先使用 |
-| PowerShell | `native/StatusBar/status-bar-native.ps1` | `Add-Type` 内存编译 C# P/Invoke，等价实现同一窗口 |
-
-**为什么需要降级**：开启 Smart App Control（Windows Defender Application Control 强制模式）的机器会拦截所有新编译／未签名 exe——包括 Go 产物和任何 Node 原生模块（`.node` 同样被拦）。`powershell.exe` 由 Microsoft 签名因而可信，`Add-Type` 在内存中编译，不受 SAC 约束。`scripts/statusbar-host.mjs` 先探测 Go 产物是否可运行，不可运行则回退到 PowerShell。
-
-窗口扩展样式（两个后端一致）：`WS_EX_NOACTIVATE | WS_EX_TRANSPARENT | WS_EX_TOOLWINDOW | WS_EX_TOPMOST | WS_EX_LAYERED`，实测 `exStyle=0x080800A8`。
-
-### 实现注意事项（踩过的坑）
-
-- **`ShowWindow` 必须从窗口自己的线程发起**。跨线程调用（含在消息循环启动前调用）会被静默丢弃，窗口不会显示。正确做法是 `PostMessage(hwnd, WM_APP_SHOW, ...)`，在 `WndProc` 里执行。
-- **`.ps1` 必须是 UTF-8 with BOM**。Windows PowerShell 5.1 按 ANSI(GBK) 读取无 BOM 文件，C# 源码里的中文字面量会被解成乱码并破坏字符串边界。
-- **`Add-Type` 里的 `DllImport` 必须显式 `CharSet.Unicode`**。`CreateFontIndirect` 漏写会解析到 ANSI 版本，传 LOGFONTW 布局导致字形被拉伸变形。`LOGFONT` 结构体本身也要标 `CharSet = CharSet.Unicode`，字段上的 `MarshalAs` 没有 `CharSet` 属性。
-- **PowerShell scriptblock 不能在没有 runspace 的线程上执行**。stdin 读取必须写在 C# 里用 `System.Threading.Thread`。
-- **`UIAutomationClient` / `UIAutomationTypes` 不在 GAC**，需从 `Framework64\v4.0.30319\WPF\` 按完整路径加载；`Rect` 需要额外引用 `WindowsBase.dll`。注意命名空间是 `System.Windows.Automation`，`UIAutomationClient` 只是程序集名。
+For a live check, point `APP_USE_HOME` at a prepared test broker and place the published Fixture at `fixture/Fixture.exe` under that directory. Run `pwsh -File tests/statusbar-live.ps1 -Work <evidence-directory>` from the Skill directory. The fixture holds a case in a wait, verifies native styles and geometry, and moves to a second display when one is available. Use `-RequireMixedDpi` for acceptance. The check fails if fewer than two displays are active or the capsule does not move between different effective DPI values. A null `secondaryDpi` in a diagnostic run means no secondary display was tested.
 
 ## Desktop UI automation（已验证）
 

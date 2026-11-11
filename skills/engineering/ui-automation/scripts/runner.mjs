@@ -68,6 +68,13 @@ export function validateCase(input){
 
 export async function runCase(client,input,options={}){
   let script;try{script=validateCase(input);}catch(e){return {status:'error',error:e.message};}
+  let identity;
+  const progress = action => {
+    try {
+      const {kind,hwnd,pid}=identity||{};
+      options.onProgress?.(kind==='desktop'?{action,hwnd,pid}:{action});
+    } catch { /* presentation cannot change the verdict */ }
+  };
   const secrets=[...script.prepare,...script.cleanup,...Object.values(script.states).map(s=>s.action).filter(Boolean)].map(a=>a.secretEnv?process.env[a.secretEnv]:undefined).filter(Boolean);
   const evidence=await Evidence.begin(script,{outDir:options.outDir,secrets,runtime:client.config?{version:client.config.version,pipe:client.config.pipe}:undefined});
   const budget=new AbortController(),timer=setTimeout(()=>budget.abort(Error('case timeout')),script.timeoutMs);
@@ -77,24 +84,28 @@ export async function runCase(client,input,options={}){
   const beginStep=ms=>{stepSignal=AbortSignal.any([signal,AbortSignal.timeout(ms)]);};
   const check=()=>{signal.throwIfAborted();if(steps>=script.maxSteps)throw Error('maximum steps reached');};
   const request=(method,p,timeoutMs=script.stepTimeoutMs)=>{stepSignal.throwIfAborted();return bounded(client.request(method,{session:script.session,...p},{signal:stepSignal,timeoutMs}),stepSignal);};
-  const observe=async()=>{last=await request('observe',script.observation||{});if(!last?.complete)throw Error('observation incomplete');evidence.event('observation',{observation:last});return last;};
+  const observe=async()=>{last=await request('observe',script.observation||{});if(!last?.complete)throw Error('observation incomplete');evidence.event('observation',{observation:last});if(!identity&&last.identity?.kind==='desktop'){identity=last.identity;progress('target');}return last;};
   async function perform(a){
     check();beginStep(script.stepTimeoutMs);steps++;const o=await observe(),actual={...a};delete actual.match;delete actual.toMatch;
     if(a.match)actual.target=resolveTarget(o,a.match,{allowSensitive:a.type==='fill'&&!!a.secretEnv}).id;
     if(a.toMatch)actual.to=resolveTarget(o,a.toMatch).id;
     if(a.secretEnv){actual.text=process.env[a.secretEnv];if(actual.text===undefined)throw Error('secret environment variable unavailable');actual.sensitive=true;delete actual.secretEnv;}
     evidence.event('action-request',{action:a,observation:o.id});
-    signal.throwIfAborted();const r=await request('act',{observation:o.id,action:actual});
+    signal.throwIfAborted();progress(a.type);const r=await request('act',{observation:o.id,action:actual});
     if(!r?.actionExecuted)throw Error('action execution unconfirmed');
     evidence.event('action',{action:a,result:r});last=r.observation;
   }
   try{
+    progress('start');
     for(const a of script.prepare)await perform(a);
     let id=script.start;
     while(!finished){
       check();const state=script.states[id];
       if(state.action){await perform(state.action);id=state.next;continue;}
-      beginStep(state.wait?.timeoutMs??state.judge?.timeoutMs??script.stepTimeoutMs);steps++;const o=await observe();
+      beginStep(state.wait?.timeoutMs??state.judge?.timeoutMs??script.stepTimeoutMs);steps++;
+      const category=kinds.find(kind=>Object.hasOwn(state,kind));
+      if(category!=='finish')progress(category);
+      const o=await observe();
       if(state.assert){const result=validateObservation(o,state.assert);evidence.event('assertion',{state:id,assertion:state.assert,...result});if(result.status==='fail'){status='fail';finished=true;}else if(result.status==='pass')passed.add(id);id=state.next;}
       else if(state.wait){
         const limit=state.wait.timeoutMs??script.stepTimeoutMs,interval=state.wait.intervalMs??100;
@@ -129,6 +140,7 @@ export async function runCase(client,input,options={}){
     // Never dispatch cleanup after cancellation or the case budget expires.
     if(!signal.aborted){
       beginStep(script.stepTimeoutMs);
+      progress('capture');
       try{await evidence.capture({request:(method,p)=>request(method,p)},script.session);}
       catch(e){evidence.event('evidence-error',{error:e.message});if(status==='pass'){status='unverified';error='screenshot evidence unavailable';}}
       for(const a of script.cleanup){try{await perform(a);}catch(e){evidence.event('cleanup-error',{error:e.message});if(status==='pass'){status='error';error='cleanup failed';}break;}}
@@ -136,5 +148,7 @@ export async function runCase(client,input,options={}){
     else {try{if(client.stop)await client.stop(script.session);else await client.request('stop',{session:script.session},{timeoutMs:1000});}catch(e){evidence.event('stop-error',{error:e.message});}}
     clearTimeout(timer);
   }
-  return evidence.finish(status,{error,steps,assertions:{required,passed:[...passed]},identity:last?.identity});
+  const report=await evidence.finish(status,{error,steps,assertions:{required,passed:[...passed]},identity:last?.identity});
+  progress(report.status);
+  return report;
 }

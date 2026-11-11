@@ -54,10 +54,10 @@ async function main() {
   const sb = new StatusBarHost();
   
   console.log('=== 启动状态条 ===');
-  await sb.start({ session: 'cleanup-demo' });
+  await sb.start({ task: '缓存清理演示' });
   
   // Phase 1: Armed
-  sb.push({ phase: 'armed', verb: 'prepare', target: '系统清理' });
+  sb.push({ action: 'start' });
   console.log('[status] armed: prepare');
   await sleep(1500);
   
@@ -71,7 +71,7 @@ async function main() {
   
   const results = [];
   for (const t of targets) {
-    sb.push({ phase: 'observe', verb: 'scan', target: t.label });
+    sb.push({ action: 'read' });
     console.log(`[status] observe: scan ${t.label}`);
     await sleep(300);
     
@@ -82,14 +82,13 @@ async function main() {
       continue;
     }
     
-    sb.push({ phase: 'act', verb: 'clean', target: t.label, actionExecuted: true });
+    sb.push({ action: 'wait' });
     console.log(`[status] act: clean ${t.label} (${(beforeSize / 1048576).toFixed(1)} MB)`);
     const result = await cleanDir(t.path, t.label);
     
-    sb.push({ phase: 'validate', verb: 'validate', target: t.label });
+    sb.push({ action: 'assert' });
     await sleep(300);
     
-    sb.push({ phase: 'verified', verb: 'done', target: t.label, goalVerified: true });
     console.log(`  Freed: ${(result.freed / 1048576).toFixed(1)} MB`);
     results.push(result);
     await sleep(500);
@@ -97,7 +96,7 @@ async function main() {
   
   // Summary
   const totalFreed = results.reduce((s, r) => s + r.freed, 0);
-  sb.push({ phase: 'verified', verb: 'complete', target: `释放 ${(totalFreed / 1073741824).toFixed(2)} GB` });
+  sb.push({ action: 'pass' });
   console.log(`\n[status] verified: complete, total freed: ${(totalFreed / 1073741824).toFixed(2)} GB`);
   await sleep(2000);
   

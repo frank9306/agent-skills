@@ -70,5 +70,5 @@ test('normal Chrome native bridge: existing session, controls, frames, files, ta
     const report=await evidence.finish('pass',{identity:o.identity,sharedState:'Controlled HttpOnly session set before attach and reused; fixture cookie cleaned. Original profile/tabs retained.',taskCreatedTabs:[tab.tabId,popup.tabId]});
     console.log(`Browser evidence: ${report.runDir}`);
   } catch(e){const r=await evidence.finish('error',{error:e.message});console.log(`Failed browser evidence: ${r.runDir}`);throw e;}
-  finally {if(session)await c.request('stop',{session,closeCreated:true}).catch(()=>{});c.close();await new Promise(r=>server.close(r));}
+  finally {if(session)await c.request('stop',{session,closeCreated:true}).catch(()=>{});c.close();await new Promise(resolve => { server.close(resolve); server.closeAllConnections(); });}
 });

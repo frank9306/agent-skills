@@ -57,10 +57,10 @@ console.log('=== app-use · Mole UI 自动化验证 ===\n');
 
 console.log('[1/4] 启动原生 Win32 状态栏...');
 await bar.start({
-    session: 'mole-cleanup',
+    task: 'Mole 清理',
     onError: (msg) => console.error('  [bar error]', msg),
 });
-bar.push({ phase: 'observe', verb: 'start', target: 'status bar' });
+bar.push({ action: 'start' });
 await sleep(600);
 
 console.log('[2/4] 启动 Mole UI 自动化驱动...');
@@ -89,7 +89,8 @@ child.stdout.on('data', (chunk) => {
         }
 
         if (evt.kind === 'status') {
-            bar.push({ phase: evt.phase, verb: evt.verb, target: evt.target });
+            const action = { preview: 'read', act: 'click', execute: 'wait', validate: 'assert' }[evt.phase];
+            if (action) bar.push({ action });
             console.log(`  [bar ${evt.phase}] ${evt.verb}${evt.target ? ' · ' + evt.target : ''}`);
             if (!captured && evt.phase === 'execute') {
                 captured = true;
@@ -115,6 +116,7 @@ const exitCode = await new Promise((resolve) => {
 console.log('\n[3/4] 驱动退出，code =', exitCode);
 
 console.log('[4/4] 停止状态栏...');
+bar.push({ action: result?.ok ? 'pass' : 'error' });
 await bar.stop();
 
 console.log('\n=== 结果 ===');

@@ -22,7 +22,7 @@ function connect() {
 }
 chrome.runtime.onMessage.addListener((message,_sender,reply)=>{
   if(message.type==='connect')connect();
-  reply({connected:!!connection,error,sessions:bridge.sessions.size});
+  reply({connected:!!connection,connecting:!!port&&!connection,error,sessions:bridge.sessions.size});
 });
 chrome.runtime.onInstalled.addListener(connect);
 chrome.runtime.onStartup.addListener(connect);
