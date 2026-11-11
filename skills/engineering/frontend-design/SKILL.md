@@ -7,6 +7,10 @@ description: Design, redesign, refine, review, and verify user interfaces for we
 
 Read the brief and project rules. Inspect the running surface and nearby screens, components, and tokens. Reuse the project’s PRODUCT.md, DESIGN.md, or equivalent when available. If the surface cannot run yet, use current code and trusted captures to guide decisions and record any missing acceptance evidence.
 
+## Apply the design standard
+
+Read and apply the [cross-platform UI design standard](references/platform-ui-standard.md) for every design, refinement, review, or UI acceptance task. Identify the actual target platform. Include all applicable requirements in the final-build acceptance checks. Consult official platform guidance when a relevant rule is missing or uncertain.
+
 ## Choose the scope
 
 - **Design or redesign.** Ground the visual direction in the audience, content, and intended action. For marketing, support the decision and next action. For tools, optimize task flow and scanning. For documentation, prioritize reading. For showcases, give the work room to lead. Choose hierarchy, layout, typography, color, imagery, and motion accordingly. Honor the brief and reuse relevant project components and tokens.

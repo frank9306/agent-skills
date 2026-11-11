@@ -62,6 +62,7 @@ None.
 | [ISSUE-0036](ISSUE-0036-add-reusable-team-delivery-runtime-and-measured-verification.md) | Add reusable team delivery runtime and measured verification |
 | [ISSUE-0037](ISSUE-0037-keep-frontend-design-as-compatibility-verification-alongside-impeccable.md) | Keep frontend-design as compatibility verification alongside Impeccable |
 | [ISSUE-0038](ISSUE-0038-unify-frontend-design-and-acceptance.md) | Unify personal frontend design and acceptance |
+| [ISSUE-0039](ISSUE-0039-adopt-cross-platform-ui-design-standard.md) | Adopt the cross-platform UI design standard |
 
 ## Cancelled
 
