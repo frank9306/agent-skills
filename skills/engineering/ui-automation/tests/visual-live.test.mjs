@@ -13,7 +13,7 @@ test('normal Chrome visual click reaches painted Canvas and raster-image control
   const server=http.createServer((req,res)=>{res.setHeader('Content-Type','text/html; charset=utf-8');res.end(html);});
   await new Promise(r=>server.listen(0,'127.0.0.1',r));
   const url=`http://127.0.0.1:${server.address().port}`,c=await AppClient.connect();let session;
-  const evidence=await Evidence.begin({version:1,id:'visual-browser-live',inputs:['skills/engineering/app-use/tests/visual-fixture.html','skills/engineering/app-use/tests/visual-live.test.mjs']});
+  const evidence=await Evidence.begin({version:1,id:'visual-browser-live',inputs:['skills/engineering/ui-automation/tests/visual-fixture.html','skills/engineering/ui-automation/tests/visual-live.test.mjs']});
   try {
     const {extensions}=await c.request('doctor');assert.ok(extensions.length,'normal Chrome bridge required');
     ({session}=await c.request('prepare',{kind:'browser',connection:extensions[0],createUrl:url,allowOrigins:[url]}));

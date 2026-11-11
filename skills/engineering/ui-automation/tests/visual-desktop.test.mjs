@@ -11,7 +11,7 @@ import {Evidence} from '../scripts/evidence.mjs';
 test('desktop visual screenshot locates a painted button with no per-button UIA node',async()=>{
   let app,c,session,evidence;
   try{
-    evidence=await Evidence.begin({version:1,id:'desktop-visual-painted',inputs:['skills/engineering/app-use/native/Fixture/Program.cs','skills/engineering/app-use/tests/visual-desktop.test.mjs']});
+    evidence=await Evidence.begin({version:1,id:'desktop-visual-painted',inputs:['skills/engineering/ui-automation/native/Fixture/Program.cs','skills/engineering/ui-automation/tests/visual-desktop.test.mjs']});
     c=await AppClient.connect();
     app=spawn(process.env.APP_USE_VISUAL_FIXTURE||path.join(stateRoot,'fixture/Fixture.exe'),['--visual'],{stdio:'ignore',windowsHide:false});
     let w;for(let i=0;i<60;i++){w=(await c.request('sessions',{discoverDesktop:true})).find(w=>w.pid===app.pid&&w.title==='app-use visual fixture');if(w)break;await new Promise(r=>setTimeout(r,100));}

@@ -9,7 +9,7 @@ import {createPageAdapter} from '../scripts/page-adapter.mjs';
 import {checkUI,verifyUIReport} from '../../frontend-design/scripts/check-ui.mjs';
 
 test('normal browser: frozen cases and unchanged layout checker detect defects and restoration',async()=>{
-  const input='skills/engineering/app-use/tests/fixtures/browser.html',html=await fs.readFile(input,'utf8');
+  const input='skills/engineering/ui-automation/tests/fixtures/browser.html',html=await fs.readFile(input,'utf8');
   const server=http.createServer((req,res)=>{res.setHeader('Content-Type','text/html; charset=utf-8');res.end(html);});await new Promise(r=>server.listen(0,'127.0.0.1',r));
   const url=`http://127.0.0.1:${server.address().port}`,c=await AppClient.connect();let session,page;
   const logs=[];

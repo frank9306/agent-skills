@@ -10,7 +10,7 @@ test('real UIA fixture: input/select/click/readback, stale and disabled guards, 
   const app = spawn(path.join(stateRoot, 'fixture/Fixture.exe'), [], { stdio:'ignore' });
   const c = await AppClient.connect();
   let session;
-  const evidence=await Evidence.begin({version:1,id:'windows-fixture',inputs:['skills/engineering/app-use/native/Fixture/Program.cs']});
+  const evidence=await Evidence.begin({version:1,id:'windows-fixture',inputs:['skills/engineering/ui-automation/native/Fixture/Program.cs']});
   try {
     let window;
     for (let i=0;i<40;i++) {

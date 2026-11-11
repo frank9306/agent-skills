@@ -7,7 +7,7 @@ import {Evidence,inspectRun} from '../scripts/evidence.mjs';
 
 test('real desktop focus preserves a maximized background target and verifies literal foreground HWND',async()=>{
   const a=await fixture('A'),c=await AppClient.connect();let session,b,bs;
-  const evidence=await Evidence.begin({version:1,id:'foreground-desktop',inputs:['skills/engineering/app-use/native/Fixture/ForegroundFixture.cs']});
+  const evidence=await Evidence.begin({version:1,id:'foreground-desktop',inputs:['skills/engineering/ui-automation/native/Fixture/ForegroundFixture.cs']});
   try {
     await a.state('maximize');b=await fixture('B');
     session=(await c.request('prepare',{kind:'desktop',hwnd:String(a.hwnd),pid:a.pid})).session;

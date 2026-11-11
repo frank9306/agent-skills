@@ -12,7 +12,7 @@ test('normal Chrome focus verifies the OS HWND, restores minimization and cleans
   const server=http.createServer((req,res)=>{res.setHeader('Content-Type','text/html; charset=utf-8');res.end(`<!doctype html><title>${title}</title><h1 id="build">app-use-focus-browser-v1</h1><button id="apply" onclick="document.querySelector('#result').textContent='Browser foreground action complete'">Apply focus fixture</button><output id="result">Pending</output>`);});
   await new Promise(r=>server.listen(0,'127.0.0.1',r));
   const url=`http://127.0.0.1:${server.address().port}`,c=await AppClient.connect();let session,ds,blocker;
-  const evidence=await Evidence.begin({version:1,id:'foreground-normal-chrome',inputs:['skills/engineering/app-use/tests/foreground-browser-live.test.mjs','skills/engineering/app-use/native/Fixture/ForegroundFixture.cs']});
+  const evidence=await Evidence.begin({version:1,id:'foreground-normal-chrome',inputs:['skills/engineering/ui-automation/tests/foreground-browser-live.test.mjs','skills/engineering/ui-automation/native/Fixture/ForegroundFixture.cs']});
   try {
     const {extensions}=await c.request('doctor');assert.ok(extensions.length,'normal Chrome bridge required');
     ({session}=await c.request('prepare',{kind:'browser',connection:extensions[0],createUrl:url,allowOrigins:[url]}));

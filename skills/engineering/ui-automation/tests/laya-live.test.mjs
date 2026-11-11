@@ -6,7 +6,7 @@ import {Evidence} from '../scripts/evidence.mjs';
 test('fixed official local Laya executes real inference, refuses overflow, and stops its worker',async()=>{
   const worker=process.env.APP_USE_LAYA_WORKER;
   const judge=worker?new LocalLaya(worker,process.env.APP_USE_LAYA_MODEL):await LocalLaya.create(process.env.APP_USE_LAYA_MODEL);
-  const e=await Evidence.begin({version:1,id:'laya-live',inputs:['skills/engineering/app-use/tests/laya-live.test.mjs']});
+  const e=await Evidence.begin({version:1,id:'laya-live',inputs:['skills/engineering/ui-automation/tests/laya-live.test.mjs']});
   const input={state:'The screen says: Result Ready. The Apply button is enabled and visible.',question:'Which screen state is directly described?',options:[{id:'ready',meaning:'The screen displays Result Ready and Apply is enabled.'},{id:'blocked',meaning:'The screen displays an error and Apply is disabled.'},{id:'unknown',meaning:'The available screen does not establish either state.'}]};
   try{
     const r=await judge.judge(input,{timeoutMs:60000});e.event('model',{request:input,reply:r});

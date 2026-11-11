@@ -23,7 +23,7 @@ Reusable Agent Skills for engineering, content, and service operations. Personal
 | [`diagnose-bug`](skills/engineering/diagnose-bug/SKILL.md) | Engineering | Reproduce a bug and determine its root cause. |
 | [`write-agent-docs`](skills/engineering/write-agent-docs/SKILL.md) | Engineering | Write concise, scoped project instructions for agents. |
 | [`frontend-design`](skills/engineering/frontend-design/SKILL.md) | Engineering | Design, refine, review, and verify frontend interfaces using the project’s design and acceptance contracts. |
-| [`app-use`](skills/engineering/app-use/SKILL.md) | Engineering | Operate the existing Chromium/Windows UI and replay bounded UI cases with local evidence. |
+| [`ui-automation`](skills/engineering/ui-automation/SKILL.md) | Engineering | Operate the existing Chromium/Windows UI and replay bounded UI cases with local evidence. |
 | [`dispatch-dsh-task`](skills/engineering/dispatch-dsh-task/SKILL.md) | Engineering | Dispatch audited my-knowledge work from Hermes to the restricted DSH runner. |
 | [`audit-codex-harness`](skills/engineering/audit-codex-harness/SKILL.md) | Engineering | Audit project-scoped Codex traces and score harness efficiency. |
 | [`read-web-content`](skills/content/read-web-content/SKILL.md) | Content | Read and extract useful content from public URLs with privacy-aware fallbacks. |
@@ -71,7 +71,7 @@ npx skills add frank9306/agent-skills --skill manage-cloudflare -g
 
 ## Validate
 
-The Skill validator uses Node.js 18+; the app-use runtime and its CLI require Node 20+ (see `skills/engineering/app-use/references/commands.md`). The complete acceptance suite also needs a supported dependency-cruiser runtime (Node 22.18+, 24, or 26+) and Python 3.10+ with the pinned test dependencies from requirements-dev.txt. Activate a project virtual environment before installing them; INIT_CHECKS_PYTHON may select an existing compatible Python environment for the checker tests. Native Hook and operating-system support still need their separate rollout evidence:
+The Skill validator uses Node.js 18+; the ui-automation runtime and its CLI require Node 20+ (see `skills/engineering/ui-automation/references/commands.md`). The complete acceptance suite also needs a supported dependency-cruiser runtime (Node 22.18+, 24, or 26+) and Python 3.10+ with the pinned test dependencies from requirements-dev.txt. Activate a project virtual environment before installing them; INIT_CHECKS_PYTHON may select an existing compatible Python environment for the checker tests. Native Hook and operating-system support still need their separate rollout evidence:
 
 ```bash
 python -m pip install -r requirements-dev.txt
@@ -88,7 +88,7 @@ The `init-checks` Skill adds project-owned executable contracts and two verifica
 
 Frontend browser acceptance also requires an existing Playwright runtime and Chromium. FRONTEND_PLAYWRIGHT_ROOT selects that runtime (default: this repository); FRONTEND_BROWSER_CHANNEL optionally selects installed chrome or msedge. Missing runtime fails rather than skipping tests. See the [frontend usage and migration guide](https://github.com/frank9306/ai-playbook/blob/main/docs/frontend-design.md).
 
-app-use browser acceptance is a separate path: it needs the installed unpacked MV3 extension and Native Messaging in the user's normal browser profile, not a Playwright runtime. Run `npm run test:app-use:live` for the opt-in real Chrome/Windows suites. The default `npm test` covers deterministic contracts only; a green run does not prove real-browser or real-desktop behavior. See [support and validation](skills/engineering/app-use/references/support.md) and the [status event contract](skills/engineering/app-use/references/status-events.md).
+ui-automation browser acceptance is a separate path: it needs the installed unpacked MV3 extension and Native Messaging in the user's normal browser profile, not a Playwright runtime. Run `npm run test:app-use:live` for the opt-in real Chrome/Windows suites. The default `npm test` covers deterministic contracts only; a green run does not prove real-browser or real-desktop behavior. See [support and validation](skills/engineering/ui-automation/references/support.md) and the [status event contract](skills/engineering/ui-automation/references/status-events.md).
 
 The static frontend verifier and article checks report review leads. They do not replace browser inspection, visual review, factual verification, accessibility checks, or project-owned test evidence.
 

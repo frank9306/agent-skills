@@ -1,9 +1,9 @@
 ---
-name: app-use
+name: ui-automation
 description: Operate the user's existing Chromium browser or Windows applications through structured targets and screenshot-bound visual clicks, and author or replay bounded UI tests with local evidence. Use for browser/desktop UI tasks and UI acceptance; ordinary HTTP, files and service APIs use their appropriate tools.
 ---
 
-# Application UI
+# UI Automation
 
 Use `node <skill>/scripts/app-use.mjs` for UI control. Read [commands](references/commands.md) for connection, target selection and actions. V1 requires Windows x64; the browser must load the supplied MV3 bridge into the user's existing profile. `doctor` and `sessions` establish actual readiness. An unavailable bridge is a prerequisite gap; never claim browser control from another profile or substitute a retired automation framework.
 

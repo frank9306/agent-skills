@@ -19,7 +19,7 @@ test('normal Chrome native bridge: existing session, controls, frames, files, ta
   });
   await new Promise(r=>server.listen(0,'0.0.0.0',r));
   const url=`http://127.0.0.1:${server.address().port}`,c=await AppClient.connect();
-  const evidence=await Evidence.begin({version:1,id:'browser-native-live',inputs:['skills/engineering/app-use/tests/browser-live.test.mjs']});
+  const evidence=await Evidence.begin({version:1,id:'browser-native-live',inputs:['skills/engineering/ui-automation/tests/browser-live.test.mjs']});
   let session;
   try {
     const doctor=await c.request('doctor');assert.ok(doctor.extensions.length,'real bridge must already be connected in normal Chrome');

@@ -1,0 +1,4 @@
+interface:
+  display_name: "UI Automation"
+  short_description: "Operate browser and Windows UI with verified local evidence"
+  default_prompt: "Use $ui-automation to operate this application and verify the requested result."
