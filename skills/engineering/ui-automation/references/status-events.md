@@ -1,6 +1,6 @@
 # Task capsule
 
-The capsule is an advisory progress display for one `app-use run`. A case starts after validation and stays visible through its actions, waits, assertions, capture, and cleanup. Individual commands remain available for diagnostics. Group a multi-action task into a frozen case to display its full lifetime. Use `--no-statusbar` for headless or intentionally silent runs.
+The capsule is an advisory progress display for one `app-use run`. A case starts after validation and stays visible through its actions, waits, assertions, capture, and cleanup. Individual commands are available for read-only preparation and diagnostics. Execute each GUI task in a single run, including visual decisions and the final verification. Use `--no-statusbar` only for headless test harnesses.
 
 The runner provides only the validated desktop HWND/PID, allowlisted action categories, and its final outcome. The renderer's stdin is private to its launcher and carries only those fields and the operator-supplied case ID. Use a short, non-sensitive case ID. Do not pass request payloads, page content, window titles, or credentials. The display has no authority over dispatch or verification. Only the runner's final `pass` shows “已验证”. Evidence is authoritative.
 

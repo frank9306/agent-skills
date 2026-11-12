@@ -1,6 +1,6 @@
 {
   "manifest_version": 3,
-  "name": "app-use bridge",
+  "name": "ui-automation",
   "version": "0.1.0",
   "minimum_chrome_version": "125",
   "key": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA9QA/QrOoFTqiylvtOTBqzBsjTn9DsCvIt924+041n09aqnkDk9HEbTyDO17Q6IzWsMK4AVmm3uZkuY0+5+++cl/UJx0/NZeuzSsfyHV6Mb5DGHRirnvziy/3TuqmipKve2O0DAy8mIbG86xLNZD7He1/57axmYfsFF5v5nBR/Vq0AJvLJSusJAeQCKZhAVdP/z47Ob7ZCKwDraMt1ubyGW3eMWSIq6zYE5VnF9UQN5HjpQ3zi8u1kXawyBvLkJrx44eRQEPtZ8T7AKyoHLO6FRlbMhtOOBt7RSxkSiJ/pZPnz18kRqSsYkbYOkn582dqBXAYwWBHvkFHJn+2q06/OwIDAQAB",
@@ -15,6 +15,20 @@
     "type": "module"
   },
   "action": {
-    "default_popup": "popup.html"
+    "default_popup": "popup.html",
+    "default_title": "ui-automation",
+    "default_icon": {
+      "16": "icons/bridge-16.png",
+      "32": "icons/bridge-32.png",
+      "48": "icons/bridge-48.png",
+      "128": "icons/bridge-128.png"
+    }
+  },
+  "description": "连接本机自动化服务，查看浏览器连接状态和活动会话。",
+  "icons": {
+    "16": "icons/bridge-16.png",
+    "32": "icons/bridge-32.png",
+    "48": "icons/bridge-48.png",
+    "128": "icons/bridge-128.png"
   }
 }

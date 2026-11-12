@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 import fs from 'node:fs/promises';
 import path from 'node:path';
+import {setTimeout as pause} from 'node:timers/promises';
 import { execFile } from 'node:child_process';
 import { promisify } from 'node:util';
 import { AppClient, prepareRuntime, skillRoot, stateRoot } from './client.mjs';
@@ -18,6 +19,20 @@ const COMMANDS = new Set(['doctor','prepare','sessions','observe','act','visual-
 
 const args = process.argv.slice(2), command = args.shift();
 let client, statusBar;
+
+async function chooseVisual(request,{signal}) {
+  const replyPath=request.image.path+'.reply.json';
+  console.error(JSON.stringify({kind:'visual-decision',...request,replyPath}));
+  for(;;){
+    signal.throwIfAborted();
+    try {
+      return JSON.parse(await fs.readFile(replyPath,{encoding:'utf8',signal}));
+    } catch(error) {
+      if(error.code!=='ENOENT')throw error;
+    }
+    await pause(100,undefined,{signal});
+  }
+}
 try {
   const flags = {};
   while (args.length) {
@@ -67,7 +82,7 @@ try {
         statusBar?.push(event);
       };
       try {
-        result = await runCase(client, p, { signal: controller.signal, outDir: flags['--out'], judge, onProgress });
+        result = await runCase(client, p, { signal: controller.signal, outDir: flags['--out'], judge, chooseVisual, onProgress });
       } finally { judge?.close(); }
     } else if (['doctor','sessions','prepare','observe','act','stop','visual-observe','visual-click'].includes(command)) {
       if (command === 'act' && p.action?.secretEnv) {

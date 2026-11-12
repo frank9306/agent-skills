@@ -72,3 +72,43 @@ test('task progress covers actions, assertions, evidence, cleanup and final verd
   assert.deepEqual(events[1], { action: 'click' });
   assert.equal(JSON.stringify(events).includes('Escape'), false);
 });
+
+test('one visual frame selects a route with a guarded click and multiple structured actions',async()=>{
+  const c=boundary(),request=c.request.bind(c),progress=[];
+  c.request=async(method,p)=>{
+    if(method==='visual-observe'){
+      c.calls.push([method,p]);
+      return {id:'frame',image:{mime:'image/png',width:100,height:100,data:'aW1hZ2U='}};
+    }
+    if(method==='visual-click'){
+      c.calls.push([method,p]);
+      return {actionExecuted:true};
+    }
+    return request(method,p);
+  };
+  const s=base({
+    route:{branch:{rules:[{when:{...goal,equals:'Unresolved'},next:'first'}],otherwise:'vision'}},
+    vision:{visual:{question:'Which route applies?',options:[{id:'apply',meaning:'Apply route',click:true,next:'first'}]}},
+    first:{action:{type:'click',match:{name:'Apply'}},next:'second'},
+    second:{action:{type:'read',match:{name:'Result'}},next:'verify'},
+    verify:{assert:goal,next:'done'},
+    done:{finish:'complete'}
+  });
+  const target={x:5,y:5,width:10,height:10,description:'Painted apply button'};
+  let requests=0;
+  const r=await runCase(c,s,{
+    outDir:await fs.mkdtemp(path.join(os.tmpdir(),'app-use-vision-')),
+    onProgress:e=>progress.push(e.action),
+    chooseVisual:async({image})=>{
+      requests++;
+      assert.equal(await fs.readFile(image.path,'utf8'),'image');
+      return {choice:'apply',target};
+    }
+  });
+  assert.equal(r.status,'pass',r.error);
+  assert.equal(requests,1);
+  assert.deepEqual(c.calls.filter(([m])=>['visual-click','act'].includes(m)).map(([m,p])=>[m,p.observation]),[
+    ['visual-click','frame'],['act','fresh'],['act','fresh']
+  ]);
+  assert.deepEqual(progress.filter(p=>['start','pass'].includes(p)),['start','pass']);
+});

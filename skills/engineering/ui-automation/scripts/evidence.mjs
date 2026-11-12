@@ -57,11 +57,14 @@ export class Evidence {
   }
   event(kind,value) { const event={at:new Date().toISOString(),kind,...this.clean(value)};appendFileSync(path.join(this.dir,'events.jsonl'),JSON.stringify(event)+'\n','utf8');this.report.events.push(event); }
   async capture(client,session,options={}) {
-    const image=await client.request('capture',{session,...options});
+    return this.saveImage(await client.request('capture',{session,...options}));
+  }
+  async saveImage(image) {
     const name=`capture-${this.report.artifacts.length}.${image.mime==='image/png'?'png':'jpg'}`;
     const data=Buffer.from(image.data,'base64');
     await fs.writeFile(path.join(this.dir,name),data);
     this.report.artifacts.push({path:name,sha256:digest(data)});
+    return path.join(this.dir,name);
   }
   async finish(status,detail={}) {
     this.report.status=status;Object.assign(this.report,this.clean(detail));this.report.ended=new Date().toISOString();

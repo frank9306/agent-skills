@@ -4,7 +4,7 @@ import {resolveTarget,validateObservation} from './assertions.mjs';
 import {Evidence} from './evidence.mjs';
 
 const hash=value=>createHash('sha256').update(JSON.stringify(value)).digest('hex');
-const kinds=['action','assert','wait','branch','judge','finish'];
+const kinds=['action','assert','wait','branch','judge','visual','finish'];
 const actionTypes=['click','invoke','fill','key','scroll','select','drag','read','focus','move','navigate','newTab','switchTab','scrollIntoView','files','dialog'];
 function fields(obj,allowed,label){if(!obj||typeof obj!=='object'||Array.isArray(obj))throw Error(`${label} must be an object`);for(const key of Object.keys(obj))if(!allowed.includes(key))throw Error(`unknown ${label} field: ${key}`);}
 function freeze(obj){if(obj&&typeof obj==='object'){Object.freeze(obj);for(const v of Object.values(obj))freeze(v);}return obj;}
@@ -58,8 +58,21 @@ export function validateCase(input){
     if(state.wait){fields(state.wait,['assertion','timeoutMs','intervalMs'],'wait');assertion(state.wait.assertion);if(state.wait.assertion.type==='not-applicable')throw Error('wait cannot be N/A');}
     if(state.branch){fields(state.branch,['rules','otherwise'],'branch');if(!Array.isArray(state.branch.rules)||!state.branch.rules.length)throw Error('branch rules required');for(const r of state.branch.rules){fields(r,['when','next'],'rule');assertion(r.when);if(r.when.type==='not-applicable')throw Error('rule cannot be N/A');next(r.next);}next(state.branch.otherwise);}
     if(state.judge){const j=state.judge;fields(j,['question','options','minProbability','timeoutMs'],'judge');if(!j.question?.trim()||!Array.isArray(j.options)||j.options.length<2||j.options.length>12||new Set(j.options.map(o=>o.id)).size!==j.options.length||!Number.isFinite(j.minProbability)||j.minProbability<=0||j.minProbability>1)throw Error('bounded judge declaration required');if(j.options.filter(o=>o.unknown===true).length!==1)throw Error('judge needs exactly one unknown candidate');for(const o of j.options){fields(o,['id','meaning','next','unknown'],'candidate');if(!/^[a-z][a-z0-9_-]{0,31}$/.test(o.id)||!o.meaning?.trim())throw Error('candidate id/meaning required');if(o.unknown){if(o.next!==undefined)throw Error('unknown cannot dispatch next');}else next(o.next);}}
-    if((state.branch||state.judge)&&state.next!==undefined)throw Error('branch/judge destinations must be declared only by candidates');
-    if(!state.branch&&!state.judge)next(state.next);
+    if(state.visual){
+      const {question,options,timeoutMs=55000}=state.visual;
+      fields(state.visual,['question','options','timeoutMs'],'visual state');
+      budget(timeoutMs,1,55000);
+      if(typeof question!=='string'||!question.trim()||!Array.isArray(options)||options.length<1||options.length>12)throw Error('bounded visual routes required');
+      const choices=new Set(['unknown']);
+      for(const option of options){
+        fields(option,['id','meaning','next','click'],'visual route');
+        if(typeof option.id!=='string'||!/^[a-z][a-z0-9_-]{0,31}$/.test(option.id)||choices.has(option.id)||typeof option.meaning!=='string'||!option.meaning.trim()||(option.click!==undefined&&typeof option.click!=='boolean'))throw Error('invalid visual route');
+        choices.add(option.id);
+        next(option.next);
+      }
+    }
+    if((state.branch||state.judge||state.visual)&&state.next!==undefined)throw Error('branch/judge destinations must be declared only by candidates');
+    if(!state.branch&&!state.judge&&!state.visual)next(state.next);
   }
   for(const name of ['prepare','cleanup']){s[name]??=[];if(!Array.isArray(s[name])||s[name].length>100)throw Error(`${name} must be a bounded action list`);s[name].forEach(action);}
   for(const state of Object.values(s.states)){if(state.wait){budget(state.wait.timeoutMs??s.stepTimeoutMs);budget(state.wait.intervalMs??100,10,1000);}if(state.judge)budget(state.judge.timeoutMs??60000);}
@@ -84,7 +97,49 @@ export async function runCase(client,input,options={}){
   const beginStep=ms=>{stepSignal=AbortSignal.any([signal,AbortSignal.timeout(ms)]);};
   const check=()=>{signal.throwIfAborted();if(steps>=script.maxSteps)throw Error('maximum steps reached');};
   const request=(method,p,timeoutMs=script.stepTimeoutMs)=>{stepSignal.throwIfAborted();return bounded(client.request(method,{session:script.session,...p},{signal:stepSignal,timeoutMs}),stepSignal);};
-  const observe=async()=>{last=await request('observe',script.observation||{});if(!last?.complete)throw Error('observation incomplete');evidence.event('observation',{observation:last});if(!identity&&last.identity?.kind==='desktop'){identity=last.identity;progress('target');}return last;};
+  const observe=async({retryIncomplete=false,interval=100,allowIncomplete=false}={})=>{
+    for(;;){
+      const observation=await request('observe',script.observation||{});
+      if(observation?.complete){
+        last=observation;
+        evidence.event('observation',{observation:last});
+        if(!identity&&last.identity?.kind==='desktop'){identity=last.identity;progress('target');}
+        return last;
+      }
+      evidence.event('observation-incomplete',{});
+      if(allowIncomplete)return null;
+      if(!retryIncomplete)throw Error('observation incomplete');
+      await pause(interval,undefined,{signal:stepSignal});
+    }
+  };
+  async function chooseVisual(state){
+    if(!options.chooseVisual)throw Error('visual decision handler unavailable');
+    const frame=await request('visual-observe',{});
+    const {data,...image}=frame?.image||{};
+    if(!frame?.id||image.mime!=='image/png'||!data)throw Error('visual observation returned no PNG');
+    const imagePath=await evidence.saveImage({mime:image.mime,data});
+    const {question,options:routes}=state.visual;
+    const reply=await bounded(options.chooseVisual({
+      question,image:{...image,path:imagePath},
+      options:routes.map(({id,meaning,click})=>({id,meaning,click:!!click}))
+    },{signal:stepSignal}),stepSignal);
+    fields(reply,['choice','target'],'visual reply');
+    const route=routes.find(option=>option.id===reply.choice);
+    evidence.event('visual-decision',{choice:reply.choice});
+    if(reply.choice==='unknown'&&reply.target===undefined)return null;
+    if(!route||!!route.click!==(reply.target!==undefined))throw Error('invalid visual choice or target');
+    if(route.click){
+      fields(reply.target,['x','y','width','height','description'],'visual target');
+      progress('click');
+      const result=await request('visual-click',{observation:frame.id,target:reply.target});
+      if(!result?.actionExecuted)throw Error('visual click execution unconfirmed');
+      evidence.event('visual-click',{choice:route.id,target:reply.target,result});
+    }else{
+      const fresh=await request('visual-observe',{});
+      if(fresh?.image?.data!==data||JSON.stringify(fresh.identity)!==JSON.stringify(frame.identity))throw Error('visual observation changed during judgment');
+    }
+    return route.next;
+  }
   async function perform(a){
     check();beginStep(script.stepTimeoutMs);steps++;const o=await observe(),actual={...a};delete actual.match;delete actual.toMatch;
     if(a.match)actual.target=resolveTarget(o,a.match,{allowSensitive:a.type==='fill'&&!!a.secretEnv}).id;
@@ -102,16 +157,25 @@ export async function runCase(client,input,options={}){
     while(!finished){
       check();const state=script.states[id];
       if(state.action){await perform(state.action);id=state.next;continue;}
-      beginStep(state.wait?.timeoutMs??state.judge?.timeoutMs??script.stepTimeoutMs);steps++;
+      beginStep((state.visual?(state.visual.timeoutMs??55000):(state.wait?.timeoutMs??state.judge?.timeoutMs??script.stepTimeoutMs)));steps++;
       const category=kinds.find(kind=>Object.hasOwn(state,kind));
-      if(category!=='finish')progress(category);
-      const o=await observe();
+      if(category!=='finish')progress(category==='visual'?'judge':category);
+      if(state.visual){
+        const next=await chooseVisual(state);
+        if(!next){status='unverified';error='unknown visual state';finished=true;}
+        else id=next;
+        continue;
+      }
+      const visualFallback=!!(state.branch&&script.states[state.branch.otherwise]?.visual);
+      const observationOptions={retryIncomplete:!!state.wait,interval:state.wait?.intervalMs??100,allowIncomplete:visualFallback};
+      const o=await observe(observationOptions);
+      if(!o){id=state.branch.otherwise;continue;}
       if(state.assert){const result=validateObservation(o,state.assert);evidence.event('assertion',{state:id,assertion:state.assert,...result});if(result.status==='fail'){status='fail';finished=true;}else if(result.status==='pass')passed.add(id);id=state.next;}
       else if(state.wait){
         const limit=state.wait.timeoutMs??script.stepTimeoutMs,interval=state.wait.intervalMs??100;
         if(!Number.isInteger(limit)||limit<1||limit>60000||!Number.isInteger(interval)||interval<10||interval>1000)throw Error('invalid wait budget');
         const until=Date.now()+limit;let current=o;
-        for(;;){const r=validateObservation(current,state.wait.assertion,{allowMissing:true});if(r.status==='pass')break;if(Date.now()>=until)throw Error('wait timed out');await pause(Math.min(interval,Math.max(1,until-Date.now())),undefined,{signal:stepSignal});current=await observe();}
+        for(;;){const r=validateObservation(current,state.wait.assertion,{allowMissing:true});if(r.status==='pass')break;if(Date.now()>=until)throw Error('wait timed out');await pause(Math.min(interval,Math.max(1,until-Date.now())),undefined,{signal:stepSignal});current=await observe(observationOptions);}
         evidence.event('wait',{state:id,status:'ready'});id=state.next;
       }
       else if(state.branch){let chosen=state.branch.otherwise;for(const rule of state.branch.rules)if(validateObservation(o,rule.when,{allowMissing:true}).status==='pass'){chosen=rule.next;break;}evidence.event('rule',{state:id,next:chosen});id=chosen;}
