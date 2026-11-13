@@ -1,7 +1,0 @@
-interface:
-  display_name: "Frontend Design"
-  short_description: "Design, refine, and verify user interfaces"
-  default_prompt: "Use $frontend-design to improve this interface and verify the affected behavior on the final build."
-
-policy:
-  allow_implicit_invocation: true

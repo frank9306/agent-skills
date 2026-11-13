@@ -22,7 +22,7 @@ Reusable Agent Skills for engineering, content, and service operations. Personal
 | [`review-architecture`](skills/engineering/review-architecture/SKILL.md) | Engineering | Review a codebase for evidence-backed structural problems. |
 | [`diagnose-bug`](skills/engineering/diagnose-bug/SKILL.md) | Engineering | Reproduce a bug and determine its root cause. |
 | [`write-agent-docs`](skills/engineering/write-agent-docs/SKILL.md) | Engineering | Write concise, scoped project instructions for agents. |
-| [`frontend-design`](skills/engineering/frontend-design/SKILL.md) | Engineering | Design, refine, review, and verify frontend interfaces using the project’s design and acceptance contracts. |
+| [`franks-design`](skills/engineering/franks-design/SKILL.md) | Engineering | Design new interfaces, redesign existing pages, and audit rendered UI using the Chinese Hallmark skill. |
 | [`franks-bot`](skills/engineering/franks-bot/SKILL.md) | Engineering | 执行 Windows 桌面操作及 UI 测试，浏览器任务转交环境默认工具。 |
 | [`dispatch-dsh-task`](skills/engineering/dispatch-dsh-task/SKILL.md) | Engineering | Dispatch audited my-knowledge work from Hermes to the restricted DSH runner. |
 | [`audit-codex-harness`](skills/engineering/audit-codex-harness/SKILL.md) | Engineering | Audit project-scoped Codex traces and score harness efficiency. |
@@ -61,7 +61,7 @@ npx skills add frank9306/agent-skills --skill review-code -g
 npx skills add frank9306/agent-skills --skill review-architecture -g
 npx skills add frank9306/agent-skills --skill diagnose-bug -g
 npx skills add frank9306/agent-skills --skill write-agent-docs -g
-npx skills add frank9306/agent-skills --skill frontend-design -g
+npx skills add frank9306/agent-skills --skill franks-design -g
 npx skills add frank9306/agent-skills --skill dispatch-dsh-task -g
 npx skills add frank9306/agent-skills --skill audit-codex-harness -g
 npx skills add frank9306/agent-skills --skill read-web-content -g
@@ -77,7 +77,7 @@ The Skill validator uses Node.js 18+. The complete acceptance suite also needs a
 python -m pip install -r requirements-dev.txt
 npm run check
 npm test
-node skills/engineering/frontend-design/scripts/verify-design.mjs <project-root>
+npm run test:franks-design
 python -m unittest discover -s skills/content/read-web-content/tests -p "test_*.py"
 python skills/content/write-articles/scripts/check_draft.py <draft.md>
 python skills/content/write-articles/scripts/check_image_specs.py <image.png> [...]
@@ -86,11 +86,11 @@ python -m unittest discover -s skills/engineering/audit-codex-harness/scripts/te
 
 The `init-checks` Skill adds project-owned executable contracts and two verification entry points, reusing existing tools. Preview setup with `python skills/engineering/init-checks/scripts/init_checks.py --project <absolute-project-root> --profile typescript|python --contract <absolute-contract-json> --full-command <json-argv> --plan`. Generated TypeScript checks use Node; generated Python checks use Python. The full wrapper always runs structure checks before the supplied project verification command. Its acceptance tests run with `npm run test:init-checks` and are included in `npm test` (the Python checker requires the pinned Import Linter environment); follow its setup instructions to validate a real project with a deliberate violation and subsequent repair. Project Hooks require native Codex trust, and required CI status checks must be enabled in the repository host before claiming merge protection.
 
-Frontend browser acceptance also requires an existing Playwright runtime and Chromium. FRONTEND_PLAYWRIGHT_ROOT selects that runtime (default: this repository); FRONTEND_BROWSER_CHANNEL optionally selects installed chrome or msedge. Missing runtime fails rather than skipping tests. See the [frontend usage and migration guide](https://github.com/frank9306/ai-playbook/blob/main/docs/frontend-design.md).
+The Hallmark render checks use Puppeteer and Chrome. See the [frank's design guide](https://github.com/frank9306/ai-playbook/blob/main/docs/franks-design.md) for setup and invocation.
 
 Windows 桌面实机验收使用 [franks-bot 执行参考](skills/engineering/franks-bot/references/windows-desktop.md)。
 
-The static frontend verifier and article checks report review leads. They do not replace browser inspection, visual review, factual verification, accessibility checks, or project-owned test evidence.
+The Hallmark static checks and article checks report review leads. They do not replace browser inspection, visual review, factual verification, accessibility checks, or project-owned test evidence.
 
 ## Structure
 
