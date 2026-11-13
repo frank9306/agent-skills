@@ -19,7 +19,6 @@ None.
 | ID | Title |
 |---|---|
 | [ISSUE-0019](ISSUE-0019-add-project-owned-deep-module-checks-and-codex-feedback.md) | Add project-owned deep-module checks and Codex feedback |
-| [ISSUE-0040](ISSUE-0040-ui-automation-task-capsule.md) | Keep the UI automation capsule visible for a full task |
 
 ## Blocked
 
@@ -64,7 +63,10 @@ None.
 | [ISSUE-0037](ISSUE-0037-keep-frontend-design-as-compatibility-verification-alongside-impeccable.md) | Keep frontend-design as compatibility verification alongside Impeccable |
 | [ISSUE-0038](ISSUE-0038-unify-frontend-design-and-acceptance.md) | Unify personal frontend design and acceptance |
 | [ISSUE-0039](ISSUE-0039-adopt-cross-platform-ui-design-standard.md) | Adopt the cross-platform UI design standard |
+| [ISSUE-0041](ISSUE-0041-franks-bot.md) | 封版并采用 franks-bot 桌面自动化 |
 
 ## Cancelled
 
-None.
+| ID | Title |
+|---|---|
+| [ISSUE-0040](ISSUE-0040-ui-automation-task-capsule.md) | Keep the UI automation capsule visible for a full task |

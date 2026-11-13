@@ -5,7 +5,6 @@
   "description": "Frank's reusable Agent Skills collection",
   "type": "module",
   "scripts": {
-    "test:ui-automation:desktop-guard": "node --test --test-concurrency=1 skills/engineering/ui-automation/tests/desktop-guard-live.test.mjs",
     "check": "node scripts/check-skills.mjs",
     "check:frontend": "node skills/engineering/frontend-design/scripts/verify-design.mjs .",
     "test:frontend": "node --test skills/engineering/frontend-design/tests/*.test.mjs",
@@ -16,13 +15,7 @@
     "test:manage-issues": "python -m unittest discover -s skills/engineering/manage-issues/scripts/tests -p \"test_*.py\"",
     "test:to-adr": "python -m unittest discover -s skills/engineering/to-adr/scripts/tests -p \"test_*.py\"",
     "test:ai-docs": "npm run test:init-docs && npm run test:manage-issues && npm run test:to-adr",
-    "test": "npm run test:frontend && npm run test:read-web-content && npm run test:dispatch-dsh-task && npm run test:audit-codex-harness && npm run test:ai-docs && npm run test:init-checks && npm run test:ui-automation",
-    "test:ui-automation": "node --test skills/engineering/ui-automation/tests/bridge.test.mjs skills/engineering/ui-automation/tests/runner.test.mjs skills/engineering/ui-automation/tests/evidence.test.mjs skills/engineering/ui-automation/tests/visual.test.mjs skills/engineering/ui-automation/tests/visual-cli.test.mjs skills/engineering/ui-automation/tests/foreground.test.mjs skills/engineering/ui-automation/tests/statusbar-client.test.mjs skills/engineering/ui-automation/tests/cli-flags.test.mjs skills/engineering/ui-automation/tests/evidence-runtime.test.mjs skills/engineering/ui-automation/tests/branch-missing.test.mjs skills/engineering/ui-automation/tests/statusbar-host.test.mjs skills/engineering/ui-automation/tests/desktop-task.test.mjs",
-    "test:ui-automation:live": "npm run test:ui-automation:foreground && npm run test:ui-automation:browser && npm run test:ui-automation:laya && npm run test:ui-automation:visual:browser",
-    "test:ui-automation:foreground": "node --test --test-concurrency=1 skills/engineering/ui-automation/tests/foreground-browser-live.test.mjs",
-    "test:ui-automation:browser": "node --test --test-concurrency=1 skills/engineering/ui-automation/tests/browser-live.test.mjs skills/engineering/ui-automation/tests/acceptance-live.test.mjs",
-    "test:ui-automation:laya": "node --test --test-concurrency=1 skills/engineering/ui-automation/tests/laya-live.test.mjs skills/engineering/ui-automation/tests/semantic-live.test.mjs",
-    "test:ui-automation:visual:browser": "node --test --test-concurrency=1 skills/engineering/ui-automation/tests/visual-live.test.mjs",
+    "test": "npm run test:frontend && npm run test:read-web-content && npm run test:dispatch-dsh-task && npm run test:audit-codex-harness && npm run test:ai-docs && npm run test:init-checks",
     "test:init-checks": "node --test skills/engineering/init-checks/tests/typescript.test.mjs && python -m unittest discover -s skills/engineering/init-checks/tests -p \"test_*.py\""
   },
   "engines": {

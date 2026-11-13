@@ -1,11 +1,11 @@
 ---
 id: ISSUE-0040
 title: "Keep the UI automation capsule visible for a full task"
-status: in-progress
+status: cancelled
 priority: medium
 created: 2026-11-11
-updated: 2026-11-11
-related_adrs: []
+updated: 2026-11-13
+closed: 2026-11-13
 depends_on: []
 ---
 
@@ -51,3 +51,10 @@ The CLI owns one capsule and one runner per GUI task. Read-only discovery can pr
 The MV3 manifest owns the toolbar name and PNG icon sizes. The popup owns the visual identity, connection status, session count, connection action and recovery controls. The extension key and existing service-worker message contract remain in place. Acceptance covers the toolbar entry, popup in light and dark themes at its normal and narrow widths, keyboard focus, and checking/offline/connecting/connected/error states. The real extension popup and native connection are the final integration checks.
 
 Verification: the final ui-automation manifest keeps the extension ID and permissions and declares four correctly sized icons. Isolated Edge loaded the real extension, displayed the new popup, and reported a connected native bridge. Browser fixture checks passed for 320/360 CSS px, light/dark themes, keyboard focus, offline/connecting/connected/error, and reload dispatch. Chrome rejected command-line extension loading in the isolated profile, so its actual toolbar popup remains unverified. All 54 configured app-use tests and the 28-Skill structure check passed. The installed extension files match the source.
+## Completion summary
+
+旧实现由 franks-bot 替换。
+
+## Activity log
+
+### 2026-11-13 — Status changed from in-progress to cancelled.

@@ -1,0 +1,3 @@
+interface:
+  display_name: "frank's-bot"
+  default_prompt: "用 $franks-bot 执行 Windows 桌面任务。"

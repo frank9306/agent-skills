@@ -1,7 +1,0 @@
-native/**/bin/
-native/**/obj/
-vendor/**/bin/
-vendor/**/obj/
-*.user
-.local/
-runs/
