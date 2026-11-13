@@ -39,8 +39,42 @@ test('a branch rule whose target is absent falls through to otherwise instead of
       done: { finish: 'complete' }
     }
   };
-  const outDir = await fs.mkdtemp(path.join(os.tmpdir(), 'app-use-branch-'));
+  const outDir = await fs.mkdtemp(path.join(os.tmpdir(), 'ui-automation-branch-'));
   const result = await runCase(boundary(), script, { outDir });
   assert.equal(result.status, 'pass');
   assert.ok(result.events.some(e => e.kind === 'rule' && e.next === 'goal'));
+});
+
+test('a stalled structured read routes to screenshot recognition after five seconds', async () => {
+  const script = {
+    version: 1, id: 'branch-timeout', session: 'controlled-session', start: 'decide',
+    stepTimeoutMs: 7000,
+    states: {
+      decide: { branch: { rules: [{ when: { target: { name: 'Result' }, property: 'value', equals: 'Ready' }, next: 'goal' }], otherwise: 'visual' } },
+      visual: { visual: { question: 'Is the goal visible?', options: [
+        { id: 'ready', meaning: 'Ready', next: 'goal' }
+      ] } },
+      goal: { assert: { target: { name: 'Result' }, property: 'value', equals: 'Ready' }, next: 'done' },
+      done: { finish: 'complete' }
+    }
+  };
+  const client = boundary();
+  const request = client.request;
+  let began, screenshot;
+  client.request = (method, ...args) => {
+    if (method === 'observe' && began === undefined) {
+      began = performance.now();
+      return new Promise(() => {});
+    }
+    if (method === 'visual-observe') {
+      screenshot ??= performance.now();
+      return Promise.resolve({ id: 'frame', image: { mime: 'image/png', data: 'YQ==' } });
+    }
+    return request(method, ...args);
+  };
+  const outDir = await fs.mkdtemp(path.join(os.tmpdir(), 'ui-automation-timeout-'));
+  const result = await runCase(client, script, { outDir, chooseVisual: async () => ({ choice: 'ready' }) });
+  assert.equal(result.status, 'pass', result.error);
+  assert.ok(screenshot - began >= 4800 && screenshot - began < 6500);
+  assert.ok(result.events.some(e => e.kind === 'observation-timeout'));
 });

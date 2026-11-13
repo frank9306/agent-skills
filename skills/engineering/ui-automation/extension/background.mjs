@@ -10,7 +10,7 @@ const bridge=new BrowserBridge(chrome,p=>new Promise((resolve,reject)=>{
 let port,error,connection;
 function connect() {
   if(port)return;
-  port=chrome.runtime.connectNative('com.frank9306.app_use');error=null;
+  port=chrome.runtime.connectNative('com.frank9306.ui_automation');error=null;
   port.onMessage.addListener(async message=>{
     if(message.connected){connection=message.connected;return;}
     if(message.nativeReply){const pending=nativePending.get(message.nativeReply);if(pending){nativePending.delete(message.nativeReply);clearTimeout(pending.timer);message.error?pending.reject(Error(message.error)):pending.resolve(message.result);}return;}

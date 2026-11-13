@@ -46,7 +46,7 @@ export class BrowserBridge {
   }
   async context(s,c) {
     if(c.isolatedId)return c;
-    const world=await this.command(s,'Page.createIsolatedWorld',{frameId:c.frameId,worldName:'app-use.v1',grantUniversalAccess:false},c.sessionId);
+    const world=await this.command(s,'Page.createIsolatedWorld',{frameId:c.frameId,worldName:'ui-automation.v1',grantUniversalAccess:false},c.sessionId);
     c.isolatedId=world.executionContextId;return c;
   }
   async evaluate(s,c,fn,args=[],byValue=true) {
@@ -383,7 +383,7 @@ export class BrowserBridge {
     }
     if(p.operation!=='eval')throw Error('unsupported adapter operation');
     if(typeof p.fn!=='string'||p.fn.length>20000)throw Error('bounded function required');
-    const args=(p.args||[]).map(a=>a?.__appUseHandle?{objectId:s.handles.get(a.__appUseHandle)||(()=>{throw Error('expired handle')})()}:{value:a});
+    const args=(p.args||[]).map(a=>a?.__uiAutomationHandle?{objectId:s.handles.get(a.__uiAutomationHandle)||(()=>{throw Error('expired handle')})()}:{value:a});
     let functionDeclaration;
     if(p.handle) {
       const h=s.handles.get(p.handle);if(!h)throw Error('expired handle');

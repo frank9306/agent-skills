@@ -1,9 +1,9 @@
 // Executed only in the extension's isolated world, never in the page's JS world.
 export function dom(operation, args = {}) {
-  const key=Symbol.for('app-use.dom.v1');
+  const key=Symbol.for('ui-automation.dom.v1');
   const state=globalThis[key]??(globalThis[key]={ids:new WeakMap(),nodes:new Map(),seq:0});
   function sensitive(el) {
-    for(let node=el;node;node=node.getRootNode()?.host)if(node.closest?.('input[type=password],[data-app-use-sensitive]'))return true;
+    for(let node=el;node;node=node.getRootNode()?.host)if(node.closest?.('input[type=password],[data-ui-automation-sensitive]'))return true;
     return false;
   }
   function text(el) {

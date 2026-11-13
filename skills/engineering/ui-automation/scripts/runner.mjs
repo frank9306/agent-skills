@@ -157,7 +157,8 @@ export async function runCase(client,input,options={}){
     while(!finished){
       check();const state=script.states[id];
       if(state.action){await perform(state.action);id=state.next;continue;}
-      beginStep((state.visual?(state.visual.timeoutMs??55000):(state.wait?.timeoutMs??state.judge?.timeoutMs??script.stepTimeoutMs)));steps++;
+      const visualFallback=!!(state.branch&&script.states[state.branch.otherwise]?.visual);
+      beginStep(visualFallback?Math.min(5000,script.stepTimeoutMs):(state.visual?(state.visual.timeoutMs??55000):(state.wait?.timeoutMs??state.judge?.timeoutMs??script.stepTimeoutMs)));steps++;
       const category=kinds.find(kind=>Object.hasOwn(state,kind));
       if(category!=='finish')progress(category==='visual'?'judge':category);
       if(state.visual){
@@ -166,9 +167,14 @@ export async function runCase(client,input,options={}){
         else id=next;
         continue;
       }
-      const visualFallback=!!(state.branch&&script.states[state.branch.otherwise]?.visual);
       const observationOptions={retryIncomplete:!!state.wait,interval:state.wait?.intervalMs??100,allowIncomplete:visualFallback};
-      const o=await observe(observationOptions);
+      let o;
+      try {
+        o=await observe(observationOptions);
+      } catch (error) {
+        if(!visualFallback||signal.aborted||!stepSignal.aborted)throw error;
+        evidence.event('observation-timeout',{state:id,next:state.branch.otherwise});
+      }
       if(!o){id=state.branch.otherwise;continue;}
       if(state.assert){const result=validateObservation(o,state.assert);evidence.event('assertion',{state:id,assertion:state.assert,...result});if(result.status==='fail'){status='fail';finished=true;}else if(result.status==='pass')passed.add(id);id=state.next;}
       else if(state.wait){

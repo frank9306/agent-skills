@@ -92,7 +92,6 @@ var (
 	setPosition       = user.NewProc("SetWindowPos")
 	showWindow        = user.NewProc("ShowWindow")
 	invalidate        = user.NewProc("InvalidateRect")
-	setRegion         = user.NewProc("SetWindowRgn")
 	drawText          = user.NewProc("DrawTextW")
 	createBrush       = gdi.NewProc("CreateSolidBrush")
 	createPen         = gdi.NewProc("CreatePen")
@@ -100,9 +99,7 @@ var (
 	deleteObject      = gdi.NewProc("DeleteObject")
 	selectObject      = gdi.NewProc("SelectObject")
 	compatibleDC      = gdi.NewProc("CreateCompatibleDC")
-	compatibleBitmap  = gdi.NewProc("CreateCompatibleBitmap")
 	deleteDC          = gdi.NewProc("DeleteDC")
-	bitBlt            = gdi.NewProc("BitBlt")
 )
 
 func wide(s string) *uint16              { return syscall.StringToUTF16Ptr(s) }
@@ -154,26 +151,19 @@ func reposition(window uintptr) {
 	}
 	placement, dpi = next, scale
 	w, h := next.right-next.left, next.bottom-next.top
+	surfaceMask = capsuleMask(w, h, max(1, px(1, dpi)))
 	setPosition.Call(window, ^uintptr(0), uintptr(next.left), uintptr(next.top), uintptr(w), uintptr(h), 0x0010)
-	region, _, _ := gdi.NewProc("CreateRoundRectRgn").Call(0, 0, uintptr(w+1), uintptr(h+1), uintptr(h), uintptr(h))
-	if ok, _, _ := setRegion.Call(window, region, 1); ok == 0 {
-		deleteObject.Call(region)
-	}
 	invalidate.Call(window, 0, 0)
 }
 
 func rgb(r, g, b uint32) uintptr { return uintptr(r | g<<8 | b<<16) }
 
-func shape(dc uintptr, api *syscall.LazyProc, bounds rect, fill, edge uintptr, corner int32) {
+func shape(dc uintptr, api *syscall.LazyProc, bounds rect, fill, edge uintptr) {
 	brush, _, _ := createBrush.Call(fill)
 	pen, _, _ := createPen.Call(0, 1, edge)
 	oldBrush, _, _ := selectObject.Call(dc, brush)
 	oldPen, _, _ := selectObject.Call(dc, pen)
-	args := []uintptr{dc, uintptr(bounds.left), uintptr(bounds.top), uintptr(bounds.right), uintptr(bounds.bottom)}
-	if corner > 0 {
-		args = append(args, uintptr(corner), uintptr(corner))
-	}
-	api.Call(args...)
+	api.Call(dc, uintptr(bounds.left), uintptr(bounds.top), uintptr(bounds.right), uintptr(bounds.bottom))
 	selectObject.Call(dc, oldPen)
 	selectObject.Call(dc, oldBrush)
 	deleteObject.Call(pen)
@@ -193,7 +183,7 @@ func text(dc uintptr, bounds rect, value string, size, weight int32, color, alig
 	deleteObject.Call(font)
 }
 
-func paint(dc uintptr) {
+func paint(dc uintptr, pixels []uint32) {
 	w, h := placement.right-placement.left, placement.bottom-placement.top
 	if w <= 0 || h <= 0 {
 		return
@@ -213,19 +203,19 @@ func paint(dc uintptr) {
 	if !connected {
 		accent, label = muted, "连接中断"
 	}
-	shape(dc, gdi.NewProc("RoundRect"), rect{0, 0, w, h}, bg, border, h)
+	fillSurface(pixels, surfaceMask, bg, border)
 	if connected && running(current.Action) {
 		paintLightband(dc, w, h, time.Since(started))
 	}
 	dotY := (h - sc(8)) / 2
-	shape(dc, gdi.NewProc("Ellipse"), rect{sc(16), dotY, sc(24), dotY + sc(8)}, accent, accent, 0)
+	shape(dc, gdi.NewProc("Ellipse"), rect{sc(16), dotY, sc(24), dotY + sc(8)}, accent, accent)
 	divider := w * 53 / 100
 	task := current.Task
 	if task == "" {
 		task = "自动化任务"
 	}
 	text(dc, rect{sc(34), 0, divider - sc(12), h}, task, 14, 600, fg, 0)
-	shape(dc, gdi.NewProc("Rectangle"), rect{divider, sc(12), divider + max(1, sc(1)), h - sc(12)}, border, border, 0)
+	shape(dc, gdi.NewProc("Rectangle"), rect{divider, sc(12), divider + max(1, sc(1)), h - sc(12)}, border, border)
 	actionRight := w - sc(14)
 	if w >= sc(350) {
 		actionRight = w - sc(64)
@@ -233,29 +223,6 @@ func paint(dc uintptr) {
 		text(dc, rect{w - sc(57), 0, w - sc(14), h}, fmt.Sprintf("%02d:%02d", elapsed/60, elapsed%60), 12, 400, muted, 2)
 	}
 	text(dc, rect{divider + sc(12), 0, actionRight, h}, label, 13, 400, muted, 0)
-}
-
-func paintBuffered(dc uintptr) {
-	width, height := placement.right-placement.left, placement.bottom-placement.top
-	if width <= 0 || height <= 0 {
-		return
-	}
-	buffer, _, _ := compatibleDC.Call(dc)
-	if buffer == 0 {
-		paint(dc)
-		return
-	}
-	defer deleteDC.Call(buffer)
-	bitmap, _, _ := compatibleBitmap.Call(dc, uintptr(width), uintptr(height))
-	if bitmap == 0 {
-		paint(dc)
-		return
-	}
-	old, _, _ := selectObject.Call(buffer, bitmap)
-	paint(buffer)
-	bitBlt.Call(dc, 0, 0, uintptr(width), uintptr(height), buffer, 0, 0, 0x00cc0020)
-	selectObject.Call(buffer, old)
-	deleteObject.Call(bitmap)
 }
 
 func windowProc(window uintptr, event uint32, w, l uintptr) uintptr {
@@ -304,15 +271,18 @@ func windowProc(window uintptr, event uint32, w, l uintptr) uintptr {
 		return 0
 	case wmPaint:
 		var state paintStruct
-		dc, _, _ := user.NewProc("BeginPaint").Call(window, uintptr(unsafe.Pointer(&state)))
-		paintBuffered(dc)
+		user.NewProc("BeginPaint").Call(window, uintptr(unsafe.Pointer(&state)))
 		user.NewProc("EndPaint").Call(window, uintptr(unsafe.Pointer(&state)))
+		if visible {
+			paintLayer(window)
+		}
 		return 0
 	case wmHitTest:
 		return ^uintptr(0)
 	case wmMouseActivate:
 		return 3
 	case wmDestroy:
+		surface.close()
 		user.NewProc("PostQuitMessage").Call(0)
 		return 0
 	}
@@ -355,7 +325,8 @@ func main() {
 		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
 	}
-	user.NewProc("SetLayeredWindowAttributes").Call(window, 0, 255, 2)
+	// Keep the animated overlay visible to the user and out of task screenshots.
+	user.NewProc("SetWindowDisplayAffinity").Call(window, 0x11) // WDA_EXCLUDEFROMCAPTURE
 	updateAnimationPreference()
 	user.NewProc("SetTimer").Call(window, 1, 33, 0)
 	go readStatus(window)

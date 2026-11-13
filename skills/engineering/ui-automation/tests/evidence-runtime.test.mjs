@@ -11,7 +11,7 @@ import { Evidence, inspectRun, runningBinary } from '../scripts/evidence.mjs';
 const digest = b => createHash('sha256').update(b).digest('hex');
 
 async function makeRun() {
-  const root = await fs.mkdtemp(path.join(os.tmpdir(), 'app-use-evidence-'));
+  const root = await fs.mkdtemp(path.join(os.tmpdir(), 'ui-automation-evidence-'));
   const project = path.join(root, 'project');
   await fs.mkdir(project);
   await fs.writeFile(path.join(project, 'input.txt'), 'hello');
@@ -69,14 +69,14 @@ test('runningBinary is null or a valid sha256 record', async () => {
 });
 
 test('runningBinary reads the published executable from runtime.json', async () => {
-  const root = await fs.mkdtemp(path.join(os.tmpdir(), 'app-use-runtime-'));
-  const exe = path.join(root, 'AppUse.exe');
+  const root = await fs.mkdtemp(path.join(os.tmpdir(), 'ui-automation-runtime-'));
+  const exe = path.join(root, 'ui-automation.exe');
   await fs.writeFile(exe, 'fake published broker');
   await fs.writeFile(path.join(root, 'runtime.json'), JSON.stringify({ executable: exe, pipe: 'test-pipe' }));
   const modPath = fileURLToPath(new URL('../scripts/evidence.mjs', import.meta.url));
   const code = `const m = await import(${JSON.stringify(pathToFileURL(modPath).href)}); console.log(JSON.stringify(await m.runningBinary()));`;
   const out = execFileSync(process.execPath, ['--input-type=module', '-e', code], {
-    env: { ...process.env, APP_USE_HOME: root }, encoding: 'utf8'
+    env: { ...process.env, UI_AUTOMATION_HOME: root }, encoding: 'utf8'
   });
   const binary = JSON.parse(out.trim());
   assert.equal(binary.sha256, digest('fake published broker'));

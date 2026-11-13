@@ -5,7 +5,7 @@ using System.Text;
 using System.Text.Json;
 using System.Text.Json.Nodes;
 
-namespace AppUse;
+namespace UiAutomation;
 
 internal sealed class Broker(string pipe)
 {
@@ -97,6 +97,7 @@ internal sealed class Broker(string pipe)
     async Task<JsonNode?> Dispatch(string method, JsonObject p)
     {
         if (method == "doctor") return JsonSerializer.SerializeToNode(new { version = "0.1.0", pipe, extensions = links.Keys.ToArray(), userScoped = true }, Json);
+        if (method == "desktop-windows") return new JsonArray(Desktop.Windows().ToArray());
         if (method == "sessions")
         {
             var result = new JsonArray();

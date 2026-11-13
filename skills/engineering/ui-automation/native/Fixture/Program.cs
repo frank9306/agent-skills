@@ -5,11 +5,11 @@ Application.SetHighDpiMode(HighDpiMode.PerMonitorV2);
 Application.EnableVisualStyles();
 if (args.Contains("--visual")) { Application.Run(new VisualFixture()); return; }
 if (args.Contains("--foreground")) { Application.Run(new ForegroundFixture(args)); return; }
-var form = new Form { Text = "app-use controlled fixture", Size = new Size(640, 460), StartPosition = FormStartPosition.CenterScreen };
+var form = new Form { Text = "ui-automation controlled fixture", Size = new Size(640, 460), StartPosition = FormStartPosition.CenterScreen };
 var menu = new MenuStrip();
 var file = new ToolStripMenuItem("Fixture");
 var dialog = new ToolStripMenuItem("Open dialog");
-dialog.Click += (_, _) => MessageBox.Show(form, "Controlled dialog", "app-use dialog", MessageBoxButtons.OK);
+dialog.Click += (_, _) => MessageBox.Show(form, "Controlled dialog", "ui-automation dialog", MessageBoxButtons.OK);
 file.DropDownItems.Add(dialog); menu.Items.Add(file); form.Controls.Add(menu);
 var input = new TextBox { AccessibleName = "Fixture input", Location = new Point(30, 70), Width = 240 };
 var select = new ComboBox { AccessibleName = "Fixture choice", Location = new Point(30, 120), Width = 240, DropDownStyle = ComboBoxStyle.DropDownList };
@@ -33,9 +33,9 @@ sealed class VisualFixture : Form
     Action? delayed;
     public VisualFixture()
     {
-        Text = "app-use visual fixture"; Size = new Size(640, 460); StartPosition = FormStartPosition.CenterScreen;
+        Text = "ui-automation visual fixture"; Size = new Size(640, 460); StartPosition = FormStartPosition.CenterScreen;
         AutoScaleMode = AutoScaleMode.Dpi;
-        var build = new Label { Text = "app-use-visual-desktop-v1", AutoSize = true, Location = new Point(30, 15) };
+        var build = new Label { Text = "ui-automation-visual-desktop-v1", AutoSize = true, Location = new Point(30, 15) };
         result = new TextBox { AccessibleName = "Visual result", ReadOnly = true, TabStop = false, Text = "Pending", Location = new Point(30, 230), Width = 400 };
         surface = new PaintedSurface { AccessibleName = "Painted surface", Location = new Point(30, 60), Size = new Size(460, 140) };
         surface.Activated += () => result.Text = "Painted action complete";

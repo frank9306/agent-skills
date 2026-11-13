@@ -19,8 +19,8 @@ test('normal Chrome visual click reaches painted Canvas and raster-image control
     ({session}=await c.request('prepare',{kind:'browser',connection:extensions[0],createUrl:url,allowOrigins:[url]}));
     let o=await c.request('observe',{session});
     await c.request('act',{session,observation:o.id,action:{type:'focus'}});
-    o=await c.request('observe',{session});assert.equal(resolveTarget(o,{selector:'#build'}).name,'app-use-visual-v1');
-    evidence.report.build={status:'verified',readback:'app-use-visual-v1'};
+    o=await c.request('observe',{session});assert.equal(resolveTarget(o,{selector:'#build'}).name,'ui-automation-visual-v1');
+    evidence.report.build={status:'verified',readback:'ui-automation-visual-v1'};
     for(const [selector,cx,cy,result,expected]of [['#surface',130,90,'#canvas-result','Canvas play selected'],['#raster',130,80,'#image-result','Image check selected']]) {
       o=await c.request('observe',{session});
       await c.request('act',{session,observation:o.id,action:{type:'scrollIntoView',target:resolveTarget(o,{selector}).id}});
@@ -43,7 +43,7 @@ test('normal Chrome visual click reaches painted Canvas and raster-image control
     await c.request('adapter',{session,operation:'eval',fn:'()=>document.querySelector("#repaint").click()'});
     await assert.rejects(c.request('visual-click',{session,observation:v.id,target:{x:10,y:10,width:20,height:20,description:'Old image'}}),/stale|consumed/);
     v=await c.request('visual-observe',{session});
-    // A repaint outside app-use must be caught by the actual screenshot comparison.
+    // A repaint outside ui-automation must be caught by the actual screenshot comparison.
     await c.request('adapter',{session,operation:'eval',fn:'()=>setTimeout(()=>{document.body.style.background="#ddeeff"},150)'});
     v=await c.request('visual-observe',{session});await new Promise(r=>setTimeout(r,250));
     await assert.rejects(c.request('visual-click',{session,observation:v.id,target:{x:10,y:10,width:20,height:20,description:'Changed image'}}),/changed/);

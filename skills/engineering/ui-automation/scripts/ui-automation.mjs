@@ -15,7 +15,7 @@ const KNOWN_FLAGS = new Set([
   '--runtime-dir','--register','--registration-dir','--model-source',
   '--model-out','--model-dir','--run','--no-statusbar'
 ]);
-const COMMANDS = new Set(['doctor','prepare','sessions','observe','act','visual-observe','visual-click','validate','run','inspect','stop']);
+const COMMANDS = new Set(['doctor','prepare','sessions','observe','act','visual-observe','visual-click','validate','run','desktop-task','inspect','stop']);
 
 const args = process.argv.slice(2), command = args.shift();
 let client, statusBar;
@@ -41,7 +41,7 @@ try {
     if (!KNOWN_FLAGS.has(key)) throw new Error('unknown flag: ' + key);
     flags[key] = args[0] && !args[0].startsWith('--') ? args.shift() : true;
   }
-  if (!COMMANDS.has(command)) throw new Error('commands: doctor prepare sessions observe act visual-observe visual-click validate run inspect stop; use --request JSON-file');
+  if (!COMMANDS.has(command)) throw new Error('commands: doctor prepare sessions observe act visual-observe visual-click validate run desktop-task inspect stop; use --request JSON-file');
   const p = flags['--request'] ? JSON.parse(await fs.readFile(flags['--request'], 'utf8')) : {};
   for (const k of ['session','kind','connection','hwnd','pid','tabId']) if (flags[`--${k}`] !== undefined) p[k] = ['pid','tabId'].includes(k) ? Number(flags[`--${k}`]) : flags[`--${k}`];
   if (command === 'visual-observe' && (typeof flags['--out'] !== 'string' || !flags['--out'].trim())) throw new Error('visual-observe requires --out <PNG-file>');
@@ -51,10 +51,12 @@ try {
     if (flags['--register']) {
       const id = (await fs.readFile(path.join(skillRoot, 'extension/extension-id.txt'),'utf8')).trim();
       const registrationDir=flags['--registration-dir']||stateRoot;await fs.mkdir(registrationDir,{recursive:true});
-      const manifest = path.join(registrationDir, 'com.frank9306.app_use.json');
-      await fs.writeFile(manifest, JSON.stringify({ name: 'com.frank9306.app_use', description: 'app-use current-user bridge', path: result.executable, type: 'stdio', allowed_origins: [`chrome-extension://${id}/`] }, null, 2));
+      const manifest = path.join(registrationDir, 'com.frank9306.ui_automation.json');
+      const executable = await fs.realpath(result.executable);
+      await fs.writeFile(manifest, JSON.stringify({ name: 'com.frank9306.ui_automation', description: 'ui-automation current-user bridge', path: executable, type: 'stdio', allowed_origins: [`chrome-extension://${id}/`] }, null, 2));
+      const manifestPath = await fs.realpath(manifest);
       for (const browser of ['Google\\Chrome','Microsoft\\Edge']) {
-        await execute('reg.exe', ['ADD', `HKCU\\Software\\${browser}\\NativeMessagingHosts\\com.frank9306.app_use`, '/ve', '/t', 'REG_SZ', '/d', manifest, '/f'], { windowsHide: true });
+        await execute('reg.exe', ['ADD', `HKCU\\Software\\${browser}\\NativeMessagingHosts\\com.frank9306.ui_automation`, '/ve', '/t', 'REG_SZ', '/d', manifestPath, '/f'], { windowsHide: true });
       }
       result = { ...result, extensionId: id, loadUnpacked: path.join(skillRoot, 'extension'), registered: 'HKCU Chrome and Edge' };
     }
@@ -62,30 +64,47 @@ try {
     const {prepareModel}=await import('./model-cache.mjs');result=await prepareModel(flags['--model-source'],flags['--model-out']?{out:flags['--model-out']}:{});
   } else if (command === 'inspect') {
     const { inspectRun } = await import('./evidence.mjs'); result = await inspectRun(flags['--run']);
+  } else if (command === 'desktop-task') {
+    if (!/^\d+$/.test(String(p.hwnd)) || !Number.isSafeInteger(p.pid) || p.pid < 1)
+      throw new Error('desktop-task requires --hwnd and --pid');
+    const { runDesktopTask } = await import('./desktop-task.mjs');
+    const controller = new AbortController();
+    process.once('SIGINT', () => controller.abort());
+    process.once('SIGTERM', () => controller.abort());
+    result = await runDesktopTask({
+      connect: () => AppClient.connect({ desktop: true }),
+      capsule: new StatusBarHost(),
+      target: { hwnd: p.hwnd, pid: p.pid },
+      input: process.stdin,
+      emit: event => console.log(JSON.stringify(event)),
+      signal: AbortSignal.any([controller.signal, AbortSignal.timeout(15 * 60 * 1000)]),
+      onError: message => console.error('Capsule: ' + message),
+    });
   } else {
+    const runner = command === 'run' ? await import('./runner.mjs') : undefined;
+    if (runner) {
+      runner.validateCase(p);
+      if (flags['--no-statusbar'] !== true && process.platform === 'win32') {
+        statusBar = new StatusBarHost();
+        statusBar.start({ task: p.id, onError: message => console.error('Capsule: ' + message) });
+        statusBar.push({ action: 'start' });
+      }
+    }
     client = await AppClient.connect();
     if (command === 'validate') {
       const observation = await client.request('observe', { session: p.session });
       result = validateObservation(observation, p.assertion);
     } else if (command === 'run') {
-      const { runCase } = await import('./runner.mjs');
       const { LocalLaya } = await import('./laya.mjs');
       const controller = new AbortController();
       process.once('SIGINT', () => controller.abort(new Error('stopped')));
       const judge=Object.values(p.states||{}).some(s=>s.judge)?await LocalLaya.create(flags['--model-dir']):undefined;
-      const onProgress = event => {
-        if (flags['--no-statusbar'] === true || process.platform !== 'win32') return;
-        if (event.action === 'start') {
-          statusBar = new StatusBarHost();
-          statusBar.start({ task: p.id, onError: message => console.error('Capsule: ' + message) });
-        }
-        statusBar?.push(event);
-      };
+      const onProgress = event => statusBar?.push(event);
       try {
-        result = await runCase(client, p, { signal: controller.signal, outDir: flags['--out'], judge, chooseVisual, onProgress });
+        result = await runner.runCase(client, p, { signal: controller.signal, outDir: flags['--out'], judge, chooseVisual, onProgress });
       } finally { judge?.close(); }
     } else if (['doctor','sessions','prepare','observe','act','stop','visual-observe','visual-click'].includes(command)) {
-      if (command === 'act' && p.action?.secretEnv) {
+      if (['act','visual-click'].includes(command) && p.action?.secretEnv) {
         const secret = process.env[p.action.secretEnv];
         if (secret === undefined) throw new Error('secret environment variable unavailable');
         p.action.text = secret;p.action.sensitive=true; delete p.action.secretEnv;

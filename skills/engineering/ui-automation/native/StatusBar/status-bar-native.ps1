@@ -1,4 +1,4 @@
-﻿# status-bar-native.ps1 - Native Win32 overlay status bar for app-use
+﻿# status-bar-native.ps1 - Native Win32 overlay status bar for ui-automation
 #
 # Creates a topmost, no-activate, click-through, tool-window overlay using
 # Win32 CreateWindowEx + GDI rendering. Functionally identical to the Go
@@ -30,7 +30,7 @@ using System.Text;
 using System.Threading;
 using System.Web.Script.Serialization;
 
-public static class AppUseStatusBar
+public static class UiAutomationStatusBar
 {
     // ---- Win32 constants ----
     public const uint WS_EX_NOACTIVATE  = 0x08000000;
@@ -573,7 +573,7 @@ public static class AppUseStatusBar
         S.barW = barW; S.barH = barH; S.radius = radius;
         S.perimeter = 2 * (barW - 2 * radius) + 2 * (barH - 2 * radius) + 2 * Math.PI * radius;
 
-        string className = "AppUseStatusBar";
+        string className = "UiAutomationStatusBar";
         IntPtr hInst = GetModuleHandle(null);
 
         wndProcKeepAlive = new WndProcDelegate(WndProc);
@@ -718,12 +718,12 @@ Add-Type -TypeDefinition $nativeSrc -Language CSharp -ReferencedAssemblies Syste
 Write-Host "[status-bar] Native Win32 helper compiled"
 
 # --- Create the overlay window ---
-$rc = [AppUseStatusBar]::Create()
+$rc = [UiAutomationStatusBar]::Create()
 if ($rc -ne 0) { exit $rc }
 
 # --- Stdin reader (dedicated .NET thread inside the native helper) ---
-[AppUseStatusBar]::StartReader()
+[UiAutomationStatusBar]::StartReader()
 
 Write-Host "[status-bar] Entering message loop..."
-[AppUseStatusBar]::RunMessageLoop()
+[UiAutomationStatusBar]::RunMessageLoop()
 Write-Host "[status-bar] Message loop exited."

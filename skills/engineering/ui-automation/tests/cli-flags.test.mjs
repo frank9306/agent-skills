@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 
-const cli = fileURLToPath(new URL('../scripts/app-use.mjs', import.meta.url));
+const cli = fileURLToPath(new URL('../scripts/ui-automation.mjs', import.meta.url));
 
 function run(args) {
   const r = spawnSync(process.execPath, [cli, ...args], { encoding: 'utf8', timeout: 10000 });

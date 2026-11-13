@@ -6,7 +6,7 @@ import {setTimeout as pause} from 'node:timers/promises';
 export async function createPageAdapter(client,session,{timeoutMs=15000,signal}={}) {
   const rpc=p=>client.request('adapter',{session,...p},{timeoutMs,signal});
   const handles=new Set();
-  const arg=v=>v instanceof Handle?{__appUseHandle:v.id}:v;
+  const arg=v=>v instanceof Handle?{__uiAutomationHandle:v.id}:v;
   class Handle {
     constructor(id){this.id=id;handles.add(this);}
     evaluate(fn,value){if(!handles.has(this))throw Error('handle disposed');return rpc({operation:'eval',handle:this.id,fn:fn.toString(),args:[arg(value)]});}

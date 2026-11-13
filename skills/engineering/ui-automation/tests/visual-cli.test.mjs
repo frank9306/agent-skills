@@ -8,10 +8,10 @@ import {skillRoot} from '../scripts/client.mjs';
 import net from 'node:net';
 import {randomUUID} from 'node:crypto';
 
-const execute=promisify(execFile),cli=path.join(skillRoot,'scripts/app-use.mjs');
+const execute=promisify(execFile),cli=path.join(skillRoot,'scripts/ui-automation.mjs');
 test('visual CLI requires an explicit output file before accessing the runtime',async()=>{
   const missing=path.join(skillRoot,'.local','missing-visual-cli-config');
-  const error=await execute(process.execPath,[cli,'visual-observe','--session','fixture'],{env:{...process.env,APP_USE_HOME:missing}}).then(()=>null,e=>e);
+  const error=await execute(process.execPath,[cli,'visual-observe','--session','fixture'],{env:{...process.env,UI_AUTOMATION_HOME:missing}}).then(()=>null,e=>e);
   assert.equal(error?.code,2);
   const result=JSON.parse(error.stdout);
   assert.match(result.error,/--out.*PNG/);
@@ -20,7 +20,7 @@ test('visual CLI requires an explicit output file before accessing the runtime',
 test('visual CLI saves the exact screenshot without base64 output or overwriting a file',async()=>{
   await fs.mkdir(path.join(skillRoot,'.local'),{recursive:true});
   const dir=await fs.mkdtemp(path.join(skillRoot,'.local','visual-cli-'));
-  const pipe='AppUse-cli-test-'+randomUUID(),methods=[];
+  const pipe='UiAutomation-cli-test-'+randomUUID(),methods=[];
   const png=Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+aHioAAAAASUVORK5CYII=','base64');
   const server=net.createServer(socket=>{
     let input='';socket.setEncoding('utf8');socket.on('data',chunk=>{
@@ -31,7 +31,7 @@ test('visual CLI saves the exact screenshot without base64 output or overwriting
   });
   await new Promise((resolve,reject)=>{server.once('error',reject);server.listen('\\\\.\\pipe\\'+pipe,resolve);});
   await fs.writeFile(path.join(dir,'runtime.json'),JSON.stringify({pipe,executable:'not-needed'}),'utf8');
-  const out=path.join(dir,'observed.png'),env={...process.env,APP_USE_HOME:dir};
+  const out=path.join(dir,'observed.png'),env={...process.env,UI_AUTOMATION_HOME:dir};
   try {
     const {stdout}=await execute(process.execPath,[cli,'visual-observe','--session','fixture','--out',out],{env});
     const result=JSON.parse(stdout);

@@ -1,11 +1,11 @@
 using System.Security.Principal;
 using System.IO;
 using System.Text.Json;
-using AppUse;
+using UiAutomation;
 
 if (!OperatingSystem.IsWindows()) return 2;
 var build = Convert.ToHexStringLower(System.Security.Cryptography.SHA256.HashData(await File.ReadAllBytesAsync(typeof(Broker).Assembly.Location)))[..12];
-var pipe = "AppUse-v1-" + WindowsIdentity.GetCurrent().User!.Value + "-" + build;
+var pipe = "UiAutomation-v1-" + WindowsIdentity.GetCurrent().User!.Value + "-" + build;
 try
 {
     if (args.Contains("--serve")) { await new Broker(pipe).Run(); return 0; }

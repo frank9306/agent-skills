@@ -5,13 +5,13 @@ using System.Security.Principal;
 using System.Text;
 using System.Text.Json.Nodes;
 
-namespace AppUse;
+namespace UiAutomation;
 
 internal static class Foreground
 {
     public static JsonObject Activate(nint hwnd, Action guard)
     {
-        using var input = new Mutex(false, "Local\\AppUse-input-" + WindowsIdentity.GetCurrent().User!.Value);
+        using var input = new Mutex(false, "Local\\UiAutomation-input-" + WindowsIdentity.GetCurrent().User!.Value);
         try { if (!input.WaitOne(3000)) throw new IOException("foreground input busy"); }
         catch (AbandonedMutexException) { }
         try { return ActivateLocked(hwnd, guard); }
@@ -69,7 +69,7 @@ internal static class Foreground
     public static JsonObject ActivateBrowser(string marker, Action guard)
     {
         if (!Guid.TryParseExact(marker, "D", out _)) throw new IOException("invalid browser activation marker");
-        var prefix = "app-use focus " + marker;
+        var prefix = "ui-automation focus " + marker;
         var until = Stopwatch.StartNew();
         while (until.ElapsedMilliseconds < 1500) {
             guard(); var matches = new List<nint>();

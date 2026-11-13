@@ -8,13 +8,14 @@ import { fileURLToPath } from 'node:url';
 import { randomUUID } from 'node:crypto';
 
 export const skillRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
-export const stateRoot = process.env.APP_USE_HOME || path.join(process.env.LOCALAPPDATA || os.homedir(), 'app-use');
+export const stateRoot = process.env.UI_AUTOMATION_HOME || path.join(process.env.LOCALAPPDATA || os.homedir(), 'ui-automation');
 const execute = promisify(execFile);
 
 export class AppClient {
   constructor(config) { this.config = config; }
   static async connect(options = {}) {
-    const config = options.config || JSON.parse(await fs.readFile(path.join(stateRoot, 'runtime.json'), 'utf8'));
+    const saved = options.config || JSON.parse(await fs.readFile(path.join(stateRoot, 'runtime.json'), 'utf8'));
+    const config = options.desktop ? saved.desktopRuntime ?? saved : saved;
     const client = new AppClient(config);
     try { await client.open(); }
     catch {
@@ -70,10 +71,10 @@ export class AppClient {
 }
 
 export async function prepareRuntime({ dotnet = 'dotnet', out = path.join(stateRoot, 'runtime', String(Date.now())), laya=false, packages, source } = {}) {
-  if (process.platform !== 'win32' || process.arch !== 'x64') throw new Error('app-use v1 requires Windows x64');
+  if (process.platform !== 'win32' || process.arch !== 'x64') throw new Error('ui-automation v1 requires Windows x64');
   await fs.mkdir(out, { recursive: true });
-  await execute(dotnet, ['publish', path.join(skillRoot, 'native/AppUse/AppUse.csproj'), '-c', 'Release', '-r', 'win-x64', '--self-contained', 'true', '-o', out], { windowsHide: true, maxBuffer: 4_000_000 });
-  const executable = path.join(out, 'AppUse.exe');
+  await execute(dotnet, ['publish', path.join(skillRoot, 'native/UiAutomation/ui-automation.csproj'), '-c', 'Release', '-r', 'win-x64', '--self-contained', 'true', '-o', out], { windowsHide: true, maxBuffer: 4_000_000 });
+  const executable = path.join(out, 'ui-automation.exe');
   await fs.copyFile(path.join(skillRoot, 'extension/extension-id.txt'), path.join(out, 'extension-id.txt'));
   const { stdout } = await execute(executable, ['--doctor'], { windowsHide: true });
   const identity = JSON.parse(stdout);

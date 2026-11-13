@@ -5,7 +5,7 @@ using System.IO.Pipes;
 using System.Text;
 using System.Text.Json.Nodes;
 
-namespace AppUse;
+namespace UiAutomation;
 
 internal static class NativeBridge
 {
