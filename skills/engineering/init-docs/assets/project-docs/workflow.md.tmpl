@@ -25,3 +25,13 @@ Before implementation, read the project-owned architecture contract and fast/ful
 Continue to the next stage while the original user-authorized goal remains incomplete. A design or newly created Issue does not complete an implementation request; discussion and design alone do not authorize implementation. Projects using another tracker retain that lifecycle and the same conditional design, structure-check, and review gates without requiring this documentation workspace.
 
 Do not create separate Spec or Ticket files. Keep desired behavior and acceptance criteria in each self-contained Issue.
+
+## Prevent defect recurrence
+
+For each defect fix, determine before final verification why the project missed the defect. Reuse and run existing coverage when it can reliably catch the original failure. For each confirmed gap, choose the smallest applicable action within the authorized scope.
+
+- **Observable behavior.** Add a focused regression test at a stable public entry point. When reproducible, use TDD to observe the intended failure before the fix and a pass afterward.
+- **Mechanically verifiable project constraint.** Extend an existing lint, structure, or CI check when appropriate. If the project needs a new check mechanism, identify what it would catch and follow the project's process for adding it.
+- **Missing durable project knowledge.** Record the verified rule in the project document that owns it. Add concise guidance or a pointer to the applicable `AGENTS.md` when future agents need it while working.
+
+Record the action and evidence in the existing task record or final report. If existing coverage suffices, the cause is unclear, or no additional action is warranted, state the reason.

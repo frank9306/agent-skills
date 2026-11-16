@@ -65,6 +65,7 @@ None.
 | [ISSUE-0039](ISSUE-0039-adopt-cross-platform-ui-design-standard.md) | Adopt the cross-platform UI design standard |
 | [ISSUE-0041](ISSUE-0041-franks-bot.md) | 封版并采用 franks-bot 桌面自动化 |
 | [ISSUE-0042](ISSUE-0042-replace-frontend-design-skill-with-franks-design.md) | Replace frontend design skill with franks-design |
+| [ISSUE-0043](ISSUE-0043-add-fix-recurrence-prevention-to-project-docs.md) | Add fix recurrence prevention to project docs |
 
 ## Cancelled
 
