@@ -16,11 +16,11 @@
 }
 ```
 
-Windows 选择器支持 `name`、`controlId`、`kind`、`key` 动作用 `keys`，托盘动作使用 `target.trayArgs` 传单步入口的参数。用 `textEnv` 指定敏感输入的环境变量名。原生断言包括控件 `count`、`equals`、`enabled`，以及 `visibleWindow`、`file`、`all`。默认回读限时 2 秒，步骤可设置 `timeoutMs`。一个桌面测试任务只启动一次浮层。输入动作派发前后都写日志，完成以断言通过为准。
+Windows 选择器支持 `name`、`controlId`、`kind`、`key` 动作用 `keys`，托盘动作使用 `target.trayArgs` 传单步入口的参数。用 `textEnv` 指定敏感输入的环境变量名。原生断言包括控件 `count`、`equals`、`enabled`，以及 `visibleWindow`、`file`、`all`。默认回读限时 2 秒，步骤可设置 `timeoutMs`。同一任务只启动一次任务级浮层。输入动作派发前后都写日志，完成以断言通过为准。
 
-多个已知步骤写入同一份用例，执行一次 `session.py`。遇到等待人工操作、分批验收或运行时获取的原生弹窗时，在一个长驻 Python 进程内持有同一个 `DesktopTarget`。分批调用 `run_case(case, target, output, finalize=False)`，每批写入独立输出目录。等待时用 `target.feedback("wait", message)` 更新说明。用 `target.bind_window(spec)` 按实际 HWND、PID 和程序路径绑定已观察到的弹窗或回到主窗口。只在整场结束时发送 `success`、`failure` 或 `cancel`，然后关闭目标。整个桌面测试保持默认反馈开启。
+多个已知步骤写入同一份用例，执行一次 `session.py`。遇到步骤需动态决定、等待人工操作、分批执行或切换软件、窗口与屏幕时，在一个长驻 Python 进程内持有同一个 `DesktopTarget`。分批调用 `run_case(case, target, output, finalize=False)`，每批写入独立输出目录。等待时用 `target.feedback("wait", message)` 更新说明。用 `target.bind_window(spec)` 按实际 HWND、PID 和程序路径绑定已观察到的新目标窗口，包括不同软件的窗口和原生弹窗。原窗口关闭或目标未就绪时维持浮层，并显示等待状态。切换后核验状态栏已跟到目标屏幕且鼠标光圈仍跟随指针，再操作新目标。只在整场结束时发送 `success`、`failure` 或 `cancel`，然后关闭目标。整个任务必须保持反馈开启，禁止使用 `noFeedback`。
 
-浏览器对象使用 `kind: chromium`、`webSocketDebuggerUrl`（本机具体页面的授权调试端点）及 `url`（准确 URL）。选择器支持 `css` 或可访问 `name`。断言可按 `text`、选择器的 `count` 或 `equals` 回读，也可用 `all` 组合。需要桌面状态栏时附上经验证的 Windows `window` 对象。CDP 不移动系统鼠标。
+浏览器对象使用 `kind: chromium`、`webSocketDebuggerUrl`（本机具体页面的授权调试端点）及 `url`（准确 URL）。选择器支持 `css` 或可访问 `name`。断言可按 `text`、选择器的 `count` 或 `equals` 回读，也可用 `all` 组合。浏览器操作同样必须使用任务级浮层。配合经验证的 Windows 窗口绑定浮层。混合桌面与浏览器的任务复用同一个浮层，切换时更新其窗口绑定。CDP 不移动系统鼠标。
 
 ## 视觉分支
 

@@ -38,19 +38,19 @@
 
 状态栏边缘的亮点沿圆角边框循环移动。蓝色双描边光圈跟随真实鼠标，白色光环标记自动化正在操作的控件。启用 Windows 减少动效时，使用静态边框和光圈。任务结束时鼠标光圈立即收起。
 
-单次键鼠或托盘动作默认显示状态栏、指针光圈和位置反馈。连续验收为已绑定窗口创建 UTF-8 事件文件，使用其绝对路径启动一次浮层进程，再把同一个文件传给本轮各动作。
+实际任务使用会话入口管理浮层。直接调用桌面入口时，各动作也必须复用已启动的任务级浮层与同一 UTF-8 事件文件。下面是由长驻任务进程启动浮层的方式。
 
 ```powershell
 Start-Process -FilePath powershell.exe -WindowStyle Hidden -PassThru -ArgumentList @(
     '-NoProfile', '-STA', '-File', '"<技能目录>/scripts/feedback.ps1"',
     '-Events', '"<事件文件绝对路径>"', '-WindowId', '<ID>', '-OwnerId', '<PID>',
-    '-StartedTick', '<首次检查目标前记录的 Stopwatch.GetTimestamp()>'
+    '-TaskOwnerId', [string]$PID, '-StartedTick', '<首次检查目标前记录的 Stopwatch.GetTimestamp()>'
 )
 ```
 
-向文件追加 UTF-8 JSON 行。普通事件包含 `phase` 和 `message`。状态可用 `observe`（观察）、`decide`（决策）、`wait`（等待）、`fallback`（接手）、`verify`（核验）、`success`（成功）、`failure`（失败）或 `cancel`（取消）。向各个键鼠、控件和托盘动作传入 `-FeedbackEvents <同一事件文件绝对路径>`，由桌面入口发布操作位置和结果。只有明确需要无浮层时才传 `-NoFeedback`。
+向文件追加 UTF-8 JSON 行。普通事件包含 `phase` 和 `message`。状态可用 `observe`（观察）、`decide`（决策）、`wait`（等待）、`fallback`（接手）、`verify`（核验）、`success`（成功）、`failure`（失败）或 `cancel`（取消）。向各个键鼠、控件和托盘动作传入 `-FeedbackEvents <同一事件文件绝对路径>`，由桌面入口发布操作位置和结果。任务中禁止传 `-NoFeedback`。
 
-任务结束时追加结束事件，可附上 `elapsedSeconds`，让状态栏冻结在报告使用的耗时。等待浮层退出后清理事件文件。关闭到托盘时保持浮层跟踪。单步浮层在目标销毁或 90 秒无事件时退出。整场测试使用会话入口管理浮层，主窗口最小化或等待人工操作期间仍显示状态栏和蓝圈。验收可传入 `-EvidenceDirectory <空目录>` 保存浮层渲染截图。浮层使用独立窗口，目标窗口截图仍由桌面入口生成。
+任务结束时追加结束事件，可附上 `elapsedSeconds`，让状态栏冻结在报告使用的耗时。等待浮层退出后清理事件文件。关闭到托盘时保持浮层跟踪。独立单步浮层在目标销毁或 90 秒无事件时退出，因此不能用于维持任务反馈。任务级浮层必须在目标窗口最小化、关闭后等待新目标或等待人工操作期间继续显示状态栏和鼠标光圈。验收可传入 `-EvidenceDirectory <空目录>` 保存浮层渲染截图。浮层使用独立窗口，目标窗口截图仍由桌面入口生成。
 
 ## Jev 决策
 
