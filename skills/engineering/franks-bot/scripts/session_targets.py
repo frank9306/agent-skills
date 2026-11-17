@@ -18,38 +18,56 @@ class ObservationUnavailable(RuntimeError):
 class DesktopTarget(VisualSearch):
     def __init__(self, spec, output):
         self.spec = spec
-        self.output = output
+        self.no_feedback = bool(spec.get("noFeedback"))
+        self.finished = False
         self.events = output / "feedback.jsonl"
         self.overlay = None
         self.process = subprocess.Popen([str(POWERSHELL), "-NoProfile", "-File", str(SCRIPTS / "session-bridge.ps1")],
                                         stdin=subprocess.PIPE, stdout=subprocess.PIPE, encoding="utf-8",
                                         creationflags=subprocess.CREATE_NO_WINDOW)
         try:
-            windows = self.call("list", bind=False)
-            wanted = Path(spec["executable"]).resolve()
-            bound = [item for item in windows if item["windowId"] == spec["windowId"]
-                     and item["processId"] == spec["processId"] and item["executable"]
-                     and Path(item["executable"]).resolve() == wanted]
-            if len(bound) != 1:
-                raise ValueError("The window, PID and executable did not match")
-            if not spec.get("noFeedback"):
+            self.bind_window(spec)
+            if not self.no_feedback:
                 evidence = output / "overlay"
                 evidence.mkdir()
+                ready = evidence / "ready"
                 self.feedback("observe", "目标已绑定")
-                self.overlay = subprocess.Popen([str(POWERSHELL), "-NoProfile", "-STA", "-File",
-                                                str(SCRIPTS / "feedback.ps1"), "-Events", str(self.events),
-                                                "-WindowId", str(spec["windowId"]), "-OwnerId", str(spec["processId"]),
-                                                "-EvidenceDirectory", str(evidence)], creationflags=subprocess.CREATE_NO_WINDOW)
+                self.overlay = subprocess.Popen(
+                    [str(POWERSHELL), "-NoProfile", "-STA", "-File", str(SCRIPTS / "feedback.ps1"),
+                     "-Events", str(self.events), "-WindowId", str(spec["windowId"]),
+                     "-OwnerId", str(spec["processId"]), "-TaskOwnerId", str(os.getpid()),
+                     "-EvidenceDirectory", str(evidence), "-ReadyFile", str(ready)],
+                    creationflags=subprocess.CREATE_NO_WINDOW,
+                )
+                deadline = time.monotonic() + 8
+                while not ready.is_file():
+                    if self.overlay.poll() is not None or time.monotonic() >= deadline:
+                        raise RuntimeError("The desktop feedback overlay did not become visible")
+                    time.sleep(.05)
         except Exception:
             self.close()
             raise
 
+    def bind_window(self, spec):
+        windows = self.call("list", bind=False)
+        wanted = Path(spec["executable"]).resolve()
+        bound = [item for item in windows if item["windowId"] == spec["windowId"]
+                 and item["processId"] == spec["processId"] and item["executable"]
+                 and Path(item["executable"]).resolve() == wanted]
+        if len(bound) != 1:
+            raise ValueError("The window, PID and executable did not match")
+        self.spec = dict(spec, kind="windows")
+        if self.overlay:
+            self.write_feedback(phase="bind", windowId=spec["windowId"], processId=spec["processId"])
+
     def call(self, action, bind=True, **values):
+        if self.overlay and not self.finished and self.overlay.poll() is not None:
+            raise RuntimeError("The desktop feedback overlay stopped before task completion")
         params = dict(values, Action=action)
         if bind:
             params.update(WindowId=self.spec["windowId"], ProcessId=self.spec["processId"])
         if action not in ("list", "observe", "window-state"):
-            params.update(FeedbackEvents=str(self.events), NoFeedback=bool(self.spec.get("noFeedback")))
+            params.update(FeedbackEvents=str(self.events), NoFeedback=self.no_feedback)
         self.process.stdin.write(json.dumps({"params": params}) + "\n")
         self.process.stdin.flush()
         response = self.process.stdout.readline()
@@ -62,13 +80,19 @@ class DesktopTarget(VisualSearch):
             raise RuntimeError(message["error"])
         return json.loads(message["json"])
 
-    def feedback(self, phase, message):
-        if self.spec.get("noFeedback"):
-            return
+    def write_feedback(self, **event):
         with self.events.open("a", encoding="utf-8") as stream:
-            stream.write(json.dumps({"phase": phase, "message": message}, ensure_ascii=False) + "\n")
+            stream.write(json.dumps(event, ensure_ascii=False) + "\n")
+
+    def feedback(self, phase, message):
+        if self.no_feedback or self.finished:
+            return
+        self.write_feedback(phase=phase, message=message)
+        self.finished = phase in ("success", "failure", "cancel")
 
     def close(self):
+        if self.overlay and self.overlay.poll() is None and not self.finished:
+            self.feedback("cancel", "桌面任务已结束")
         if self.process.stdin:
             self.process.stdin.close()
         if self.process.stdout:

@@ -16,7 +16,9 @@
 }
 ```
 
-Windows 选择器支持 `name`、`controlId`、`kind`、`key` 动作用 `keys`，托盘动作使用 `target.trayArgs` 传单步入口的参数。用 `textEnv` 指定敏感输入的环境变量名。原生断言包括控件 `count`、`equals`、`enabled`，以及 `visibleWindow`、`file`、`all`。默认回读限时 2 秒，步骤可设置 `timeoutMs`。一个长任务一次启动浮层。输入动作派发前后都写日志，完成以断言通过为准。
+Windows 选择器支持 `name`、`controlId`、`kind`、`key` 动作用 `keys`，托盘动作使用 `target.trayArgs` 传单步入口的参数。用 `textEnv` 指定敏感输入的环境变量名。原生断言包括控件 `count`、`equals`、`enabled`，以及 `visibleWindow`、`file`、`all`。默认回读限时 2 秒，步骤可设置 `timeoutMs`。一个桌面测试任务只启动一次浮层。输入动作派发前后都写日志，完成以断言通过为准。
+
+多个已知步骤写入同一份用例，执行一次 `session.py`。遇到等待人工操作、分批验收或运行时获取的原生弹窗时，在一个长驻 Python 进程内持有同一个 `DesktopTarget`。分批调用 `run_case(case, target, output, finalize=False)`，每批写入独立输出目录。等待时用 `target.feedback("wait", message)` 更新说明。用 `target.bind_window(spec)` 按实际 HWND、PID 和程序路径绑定已观察到的弹窗或回到主窗口。只在整场结束时发送 `success`、`failure` 或 `cancel`，然后关闭目标。整个桌面测试保持默认反馈开启。
 
 浏览器对象使用 `kind: chromium`、`webSocketDebuggerUrl`（本机具体页面的授权调试端点）及 `url`（准确 URL）。选择器支持 `css` 或可访问 `name`。断言可按 `text`、选择器的 `count` 或 `equals` 回读，也可用 `all` 组合。需要桌面状态栏时附上经验证的 Windows `window` 对象。CDP 不移动系统鼠标。
 

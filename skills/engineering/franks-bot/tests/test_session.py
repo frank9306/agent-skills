@@ -11,6 +11,7 @@ from session import run_case
 class BrowserFixture:
     def __init__(self, value=""):
         self.dispatched = []
+        self.phases = []
         self.value = value
 
     def locate(self, step):
@@ -26,10 +27,24 @@ class BrowserFixture:
         path.write_bytes(b"fixture")
 
     def feedback(self, phase, message):
-        pass
+        self.phases.append(phase)
 
 
 class SessionTest(unittest.TestCase):
+    def test_subcases_leave_feedback_alive_until_task_completion(self):
+        fixture = BrowserFixture(value="demo")
+        step = {"id": "check", "action": "click", "target": {"css": "#button"}, "timeoutMs": 10}
+        with tempfile.TemporaryDirectory() as folder:
+            root = Path(folder)
+            good = {"steps": [dict(step, expect={"equals": "demo"})]}
+            bad = {"steps": [dict(step, expect={"equals": "other"})]}
+            self.assertTrue(run_case(good, fixture, root / "good", finalize=False))
+            self.assertFalse(run_case(bad, fixture, root / "bad", finalize=False))
+            self.assertEqual({"success", "failure", "cancel"} & set(fixture.phases), set())
+            self.assertTrue(run_case(good, fixture, root / "final"))
+            self.assertEqual(fixture.phases.count("success"), 1)
+            self.assertEqual(fixture.phases[-1], "success")
+
     def test_timeout_does_not_repeat_a_dispatched_action(self):
         fixture = BrowserFixture()
         case = {"steps": [{"id": "search", "action": "type", "text": "demo",

@@ -3,7 +3,7 @@
     [long]$WindowId,
     [int]$OwnerId,
     [long]$StartedTick = [Diagnostics.Stopwatch]::GetTimestamp(),
-    [string]$EvidenceDirectory, [string]$ReadyFile, [switch]$Transient
+    [string]$EvidenceDirectory, [string]$ReadyFile, [int]$TaskOwnerId, [switch]$Transient
 )
 $ErrorActionPreference = 'Stop'
 Add-Type -AssemblyName PresentationFramework, PresentationCore, WindowsBase, System.Drawing
@@ -132,7 +132,10 @@ $pointerOuter.Child = $pointerInner
 $pointerWindow = New-Overlay $pointerOuter
 $app = [Windows.Application]::new()
 $app.ShutdownMode = 'OnExplicitShutdown'
-$target = [IntPtr]$WindowId
+$script:target = [IntPtr]$WindowId
+$script:targetOwner = $OwnerId
+$script:monitor = [IntPtr]::Zero
+$taskOwner = if ($TaskOwnerId) { Get-Process -Id $TaskOwnerId }
 $timer = [Windows.Threading.DispatcherTimer]::new()
 $timer.Interval = [TimeSpan]::FromMilliseconds(50)
 $script:lastLine = 0
@@ -187,11 +190,19 @@ function Update-Edge([double]$now) {
     }
 }
 
-function Place($window, [int]$x, [int]$y, [int]$w, [int]$h) {
+function Place($window, [int]$x, [int]$y, [int]$w, [int]$h, [double]$scale) {
     $helper = [Windows.Interop.WindowInteropHelper]::new($window)
     $hwnd = $helper.EnsureHandle()
     [void][FrankFeedback]::SetWindowPos($hwnd, [IntPtr](-1), $x, $y, $w, $h, 0x10)
     if (-not $window.IsVisible) { $window.Show() }
+    # Win32 places the HWND in physical pixels. WPF can retain the host monitor's DPI.
+    $dpi = [Windows.Media.VisualTreeHelper]::GetDpi($window)
+    $scaleX = $scale / $dpi.DpiScaleX
+    $scaleY = $scale / $dpi.DpiScaleY
+    $transform = $window.Content.LayoutTransform.Value
+    if ($transform.M11 -ne $scaleX -or $transform.M22 -ne $scaleY) {
+        $window.Content.LayoutTransform = [Windows.Media.ScaleTransform]::new($scaleX, $scaleY)
+    }
 }
 
 function Save-Evidence($window, [string]$name) {
@@ -223,9 +234,7 @@ $script:lastTracking = 0.0
 $timer.Add_Tick({
     try {
         $now = $clock.Elapsed.TotalSeconds
-        $pidOfWindow = 0
-        [void][FrankFeedback]::GetWindowThreadProcessId($target, [ref]$pidOfWindow)
-        if ($pidOfWindow -ne $OwnerId) {
+        if ($taskOwner -and $taskOwner.HasExited) {
             $app.Shutdown()
             return
         }
@@ -242,6 +251,12 @@ $timer.Add_Tick({
             catch { break }
             $script:lastLine++
             if ($event.phase -eq 'foreground') { continue }
+            if ($taskOwner -and $event.phase -eq 'bind') {
+                $script:target = [IntPtr][long]$event.windowId
+                $script:targetOwner = [int]$event.processId
+                $script:ring = $null
+                continue
+            }
             $script:lastEvent = $now
             $script:phase = $event.phase
             $label.Text = [string]$event.message
@@ -268,30 +283,28 @@ $timer.Add_Tick({
                 $script:finishAt = $now + $(if ($phase -eq 'success') { 2 } else { 4 })
             }
         }
-        if (($null -ne $finishAt -and $now -ge $finishAt) -or $now - $lastEvent -gt 90) {
+        $pidOfWindow = 0
+        [void][FrankFeedback]::GetWindowThreadProcessId($target, [ref]$pidOfWindow)
+        $bound = $pidOfWindow -ne 0 -and $pidOfWindow -eq $targetOwner
+        if (($null -ne $finishAt -and $now -ge $finishAt) -or
+            (!$taskOwner -and (!$bound -or $now - $lastEvent -gt 90))) {
             $app.Shutdown()
             return
         }
-        if ([FrankFeedback]::IsIconic($target)) {
-            $statusWindow.Hide()
-            $focusWindow.Hide()
-            $pointerWindow.Hide()
-            return
-        }
-        $monitor = [FrankFeedback]::MonitorFromWindow($target, 2)
+        if ($bound) { $script:monitor = [FrankFeedback]::MonitorFromWindow($target, 2) }
+        if ($monitor -eq [IntPtr]::Zero) { return }
         $info = New-Object FrankFeedback+MonitorInfo
         $info.Size = [Runtime.InteropServices.Marshal]::SizeOf($info)
         if (-not [FrankFeedback]::GetMonitorInfo($monitor, [ref]$info)) { return }
         $dpiX = [uint32]96
         $dpiY = [uint32]96
         [void][FrankFeedback]::GetDpiForMonitor($monitor, 0, [ref]$dpiX, [ref]$dpiY)
-        $width = [int][Math]::Min(440 * $dpiX / 96, $info.Work.Right - $info.Work.Left - 24)
-        $height = [int](44 * $dpiY / 96)
-        Place $statusWindow ([int](($info.Work.Left + $info.Work.Right - $width) / 2)) ($info.Work.Top + 12) $width $height
-        if ($ReadyFile -and !$script:ready) {
-            [IO.File]::WriteAllText($ReadyFile,"ready")
-            $script:ready = $true
-        }
+        $scale = $dpiX / 96.0
+        $margin = [int](12 * $scale)
+        $statusScale = [Math]::Min($scale, ($info.Work.Right - $info.Work.Left - 2 * $margin) / 440.0)
+        $width = [int](440 * $statusScale)
+        $height = [int](44 * $statusScale)
+        Place $statusWindow ([int](($info.Work.Left + $info.Work.Right - $width) / 2)) ($info.Work.Top + $margin) $width $height $statusScale
         $seconds = [int][Math]::Floor($(if ($null -ne $terminalElapsed) { $terminalElapsed } else {
             ([Diagnostics.Stopwatch]::GetTimestamp() - $StartedTick) / [Diagnostics.Stopwatch]::Frequency
         }))
@@ -310,8 +323,12 @@ $timer.Add_Tick({
             $diameter = [int](36 * $pointerDpi / 96)
             $half = [int]($diameter / 2)
             $pointerInner.Opacity = if ($reducedMotion) { 1 } else { 0.78 + 0.22 * [Math]::Cos($now * 5) }
-            Place $pointerWindow ($cursor.X - $half) ($cursor.Y - $half) $diameter $diameter
+            Place $pointerWindow ($cursor.X - $half) ($cursor.Y - $half) $diameter $diameter ($pointerDpi / 96.0)
         } else { $pointerWindow.Hide() }
+        if ($ReadyFile -and !$script:ready -and $statusWindow.IsVisible -and $pointerWindow.IsVisible) {
+            [IO.File]::WriteAllText($ReadyFile, 'ready')
+            $script:ready = $true
+        }
         if ($EvidenceDirectory -and ($now - $lastTracking -ge 0.10)) {
             $script:lastTracking = $now
             $pointer = New-Object FrankFeedback+Rect
@@ -331,7 +348,10 @@ $timer.Add_Tick({
             if ($now - $lastEvent -ge 0.7) { Save-Evidence $statusWindow 'status-decide-later' }
         }
 
-        if (-not $ring) { $focusWindow.Hide(); return }
+        if (-not $ring -or !$bound -or [FrankFeedback]::IsIconic($target)) {
+            $focusWindow.Hide()
+            return
+        }
         $age = $now - $ringAt
         $pressed = $phase -ne 'focus'
         if ($age -gt 2 -or ($pressed -and $age -gt 0.55)) {
@@ -350,7 +370,7 @@ $timer.Add_Tick({
         }
         $pad = if ($reducedMotion) { 4 } elseif ($pressed) { 4 + [int]($age * 18) } else { 4 + [int](4 * [Math]::Max(0, 1 - $age * 6)) }
         $outline.Opacity = if ($pressed -and -not $reducedMotion) { [Math]::Max(0, 1 - $age / 0.55) } else { 1 }
-        Place $focusWindow ($bounds.Left + $ring.x - $pad) ($bounds.Top + $ring.y - $pad) ($ring.width + 2*$pad) ($ring.height + 2*$pad)
+        Place $focusWindow ($bounds.Left + $ring.x - $pad) ($bounds.Top + $ring.y - $pad) ($ring.width + 2*$pad) ($ring.height + 2*$pad) $scale
         if ($phase -eq 'focus') {
             Save-Evidence $statusWindow "step-$frame-status"
             Save-Evidence $focusWindow "step-$frame-focus"

@@ -68,6 +68,7 @@ None.
 | [ISSUE-0042](ISSUE-0042-replace-frontend-design-skill-with-franks-design.md) | Replace frontend design skill with franks-design |
 | [ISSUE-0043](ISSUE-0043-add-fix-recurrence-prevention-to-project-docs.md) | Add fix recurrence prevention to project docs |
 | [ISSUE-0045](ISSUE-0045-franks-screencast.md) | franks-screencast 自动产品演示成片 |
+| [ISSUE-0046](ISSUE-0046-franks-bot.md) | 修复 franks-bot 多屏反馈显示与任务生命周期 |
 
 ## Cancelled
 

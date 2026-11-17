@@ -50,7 +50,7 @@ Start-Process -FilePath powershell.exe -WindowStyle Hidden -PassThru -ArgumentLi
 
 向文件追加 UTF-8 JSON 行。普通事件包含 `phase` 和 `message`。状态可用 `observe`（观察）、`decide`（决策）、`wait`（等待）、`fallback`（接手）、`verify`（核验）、`success`（成功）、`failure`（失败）或 `cancel`（取消）。向各个键鼠、控件和托盘动作传入 `-FeedbackEvents <同一事件文件绝对路径>`，由桌面入口发布操作位置和结果。只有明确需要无浮层时才传 `-NoFeedback`。
 
-任务结束时追加结束事件，可附上 `elapsedSeconds`，让状态栏冻结在报告使用的耗时。等待浮层退出后清理事件文件。关闭到托盘时保持浮层跟踪。目标进程或窗口销毁时浮层关闭，连续 90 秒无事件也会退出。验收可传入 `-EvidenceDirectory <空目录>` 保存浮层渲染截图。浮层使用独立窗口，目标窗口截图仍由桌面入口生成。
+任务结束时追加结束事件，可附上 `elapsedSeconds`，让状态栏冻结在报告使用的耗时。等待浮层退出后清理事件文件。关闭到托盘时保持浮层跟踪。单步浮层在目标销毁或 90 秒无事件时退出。整场测试使用会话入口管理浮层，主窗口最小化或等待人工操作期间仍显示状态栏和蓝圈。验收可传入 `-EvidenceDirectory <空目录>` 保存浮层渲染截图。浮层使用独立窗口，目标窗口截图仍由桌面入口生成。
 
 ## Jev 决策
 

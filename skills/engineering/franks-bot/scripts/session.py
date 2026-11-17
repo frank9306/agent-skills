@@ -10,11 +10,11 @@ import sys
 import time
 
 SCRIPT_DIR = Path(__file__).resolve().parent
-RELEASE = "0.2.6"
+RELEASE = "0.2.7"
 POLL_SECONDS = 0.05
 
 
-def run_case(case, target, output):
+def run_case(case, target, output, *, finalize=True):
     previous = None
     start = time.perf_counter()
     output.mkdir(parents=True, exist_ok=True)
@@ -76,10 +76,11 @@ def run_case(case, target, output):
                     evidence = None
                 record("result", key, status=status if status != "passed" else "failed",
                        technique=technique, screenshot=evidence, error=str(exc))
-                target.feedback("cancel" if status == "cancelled" else "failure", f"{key} · {status}")
+                phase = ("cancel" if status == "cancelled" else "failure") if finalize else "fallback"
+                target.feedback(phase, f"{key} · {status}")
                 return False
 
-        target.feedback("success", "所有步骤已核验")
+        target.feedback("success" if finalize else "wait", "所有步骤已核验")
         return True
 
 
