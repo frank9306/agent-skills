@@ -67,6 +67,7 @@ None.
 | [ISSUE-0041](ISSUE-0041-franks-bot.md) | 封版并采用 franks-bot 桌面自动化 |
 | [ISSUE-0042](ISSUE-0042-replace-frontend-design-skill-with-franks-design.md) | Replace frontend design skill with franks-design |
 | [ISSUE-0043](ISSUE-0043-add-fix-recurrence-prevention-to-project-docs.md) | Add fix recurrence prevention to project docs |
+| [ISSUE-0045](ISSUE-0045-franks-screencast.md) | franks-screencast 自动产品演示成片 |
 
 ## Cancelled
 

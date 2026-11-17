@@ -26,6 +26,7 @@ Reusable Agent Skills for engineering, content, and service operations. Personal
 | [`franks-bot`](skills/engineering/franks-bot/SKILL.md) | Engineering | 执行 Windows 桌面操作及 UI 测试，浏览器任务转交环境默认工具。 |
 | [`dispatch-dsh-task`](skills/engineering/dispatch-dsh-task/SKILL.md) | Engineering | Dispatch audited my-knowledge work from Hermes to the restricted DSH runner. |
 | [`audit-codex-harness`](skills/engineering/audit-codex-harness/SKILL.md) | Engineering | Audit project-scoped Codex traces and score harness efficiency. |
+| [`franks-screencast`](skills/content/franks-screencast/SKILL.md) | Content | Record product demonstrations with franks-bot, Yunyang narration, synchronized Chinese subtitles, and video output. |
 | [`read-web-content`](skills/content/read-web-content/SKILL.md) | Content | Read and extract useful content from public URLs with privacy-aware fallbacks. |
 | [`daily-news`](skills/content/daily-news/SKILL.md) | Content | Produce a cited Chinese daily briefing on official AI updates, frontier research, and major headlines. |
 | [`write-articles`](skills/content/write-articles/SKILL.md) | Content | Write evidence-led articles with factual checks and blue engineering hand-drawn knowledge-card illustrations. |

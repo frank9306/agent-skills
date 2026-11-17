@@ -1,0 +1,24 @@
+{
+  "version": "0.1.0",
+  "passed": true,
+  "sample": "release-run/demo.mp4",
+  "durationSeconds": 30.021333,
+  "voice": "zh-CN-YunyangNeural",
+  "actionsPassed": 3,
+  "unitAndMediaTests": 5,
+  "negativeAssertionStopsRecording": true,
+  "fullWindowDpiCaptureVerified": true,
+  "maxCaptureGapMs": 84.69150000018999,
+  "repeatedFrames": 0,
+  "qaFrames": [
+    "qa-1.png",
+    "qa-2.png",
+    "qa-3.png"
+  ],
+  "scope": "Windows独立演示窗口，非IM产品实录",
+  "limitations": [
+    "HWND捕获不包含系统鼠标/窗口外浮层",
+    "云扬需联网；声音听感由用户试听确认",
+    "Chromium适配复用franks-bot已有连接能力，本次新Skill端到端实测为原生Windows"
+  ]
+}

@@ -1,0 +1,4 @@
+interface:
+  display_name: "franks-screencast"
+  short_description: "自动录制产品功能演示，配云扬中文旁白与字幕，按实际操作结果同步成片"
+  default_prompt: "使用 $franks-screencast 录制产品功能演示，默认云扬旁白和中文字幕，并验证音画同步。"

@@ -1,0 +1,11 @@
+{
+  "SKILL.md": "1b0efddba7fe6b24e985965716a04276586c00dc391ad8f55394ac23125e3053",
+  "agents\\openai.yaml": "6901ebf7406832a0b89fc9a378d89250bc6ee9192bcb2e759caf62324b7fde2e",
+  "references\\plan.md": "73fd9b96babd1c08046a0c7b2a01e342bc7243c0a908a015913fcca10ba3ea08",
+  "scripts\\media.py": "4993b335edaf134f7f9d1e7fcb8f407beb7e8c417125b45d11580019aeb4e33a",
+  "scripts\\screencast.py": "87d09134bf306e81f4e39d7f8a4bc2386f98840921555a7248da6d08aec94adf",
+  "scripts\\timeline.py": "58461edfa31ca66a1d17049504867a874c2d98aa940be7ddfab20552e05bc584",
+  "tests\\demo-window.ps1": "6aad546bcd86245d3367daa8bb6274eeec020218a5e26442cba1cc27e3496f55",
+  "tests\\test_media.py": "c3f2b6a5c05dd15a8f2229b64b3da34570e55494c78644ddae4e90e20f2fe910",
+  "tests\\test_timeline.py": "282477f4bb2b30223a3c13b85c8a74f7a7f4014f23fbc56e9a2df40ffbd88cfb"
+}
