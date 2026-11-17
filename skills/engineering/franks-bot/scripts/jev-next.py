@@ -29,7 +29,7 @@ def main():
             "assets": {"window-frame": {"type": "image", "format": "png", "data_base64": screenshot}},
             "questions": {"next": {
                 "type": "choice",
-                "instructions": "Use the current screenshot and confirmed progress to choose the next single action for the goal. Choose no_match if none fits.",
+                "instructions": "Which candidate identifies the target requested in state.goal? Use the screenshot, candidate descriptions and spatial context. A marked rectangle may enclose only the text within a button. Choose no_match only when none of the candidates identifies the requested target.",
                 "criteria": candidates,
             }},
         }
@@ -42,11 +42,13 @@ def main():
         if args.simulate_failure:
             raise TimeoutError("Injected Jev timeout; no request sent")
         with urlopen(request, timeout=15) as response:
-            answer = json.load(response)["answers"]["next"]
+            envelope = json.load(response)
+            answer = envelope["answers"]["next"]
         choice = answer["choice"]
-        if answer["type"] != "choice" or choice not in candidates or choice == "no_match":
+        if answer["type"] != "choice" or choice not in candidates:
             raise ValueError("Jev returned no usable choice.")
-        print(json.dumps({"choice": choice, "confidence": answer.get("confidence")}))
+        print(json.dumps({"choice": choice, "confidence": answer.get("confidence"),
+                          "probabilities": answer.get("probabilities"), "model": envelope.get("model")}))
     except (OSError, URLError, ValueError, KeyError, TypeError) as error:
         print(json.dumps({"fallback": True, "reason": str(error)}))
         return 1

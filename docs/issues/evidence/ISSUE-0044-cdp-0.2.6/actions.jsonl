@@ -1,0 +1,18 @@
+{"event": "probe", "step": "type-chinese", "elapsedMs": 12.13, "technique": "CDP", "durationMs": 9.95, "status": "matched"}
+{"event": "dispatch", "step": "type-chinese", "elapsedMs": 12.46, "technique": "CDP", "action": "type", "monotonicNs": 13224918491500, "utc": "2026-11-17T04:39:51.110395+00:00", "sincePreviousMs": null}
+{"event": "result", "step": "type-chinese", "elapsedMs": 143.35, "status": "passed", "technique": "CDP", "screenshot": "type-chinese.png"}
+{"event": "probe", "step": "search", "elapsedMs": 146.29, "technique": "CDP", "durationMs": 2.41, "status": "matched"}
+{"event": "dispatch", "step": "search", "elapsedMs": 146.37, "technique": "CDP", "action": "click", "monotonicNs": 13225052434300, "utc": "2026-11-17T04:39:51.245258+00:00", "sincePreviousMs": 133.94}
+{"event": "result", "step": "search", "elapsedMs": 224.78, "status": "passed", "technique": "CDP", "screenshot": "search.png"}
+{"event": "probe", "step": "open-archive", "elapsedMs": 226.8, "technique": "CDP", "durationMs": 1.37, "status": "matched"}
+{"event": "dispatch", "step": "open-archive", "elapsedMs": 226.87, "technique": "CDP", "action": "click", "monotonicNs": 13225132932600, "utc": "2026-11-17T04:39:51.324482+00:00", "sincePreviousMs": 80.5}
+{"event": "result", "step": "open-archive", "elapsedMs": 300.54, "status": "passed", "technique": "CDP", "screenshot": "open-archive.png"}
+{"event": "probe", "step": "scroll-bottom", "elapsedMs": 304.67, "technique": "CDP", "durationMs": 1.63, "status": "matched"}
+{"event": "dispatch", "step": "scroll-bottom", "elapsedMs": 304.74, "technique": "CDP", "action": "click", "monotonicNs": 13225210804500, "utc": "2026-11-17T04:39:51.403418+00:00", "sincePreviousMs": 77.87}
+{"event": "result", "step": "scroll-bottom", "elapsedMs": 371.82, "status": "passed", "technique": "CDP", "screenshot": "scroll-bottom.png"}
+{"event": "probe", "step": "replace-empty", "elapsedMs": 373.69, "technique": "CDP", "durationMs": 1.42, "status": "matched"}
+{"event": "dispatch", "step": "replace-empty", "elapsedMs": 373.73, "technique": "CDP", "action": "type", "monotonicNs": 13225279799000, "utc": "2026-11-17T04:39:51.472534+00:00", "sincePreviousMs": 68.99}
+{"event": "result", "step": "replace-empty", "elapsedMs": 458.8, "status": "passed", "technique": "CDP", "screenshot": "replace-empty.png"}
+{"event": "probe", "step": "replace-again", "elapsedMs": 460.4, "technique": "CDP", "durationMs": 1.19, "status": "matched"}
+{"event": "dispatch", "step": "replace-again", "elapsedMs": 460.43, "technique": "CDP", "action": "type", "monotonicNs": 13225366506600, "utc": "2026-11-17T04:39:51.558908+00:00", "sincePreviousMs": 86.71}
+{"event": "result", "step": "replace-again", "elapsedMs": 534.59, "status": "passed", "technique": "CDP", "screenshot": "replace-again.png"}

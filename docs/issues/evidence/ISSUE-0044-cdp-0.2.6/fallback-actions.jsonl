@@ -1,0 +1,6 @@
+{"event": "probe", "step": "ai-fallback", "elapsedMs": 1.58, "technique": "CDP", "durationMs": 0.8, "status": "miss"}
+{"event": "probe", "step": "ai-fallback", "elapsedMs": 478.2, "technique": "OCR", "durationMs": 210.33, "status": "miss"}
+{"event": "probe", "step": "ai-fallback", "elapsedMs": 478.27, "technique": "Jev", "durationMs": 0, "status": "no-candidates"}
+{"event": "probe", "step": "ai-fallback", "elapsedMs": 16001.05, "technique": "AI screenshot", "durationMs": 15522.76, "status": "reply"}
+{"event": "dispatch", "step": "ai-fallback", "elapsedMs": 16075.98, "technique": "AI screenshot", "action": "click", "monotonicNs": 13241615862300, "utc": "2026-11-17T04:40:07.808016+00:00", "sincePreviousMs": null}
+{"event": "result", "step": "ai-fallback", "elapsedMs": 16154.91, "status": "passed", "technique": "AI screenshot", "screenshot": "ai-fallback.png"}

@@ -1,0 +1,8 @@
+﻿step,technique,action,utc,sincePreviousMs
+type-chinese,CDP,type,2026-11-17T04:39:51.110395+00:00,
+search,CDP,click,2026-11-17T04:39:51.245258+00:00,133.943
+open-archive,CDP,click,2026-11-17T04:39:51.324482+00:00,80.498
+scroll-bottom,CDP,click,2026-11-17T04:39:51.403418+00:00,77.872
+replace-empty,CDP,type,2026-11-17T04:39:51.472534+00:00,68.995
+replace-again,CDP,type,2026-11-17T04:39:51.558908+00:00,86.708
+ai-fallback,AI screenshot,click,2026-11-17T04:40:07.808016+00:00,16249.356

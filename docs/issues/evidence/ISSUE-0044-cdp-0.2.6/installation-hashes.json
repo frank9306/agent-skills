@@ -1,0 +1,20 @@
+{
+  "SKILL.md": "5fd06d90d7e7686a5a538fc5a64d2673d5dec6d6a24f4cbe05cde8c351265682",
+  "agents\\openai.yaml": "548df886ccc55cc13ea6453f40bfcc401deef9465ecb18c1223ea8ce12ec0781",
+  "references\\session.md": "0bb0c51ff72a6cf81183a21083ef9e7ffb2e43c1bbfc4aaf8f0f4c3c3bbf4f91",
+  "references\\windows-desktop.md": "9cb91899afcf19e2b12fb4b4817de6d7e92a419fc9524bd1af8aecee4e302e48",
+  "scripts\\desktop-input.cs": "edec046703b5bd42294709dce95100b7456d7c4168396e15681ccdbbbd768426",
+  "scripts\\desktop.ps1": "b58675fccbf3097b64cf3fee8c2dc5bf0254d72be490a16abfba3d7637b40712",
+  "scripts\\feedback.ps1": "7f5d131c9441e0e35d355addb23ddffd3e22a42f6d45b2f99bc6b82e4391f1a8",
+  "scripts\\jev-next.py": "7dbe7fa8f487de649e7cf25ecfe3ed78be6e5ac090f539ec022ffc606e12f6f5",
+  "scripts\\session-bridge.ps1": "2b827eefa3a325d3263e354e617a2559a85eb095a379cfde2ec94789b0c8372b",
+  "scripts\\session.py": "b3937ff0a681d79ee04f70992f37760c46579df6768904d7ac069aecd77ec813",
+  "scripts\\session_targets.py": "481f6cd1dd829f1752e2a69b3e6eb6e256ef5564a9cf6c81ce3f5c53956ae826",
+  "scripts\\session_visual.py": "cc05790a9e2d228b4d12c682869cbfb8ab02ab30f6ae21b8e69b364c70bc98ca",
+  "tests\\test_browser.py": "39462ea3da38cb99192a2c57896225eb1285022bef17c05c5e8a2c9ae3386d67",
+  "tests\\test_connection.py": "602f9934e1a2b99432543894c170f34fa156eec0e630b7c04d705f7adca80f2a",
+  "tests\\test_desktop.py": "bb4ddba7383cceb88aef7070274e4e124402d07630401833aad994be2c28345d",
+  "tests\\test_foreground.ps1": "c9564a893743387cbaa9c8bb1eeb882856faa2ac41ff7491cf0985c1564a71d3",
+  "tests\\test_jev.py": "1aed51807f0a8480dede4c82a3e3687c11c169ae7a1809cf66fc030cf02e885b",
+  "tests\\test_session.py": "472cb79d3bbc3152e0896af566fdc74394535fe51f6d3b5624700504b582c0fd"
+}

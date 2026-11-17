@@ -19,6 +19,7 @@ None.
 | ID | Title |
 |---|---|
 | [ISSUE-0019](ISSUE-0019-add-project-owned-deep-module-checks-and-codex-feedback.md) | Add project-owned deep-module checks and Codex feedback |
+| [ISSUE-0044](ISSUE-0044-franks-bot-im.md) | franks-bot 分层定位与 IM 采集器实机验收 |
 
 ## Blocked
 

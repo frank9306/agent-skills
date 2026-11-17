@@ -14,7 +14,8 @@
     "test:manage-issues": "python -m unittest discover -s skills/engineering/manage-issues/scripts/tests -p \"test_*.py\"",
     "test:to-adr": "python -m unittest discover -s skills/engineering/to-adr/scripts/tests -p \"test_*.py\"",
     "test:ai-docs": "npm run test:init-docs && npm run test:manage-issues && npm run test:to-adr",
-    "test": "npm run test:franks-design && npm run test:read-web-content && npm run test:dispatch-dsh-task && npm run test:audit-codex-harness && npm run test:ai-docs && npm run test:init-checks",
+    "test:franks-bot": "python -m unittest discover -s skills/engineering/franks-bot/tests -p \"test_*.py\"",
+    "test": "npm run test:franks-design && npm run test:read-web-content && npm run test:dispatch-dsh-task && npm run test:audit-codex-harness && npm run test:ai-docs && npm run test:init-checks && npm run test:franks-bot",
     "test:init-checks": "node --test skills/engineering/init-checks/tests/typescript.test.mjs && python -m unittest discover -s skills/engineering/init-checks/tests -p \"test_*.py\""
   },
   "engines": {

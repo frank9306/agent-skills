@@ -1,0 +1,13 @@
+{
+  "version": "0.2.6",
+  "sha256": {
+    "desktop-input.cs": "edec046703b5bd42294709dce95100b7456d7c4168396e15681ccdbbbd768426",
+    "desktop.ps1": "b58675fccbf3097b64cf3fee8c2dc5bf0254d72be490a16abfba3d7637b40712",
+    "feedback.ps1": "7f5d131c9441e0e35d355addb23ddffd3e22a42f6d45b2f99bc6b82e4391f1a8",
+    "jev-next.py": "7dbe7fa8f487de649e7cf25ecfe3ed78be6e5ac090f539ec022ffc606e12f6f5",
+    "session-bridge.ps1": "c2ac36cad4da4cfb8a646372b4503cabbc76cd5ca8d0f752b16cc9c9122315fd",
+    "session.py": "22d2a4984d12653122f66dd61c546315a7d7dfe56d546226243ff8040d4dd639",
+    "session_targets.py": "82a904ab42cd563527d5a742cb308955ef3e57e0abb8d8bc06546ef8d3833cd2",
+    "session_visual.py": "9fc9be46216da47537854bf32ca5f00b43ef462934d2b63423c12eec4300dd84"
+  }
+}

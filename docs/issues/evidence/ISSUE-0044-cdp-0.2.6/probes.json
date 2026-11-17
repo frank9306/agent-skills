@@ -1,0 +1,202 @@
+[
+  {
+    "scenario": "missing",
+    "durationMs": 8.056,
+    "passed": true
+  },
+  {
+    "scenario": "missing",
+    "durationMs": 0.7,
+    "passed": true
+  },
+  {
+    "scenario": "missing",
+    "durationMs": 0.673,
+    "passed": true
+  },
+  {
+    "scenario": "missing",
+    "durationMs": 0.534,
+    "passed": true
+  },
+  {
+    "scenario": "missing",
+    "durationMs": 0.55,
+    "passed": true
+  },
+  {
+    "scenario": "missing",
+    "durationMs": 0.514,
+    "passed": true
+  },
+  {
+    "scenario": "missing",
+    "durationMs": 0.489,
+    "passed": true
+  },
+  {
+    "scenario": "missing",
+    "durationMs": 0.448,
+    "passed": true
+  },
+  {
+    "scenario": "missing",
+    "durationMs": 0.461,
+    "passed": true
+  },
+  {
+    "scenario": "missing",
+    "durationMs": 0.404,
+    "passed": true
+  },
+  {
+    "scenario": "disabled",
+    "durationMs": 0.644,
+    "passed": true
+  },
+  {
+    "scenario": "disabled",
+    "durationMs": 0.786,
+    "passed": true
+  },
+  {
+    "scenario": "disabled",
+    "durationMs": 0.715,
+    "passed": true
+  },
+  {
+    "scenario": "disabled",
+    "durationMs": 0.721,
+    "passed": true
+  },
+  {
+    "scenario": "disabled",
+    "durationMs": 0.567,
+    "passed": true
+  },
+  {
+    "scenario": "disabled",
+    "durationMs": 0.592,
+    "passed": true
+  },
+  {
+    "scenario": "disabled",
+    "durationMs": 0.44,
+    "passed": true
+  },
+  {
+    "scenario": "disabled",
+    "durationMs": 0.621,
+    "passed": true
+  },
+  {
+    "scenario": "disabled",
+    "durationMs": 0.662,
+    "passed": true
+  },
+  {
+    "scenario": "disabled",
+    "durationMs": 0.842,
+    "passed": true
+  },
+  {
+    "scenario": "ambiguous",
+    "durationMs": 0.626,
+    "passed": true
+  },
+  {
+    "scenario": "ambiguous",
+    "durationMs": 0.762,
+    "passed": true
+  },
+  {
+    "scenario": "ambiguous",
+    "durationMs": 0.769,
+    "passed": true
+  },
+  {
+    "scenario": "ambiguous",
+    "durationMs": 0.712,
+    "passed": true
+  },
+  {
+    "scenario": "ambiguous",
+    "durationMs": 0.782,
+    "passed": true
+  },
+  {
+    "scenario": "ambiguous",
+    "durationMs": 0.593,
+    "passed": true
+  },
+  {
+    "scenario": "ambiguous",
+    "durationMs": 0.729,
+    "passed": true
+  },
+  {
+    "scenario": "ambiguous",
+    "durationMs": 0.525,
+    "passed": true
+  },
+  {
+    "scenario": "ambiguous",
+    "durationMs": 0.635,
+    "passed": true
+  },
+  {
+    "scenario": "ambiguous",
+    "durationMs": 0.374,
+    "passed": true
+  },
+  {
+    "scenario": "occluded",
+    "durationMs": 0.59,
+    "passed": true
+  },
+  {
+    "scenario": "occluded",
+    "durationMs": 0.397,
+    "passed": true
+  },
+  {
+    "scenario": "occluded",
+    "durationMs": 0.768,
+    "passed": true
+  },
+  {
+    "scenario": "occluded",
+    "durationMs": 1.058,
+    "passed": true
+  },
+  {
+    "scenario": "occluded",
+    "durationMs": 0.651,
+    "passed": true
+  },
+  {
+    "scenario": "occluded",
+    "durationMs": 0.599,
+    "passed": true
+  },
+  {
+    "scenario": "occluded",
+    "durationMs": 0.558,
+    "passed": true
+  },
+  {
+    "scenario": "occluded",
+    "durationMs": 0.701,
+    "passed": true
+  },
+  {
+    "scenario": "occluded",
+    "durationMs": 0.623,
+    "passed": true
+  },
+  {
+    "scenario": "occluded",
+    "durationMs": 0.573,
+    "passed": true
+  }
+]

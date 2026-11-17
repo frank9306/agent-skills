@@ -1,0 +1,3 @@
+{"event": "opened", "monotonicNs": 13223836152100, "durationMs": 3780.81}
+{"event": "bound", "monotonicNs": 13223852956400}
+{"event": "closed", "monotonicNs": 13241695856900, "commands": 180}

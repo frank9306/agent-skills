@@ -3,7 +3,7 @@
     [long]$WindowId,
     [int]$OwnerId,
     [long]$StartedTick = [Diagnostics.Stopwatch]::GetTimestamp(),
-    [string]$EvidenceDirectory
+    [string]$EvidenceDirectory, [string]$ReadyFile, [switch]$Transient
 )
 $ErrorActionPreference = 'Stop'
 Add-Type -AssemblyName PresentationFramework, PresentationCore, WindowsBase, System.Drawing
@@ -139,6 +139,7 @@ $script:lastLine = 0
 $script:clock = [Diagnostics.Stopwatch]::StartNew()
 $script:lastEvent = 0
 $script:phase = 'observe'
+$script:ready = $false
 $script:finishAt = $null
 $script:ringAt = $null
 $script:ring = $null
@@ -218,22 +219,29 @@ function Save-Evidence($window, [string]$name) {
     $captures[$name] = $true
 }
 
+$script:lastTracking = 0.0
 $timer.Add_Tick({
     try {
         $now = $clock.Elapsed.TotalSeconds
         $pidOfWindow = 0
         [void][FrankFeedback]::GetWindowThreadProcessId($target, [ref]$pidOfWindow)
-        if ($pidOfWindow -ne $OwnerId -or -not [FrankFeedback]::IsWindowVisible($target)) {
+        if ($pidOfWindow -ne $OwnerId) {
             $app.Shutdown()
             return
         }
         $lines = @()
-        try { $lines = @([IO.File]::ReadAllLines($Events, [Text.Encoding]::UTF8)) }
+        try {
+            $stream = [IO.File]::Open($Events, [IO.FileMode]::Open, [IO.FileAccess]::Read, [IO.FileShare]::ReadWrite)
+            $reader = [IO.StreamReader]::new($stream, [Text.Encoding]::UTF8)
+            try { $lines = @($reader.ReadToEnd().Split([string[]]@("`r`n", "`n"), [StringSplitOptions]::RemoveEmptyEntries)) }
+            finally { $reader.Dispose() }
+        }
         catch [IO.IOException] {}
         while ($lastLine -lt $lines.Count) {
             try { $event = ConvertFrom-Json -InputObject $lines[$lastLine] -ErrorAction Stop }
             catch { break }
             $script:lastLine++
+            if ($event.phase -eq 'foreground') { continue }
             $script:lastEvent = $now
             $script:phase = $event.phase
             $label.Text = [string]$event.message
@@ -280,6 +288,10 @@ $timer.Add_Tick({
         $width = [int][Math]::Min(440 * $dpiX / 96, $info.Work.Right - $info.Work.Left - 24)
         $height = [int](44 * $dpiY / 96)
         Place $statusWindow ([int](($info.Work.Left + $info.Work.Right - $width) / 2)) ($info.Work.Top + 12) $width $height
+        if ($ReadyFile -and !$script:ready) {
+            [IO.File]::WriteAllText($ReadyFile,"ready")
+            $script:ready = $true
+        }
         $seconds = [int][Math]::Floor($(if ($null -ne $terminalElapsed) { $terminalElapsed } else {
             ([Diagnostics.Stopwatch]::GetTimestamp() - $StartedTick) / [Diagnostics.Stopwatch]::Frequency
         }))
@@ -300,6 +312,19 @@ $timer.Add_Tick({
             $pointerInner.Opacity = if ($reducedMotion) { 1 } else { 0.78 + 0.22 * [Math]::Cos($now * 5) }
             Place $pointerWindow ($cursor.X - $half) ($cursor.Y - $half) $diameter $diameter
         } else { $pointerWindow.Hide() }
+        if ($EvidenceDirectory -and ($now - $lastTracking -ge 0.10)) {
+            $script:lastTracking = $now
+            $pointer = New-Object FrankFeedback+Rect
+            $pointerHandle = [Windows.Interop.WindowInteropHelper]::new($pointerWindow).Handle
+            $pointerVisible = $pointerWindow.IsVisible -and [FrankFeedback]::GetWindowRect($pointerHandle, [ref]$pointer)
+            $sample = @{
+                ms = [int]($now * 1000); phase = $phase; statusVisible = $statusWindow.IsVisible
+                mouseX = $cursor.X; mouseY = $cursor.Y; pointerVisible = [bool]$pointerVisible
+                ringX = if ($pointerVisible) { ($pointer.Left + $pointer.Right) / 2 } else { $null }
+                ringY = if ($pointerVisible) { ($pointer.Top + $pointer.Bottom) / 2 } else { $null }
+            }
+            [IO.File]::AppendAllText((Join-Path $EvidenceDirectory 'tracking.jsonl'), ($sample | ConvertTo-Json -Compress) + [Environment]::NewLine)
+        }
         if ($phase -in 'decide','verify','success','failure','fallback') { Save-Evidence $statusWindow "status-$phase" }
         if ($phase -eq 'decide') {
             Save-Evidence $pointerWindow 'pointer'
@@ -329,6 +354,7 @@ $timer.Add_Tick({
         if ($phase -eq 'focus') {
             Save-Evidence $statusWindow "step-$frame-status"
             Save-Evidence $focusWindow "step-$frame-focus"
+            Save-Evidence $pointerWindow "step-$frame-pointer"
         }
     } catch {
         [IO.File]::WriteAllText("$Events.error", $_.ToString())
@@ -337,3 +363,8 @@ $timer.Add_Tick({
 })
 $timer.Start()
 [void]$app.Run()
+if ($Transient) {
+    foreach ($file in @($Events,$ReadyFile) | Where-Object { $_ }) {
+        if (Test-Path -LiteralPath $file -PathType Leaf) { Remove-Item -LiteralPath $file }
+    }
+}

@@ -1,0 +1,27 @@
+{
+  "scripts/session-bridge.ps1": {
+    "testedSha256": "c2ac36cad4da4cfb8a646372b4503cabbc76cd5ca8d0f752b16cc9c9122315fd",
+    "releaseSha256": "2b827eefa3a325d3263e354e617a2559a85eb095a379cfde2ec94789b0c8372b",
+    "onlyTrailingNewlinesChanged": true
+  },
+  "scripts/session.py": {
+    "testedSha256": "22d2a4984d12653122f66dd61c546315a7d7dfe56d546226243ff8040d4dd639",
+    "releaseSha256": "b3937ff0a681d79ee04f70992f37760c46579df6768904d7ac069aecd77ec813",
+    "onlyTrailingNewlinesChanged": true
+  },
+  "scripts/session_targets.py": {
+    "testedSha256": "82a904ab42cd563527d5a742cb308955ef3e57e0abb8d8bc06546ef8d3833cd2",
+    "releaseSha256": "481f6cd1dd829f1752e2a69b3e6eb6e256ef5564a9cf6c81ce3f5c53956ae826",
+    "onlyTrailingNewlinesChanged": true
+  },
+  "scripts/session_visual.py": {
+    "testedSha256": "9fc9be46216da47537854bf32ca5f00b43ef462934d2b63423c12eec4300dd84",
+    "releaseSha256": "cc05790a9e2d228b4d12c682869cbfb8ab02ab30f6ae21b8e69b364c70bc98ca",
+    "onlyTrailingNewlinesChanged": true
+  },
+  "tests/test_session.py": {
+    "testedSha256": "6c73b319548516491ec4e38d3a6755991d944eae4c98da8067d01dad43605a33",
+    "releaseSha256": "472cb79d3bbc3152e0896af566fdc74394535fe51f6d3b5624700504b582c0fd",
+    "onlyTrailingNewlinesChanged": true
+  }
+}

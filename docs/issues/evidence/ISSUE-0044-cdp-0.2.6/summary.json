@@ -1,0 +1,18 @@
+{
+  "version": "0.2.6",
+  "cdpPassed": true,
+  "connectionsOpened": 1,
+  "commands": 180,
+  "actionsPassed": 7,
+  "negativeProbesPassed": 40,
+  "permissionEvidence": "用户确认首轮一次授权；最终轮同一 socket 无重连，单次连接建立成功",
+  "missingMs": {
+    "min": 0.404,
+    "max": 8.056
+  },
+  "beforeAiMs": 478.27,
+  "aiHandoffMs": 15522.76,
+  "foregroundMaxMs": 9.4028,
+  "unitTestsPassed": 8,
+  "imFullAcceptanceComplete": false
+}
