@@ -34,7 +34,7 @@ Use the first matching route:
 | Confirmed lasting technical decision | `$to-adr` |
 | Explicit request to initialize missing AI engineering documentation | `$init-docs` |
 | Explicit request to create or revise project-facing agent instructions | `$write-agent-docs` |
-| New frontend design, or an existing interface redesign or audit | $franks-design. For an existing interface, explicitly invoke its redesign or audit mode. Follow project engineering and verification requirements. |
+| Read or maintain the project design specification for interface work | $franks-design for DESIGN.md. Follow project engineering and verification requirements for interface work. |
 | Public URL content extraction | `$read-web-content` |
 | Daily browser/desktop UI operation, or authoring/replaying a bounded UI case without a code/design change | Project-authorized browser/desktop tools and UI operation instructions |
 | Evidence-led article creation | `$write-articles` |
