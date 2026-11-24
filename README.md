@@ -23,7 +23,7 @@ Reusable Agent Skills for engineering, content, and service operations. Personal
 | [`diagnose-bug`](skills/engineering/diagnose-bug/SKILL.md) | Engineering | Reproduce a bug and determine its root cause. |
 | [`write-agent-docs`](skills/engineering/write-agent-docs/SKILL.md) | Engineering | Write concise, scoped project instructions for agents. |
 | [`franks-design`](skills/engineering/franks-design/SKILL.md) | Engineering | Read and maintain project DESIGN.md files. |
-| [`franks-bot`](skills/engineering/franks-bot/SKILL.md) | Engineering | 执行 Windows 桌面操作及 UI 测试，浏览器任务转交环境默认工具。 |
+| [`franks-bot`](skills/engineering/franks-bot/SKILL.md) | Engineering | 执行 Windows 桌面操作及 UI 测试，真实浏览器网页测试使用 ego-browser。 |
 | [`dispatch-dsh-task`](skills/engineering/dispatch-dsh-task/SKILL.md) | Engineering | Dispatch audited my-knowledge work from Hermes to the restricted DSH runner. |
 | [`audit-codex-harness`](skills/engineering/audit-codex-harness/SKILL.md) | Engineering | Audit project-scoped Codex traces and score harness efficiency. |
 | [`franks-screencast`](skills/content/franks-screencast/SKILL.md) | Content | Record product demonstrations with franks-bot, Yunyang narration, synchronized Chinese subtitles, and video output. |

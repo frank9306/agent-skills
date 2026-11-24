@@ -70,6 +70,7 @@ None.
 | [ISSUE-0045](ISSUE-0045-franks-screencast.md) | franks-screencast 自动产品演示成片 |
 | [ISSUE-0046](ISSUE-0046-franks-bot.md) | 修复 franks-bot 多屏反馈显示与任务生命周期 |
 | [ISSUE-0047](ISSUE-0047-limit-franks-design-to-design-md.md) | Limit franks-design to DESIGN.md |
+| [ISSUE-0048](ISSUE-0048-route-franks-bot-browser-testing-to-ego-browser.md) | Route franks-bot browser testing to ego-browser |
 
 ## Cancelled
 
