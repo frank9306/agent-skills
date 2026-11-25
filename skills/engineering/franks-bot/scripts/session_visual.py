@@ -164,6 +164,9 @@ class VisualSearch:
             print(f"Vision requested: {request}", file=sys.stderr, flush=True)
             deadline = time.perf_counter() + config["aiReplyMs"] / 1000
             while time.perf_counter() < deadline:
+                check_cancelled = getattr(self, "check_cancelled", None)
+                if check_cancelled:
+                    check_cancelled()
                 if reply.is_file():
                     try:
                         data = json.loads(reply.read_text(encoding="utf-8"))

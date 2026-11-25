@@ -1,0 +1,6 @@
+/brand/
+/cmd/player/icon.png
+/cmd/player/web/
+/cmd/player/*.syso
+/cmd/source/*.syso
+/ui/public/franks-bot.png

@@ -10,7 +10,7 @@ import sys
 import time
 
 SCRIPT_DIR = Path(__file__).resolve().parent
-RELEASE = "0.2.7"
+RELEASE = "0.3.2"
 POLL_SECONDS = 0.05
 
 
@@ -33,6 +33,9 @@ def run_case(case, target, output, *, finalize=True):
             status = "failed"
             target.feedback("decide", f"{key} · 定位")
             try:
+                check_cancelled = getattr(target, "check_cancelled", None)
+                if check_cancelled:
+                    check_cancelled()
                 probe_start = time.perf_counter()
                 location = target.locate(step)
                 if hasattr(target, "spec"):
@@ -72,7 +75,7 @@ def run_case(case, target, output, *, finalize=True):
                 try:
                     evidence = key + "-failure.png"
                     target.screenshot(output / evidence)
-                except Exception:
+                except (Exception, KeyboardInterrupt):
                     evidence = None
                 record("result", key, status=status if status != "passed" else "failed",
                        technique=technique, screenshot=evidence, error=str(exc))
@@ -86,6 +89,7 @@ def run_case(case, target, output, *, finalize=True):
 
 def build_manifest():
     files = sorted(p for p in SCRIPT_DIR.iterdir() if p.suffix in {".ps1", ".cs", ".py"})
+    files += sorted((SCRIPT_DIR.parent / "bin").glob("*.exe"))
     return {"version": RELEASE, "sha256": {p.name: hashlib.sha256(p.read_bytes()).hexdigest() for p in files}}
 
 
@@ -94,11 +98,34 @@ def main():
     parser.add_argument("--version", action="store_true")
     parser.add_argument("--case", type=Path)
     parser.add_argument("--output", type=Path)
+    parser.add_argument("--retained-status", type=Path, metavar="OUTPUT")
+    parser.add_argument("--close-retained", type=Path, metavar="OUTPUT")
+    parser.add_argument("--cancel-hidden", type=Path, metavar="OUTPUT")
+    parser.add_argument("--hidden-worker", action="store_true", help=argparse.SUPPRESS)
     args = parser.parse_args()
     manifest = build_manifest()
     if args.version:
         print(json.dumps(manifest))
         return 0
+    controls = (args.retained_status, args.close_retained, args.cancel_hidden)
+    if any(controls):
+        from session_hidden import cancel_run, read_status, request_close
+        if any((args.case, args.output, args.hidden_worker)) or sum(p is not None for p in controls) != 1:
+            parser.error("Choose one hidden task command")
+        try:
+            if args.retained_status:
+                print(json.dumps(read_status(args.retained_status), ensure_ascii=True))
+                return 0
+            if args.cancel_hidden:
+                return cancel_run(args.cancel_hidden)
+            return request_close(args.close_retained)
+        except (OSError, ValueError) as exc:
+            parser.error(str(exc))
+    if args.hidden_worker:
+        from session_hidden import worker
+        if args.output is None:
+            parser.error("Missing hidden worker output")
+        return worker(json.load(sys.stdin), args.output, run_case)
     if args.case is None or args.output is None:
         parser.error("Specify --case and --output, or --version")
     case = json.loads(args.case.read_text(encoding="utf-8-sig"))
@@ -107,11 +134,19 @@ def main():
     ids = [step["id"] for step in case["steps"]]
     if len(ids) != len(set(ids)) or any(not re.fullmatch(r"[A-Za-z0-9_-]+", key) for key in ids):
         parser.error("Every step needs a unique id containing only letters, digits, - and _")
+    mode = case["target"]["kind"]
+    if mode == "windows-hidden":
+        from session_hidden import run_hidden, validate
+        try:
+            validate(case)
+        except ValueError as exc:
+            parser.error(str(exc))
     args.output.mkdir(parents=True, exist_ok=False)
     (args.output / "manifest.json").write_text(
         json.dumps({"build": manifest, "startedAt": datetime.now(timezone.utc).isoformat()}, indent=2), encoding="utf-8")
     from session_targets import BrowserTarget, DesktopTarget
-    mode = case["target"]["kind"]
+    if mode == "windows-hidden":
+        return run_hidden(case, args.output)
     adapter = {"windows": DesktopTarget, "chromium": BrowserTarget}[mode]
     with closing(adapter(case["target"], args.output)) as target:
         return 0 if run_case(case, target, args.output) else 1

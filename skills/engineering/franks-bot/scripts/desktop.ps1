@@ -1,6 +1,8 @@
 ﻿param(
     [Parameter(Mandatory)][ValidateSet('list','launch','launch-calculator','observe','window-state','focus','invoke','toggle','click','hover','type','key','scroll','drag','tray-open','tray-menu','tray-select')][string]$Action,
     [long]$WindowId,
+    [long]$NativeEditId,
+    [long]$NativeButtonId,
     [int]$ProcessId,
     [string]$Screenshot,
     [string]$ControlId,
@@ -25,7 +27,8 @@
     [string]$ControlType,
     [switch]$ControlsOnly,
     [switch]$AsyncFeedback,
-    [switch]$NoFeedback
+    [switch]$NoFeedback,
+    [switch]$HiddenDesktop
 )
 
 $ErrorActionPreference = 'Stop'
@@ -38,6 +41,7 @@ using System;
 using System.Runtime.InteropServices;
 public static class FrankBotWindows {
     [DllImport("user32.dll")] public static extern bool SetProcessDpiAwarenessContext(IntPtr context);
+    [DllImport("user32.dll")] public static extern IntPtr SetThreadDpiAwarenessContext(IntPtr context);
     [DllImport("user32.dll")] public static extern uint GetDpiForWindow(IntPtr hwnd);
     [DllImport("user32.dll")] public static extern IntPtr GetWindowDpiAwarenessContext(IntPtr hwnd);
     [DllImport("user32.dll")] public static extern int GetAwarenessFromDpiAwarenessContext(IntPtr context);
@@ -57,7 +61,11 @@ if (-not [FrankBotWindows]::SetProcessDpiAwarenessContext([IntPtr](-4))) {
     [void][FrankBotWindows]::SetProcessDPIAware()
 }
 }
-$root = [Windows.Automation.AutomationElement]::RootElement
+if ($HiddenDesktop) {
+    if ($Action -notin 'observe','invoke','toggle','click','type') { throw "Unsupported hidden desktop action: $Action" }
+    [FrankBotHidden]::RequireWindow([IntPtr]$WindowId)
+}
+$root = if (!$HiddenDesktop) { [Windows.Automation.AutomationElement]::RootElement }
 $scope = [Windows.Automation.TreeScope]
 $any = [Windows.Automation.Condition]::TrueCondition
 
@@ -104,6 +112,9 @@ $owner = 0
 if ($owner -ne $ProcessId -or -not [FrankBotInput]::IsWindow($handle)) {
     throw 'The bound window is unavailable. List and select again.'
 }
+if ($HiddenDesktop) {
+    [void][FrankBotWindows]::SetThreadDpiAwarenessContext([FrankBotWindows]::GetWindowDpiAwarenessContext($handle))
+}
 $target = [Windows.Automation.AutomationElement]::FromHandle($handle)
 
 function Get-Rect {
@@ -113,14 +124,14 @@ function Get-Rect {
 }
 
 function Find-Control([switch]$Editable) {
-    if (($ControlId -and $ControlName) -or (!$ControlId -and !$ControlName)) {
+    if (($ControlId -and $ControlName) -or (!$ControlId -and !$ControlName -and !($HiddenDesktop -and $ControlType))) {
         throw 'Supply exactly one ControlId or ControlName from the current observation.'
     }
     $property = if ($ControlId) { [Windows.Automation.AutomationElement]::AutomationIdProperty } else { [Windows.Automation.AutomationElement]::NameProperty }
     $value = if ($ControlId) { $ControlId } else { $ControlName }
-    $condition = [Windows.Automation.PropertyCondition]::new($property, $value)
+    $condition = if ($value) { [Windows.Automation.PropertyCondition]::new($property, $value) } else { $any }
     $matches = @($target.FindAll($scope::Descendants, $condition) | Where-Object {
-        $_.Current.IsEnabled -and !$_.Current.IsOffscreen -and
+        $_.Current.IsEnabled -and ($HiddenDesktop -or !$_.Current.IsOffscreen) -and
             (!$ControlType -or $_.Current.ControlType.ProgrammaticName -eq "ControlType.$ControlType") -and (!$Editable -or $_.Current.ControlType -eq [Windows.Automation.ControlType]::Edit)
     })
     if ($matches.Count -ne 1) { throw "Expected one visible, enabled control matching '$value', found $($matches.Count)." }
@@ -306,7 +317,7 @@ if ($Action -in 'tray-open','tray-menu') {
 
 if (![FrankBotWindows]::IsWindowVisible($handle)) { throw 'The bound window is hidden. Restore it from the tray.' }
 
-if ($Action -in 'focus','invoke','toggle','click','hover','scroll','drag','type','key' -or ($Action -eq 'observe' -and !$ControlsOnly)) {
+if (!$HiddenDesktop -and ($Action -in 'focus','invoke','toggle','click','hover','scroll','drag','type','key' -or ($Action -eq 'observe' -and !$ControlsOnly))) {
     $focusTimer = [Diagnostics.Stopwatch]::StartNew()
     $alreadyForeground = [FrankBotInput]::GetForegroundWindow() -eq $handle -and ![FrankBotWindows]::IsIconic($handle)
     $focused = [FrankBotInput]::EnsureForeground($handle, 190)
@@ -318,6 +329,29 @@ if ($Action -in 'focus','invoke','toggle','click','hover','scroll','drag','type'
     }
     if (!$focused) { throw "Foreground could not be verified within budget (elapsed=$($focusTimer.Elapsed.TotalMilliseconds) ms). Bind the active owned dialog explicitly if present." }
     if ($Action -eq 'focus') { $focusResult | ConvertTo-Json -Compress; return }
+}
+
+if ($HiddenDesktop -and $Action -in 'click','type') {
+    if ($Action -eq 'click') {
+        if ($MouseButton -ne 'left' -or $ClickCount -ne 1) { throw 'Hidden mode supports a single left click.' }
+        $point = Get-WindowPoint $X $Y
+        [FrankBotHidden]::Click($handle, $point.X, $point.Y)
+    } else {
+        if ($Observation) { throw 'Hidden typing requires a writable UI Automation text control.' }
+        $value = if ($TextFile) { Get-Content -LiteralPath $TextFile -Raw -Encoding utf8 } else { $Text }
+        if ($NativeEditId) {
+            [FrankBotHidden]::WriteEdit($handle, [IntPtr]$NativeEditId, [string]$value)
+        } else {
+            $control = Find-Control -Editable
+            $pattern = $null
+            if (!$control.TryGetCurrentPattern([Windows.Automation.ValuePattern]::Pattern, [ref]$pattern) -or $pattern.Current.IsReadOnly) {
+                throw 'Hidden typing requires a writable UI Automation ValuePattern.'
+            }
+            $pattern.SetValue([string]$value)
+        }
+    }
+    @{ action = $Action; windowId = $WindowId; processId = $ProcessId } | ConvertTo-Json -Compress
+    return
 }
 
 if ($Action -in 'click','hover','scroll','drag','type','key') {
@@ -382,6 +416,11 @@ if ($Action -in 'click','hover','scroll','drag','type','key') {
 }
 
 if ($Action -in 'invoke','toggle') {
+    if ($HiddenDesktop -and $Action -eq 'invoke' -and $NativeButtonId) {
+        [FrankBotHidden]::InvokeButton($handle, [IntPtr]$NativeButtonId)
+        @{ action = $Action; windowId = $WindowId; processId = $ProcessId } | ConvertTo-Json -Compress
+        return
+    }
     $matched = Find-Control
     $name = $matched.Current.Name
     $pattern = $null
@@ -419,6 +458,7 @@ if ($ControlsOnly) {
 } else {
 if (-not $Screenshot) { throw 'Provide a screenshot output path.' }
 if ([FrankBotWindows]::IsIconic($handle)) {
+    if ($HiddenDesktop) { throw 'Hidden capture cannot restore a minimized window.' }
     [void][FrankBotWindows]::ShowWindowAsync($handle, 9)
 }
 $rect = New-Object FrankBotWindows+Rect
@@ -428,7 +468,7 @@ try {
     $graphics = [Drawing.Graphics]::FromImage($bitmap)
     try {
         $awareness = [FrankBotWindows]::GetAwarenessFromDpiAwarenessContext([FrankBotWindows]::GetWindowDpiAwarenessContext($handle))
-        if ($awareness -ne 2) {
+        if (!$HiddenDesktop -and $awareness -ne 2) {
             if ([FrankBotInput]::GetForegroundWindow() -ne $handle) { throw 'The scaled window must be foreground for an accurate screenshot.' }
             $graphics.CopyFromScreen($rect.Left, $rect.Top, 0, 0, $bitmap.Size)
             $capture = 'screen'
@@ -452,24 +492,34 @@ try {
 
 $controls = foreach ($element in $target.FindAll($scope::Descendants, $any)) {
     $control = $element.Current
-    if ($control.IsOffscreen -or -not $control.Name) { continue }
+    if (!$HiddenDesktop -and ($control.IsOffscreen -or -not $control.Name)) { continue }
     $invoke = $null
     $toggle = $null
     $editable = $null
     $hasToggle = $element.TryGetCurrentPattern([Windows.Automation.TogglePattern]::Pattern, [ref]$toggle)
     $hasValue = $element.TryGetCurrentPattern([Windows.Automation.ValuePattern]::Pattern, [ref]$editable)
     $enabled = $control.IsEnabled
+    $native = $false
+    $nativeButton = $false
+    if ($HiddenDesktop) {
+        $nativeHandle = [IntPtr][long]$control.NativeWindowHandle
+        $native = [FrankBotHidden]::IsEdit($handle, $nativeHandle)
+        $nativeButton = [FrankBotHidden]::IsPushButton($handle, $nativeHandle)
+    }
     $b = $control.BoundingRectangle
-    [pscustomobject]@{
+    $row = @{
         id = $control.AutomationId
         name = $control.Name
-        controlType = $control.ControlType.ProgrammaticName
+        controlType = $(if ($native) { "ControlType.Edit" } elseif ($nativeButton) { "ControlType.Button" } else { $control.ControlType.ProgrammaticName })
         enabled = $enabled
         invokable = [bool]($enabled -and $element.TryGetCurrentPattern([Windows.Automation.InvokePattern]::Pattern, [ref]$invoke))
         toggleState = $(if ($hasToggle) { $toggle.Current.ToggleState.ToString() } else { $null })
-        value = $(if ($hasValue -and !$control.IsPassword) { $editable.Current.Value } else { $null })
+        value = $(if ($hasValue -and !$control.IsPassword) { $editable.Current.Value } elseif ($native -and !$control.IsPassword) { [FrankBotHidden]::ReadEdit($handle, [IntPtr][long]$control.NativeWindowHandle) } else { $null })
         bounds = $(if (!$b.IsEmpty) { @{ left = $b.Left - $rect.Left; top = $b.Top - $rect.Top; width = $b.Width; height = $b.Height } })
     }
+    if ($native) { $row.nativeEditId = $control.NativeWindowHandle }
+    if ($nativeButton) { $row.nativeButtonId = $control.NativeWindowHandle }
+    [pscustomobject]$row
 }
 $result = @{ windowId = $WindowId; processId = $ProcessId; title = $target.Current.Name;
    screenshot = $Screenshot; capture = $capture; dpi = [FrankBotWindows]::GetDpiForWindow($handle); imageWidth = $imageWidth; imageHeight = $imageHeight;
